@@ -36,9 +36,7 @@ const LoginPage: React.FC = () => {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <div className="mx-auto h-16 w-16 bg-blue-600 rounded-xl flex items-center justify-center mb-4">
-              <Building2 className="h-10 w-10 text-white" />
-            </div>
+            <img src="/logo-sirangkul.png" alt="SiRangkul Logo" className="mx-auto h-24 w-24 mb-4" />
             <h1 className="text-3xl font-bold text-gray-900 mb-2">SiRangkul</h1>
             <p className="text-gray-600">Sistem Informasi Rencana Anggaran dan Kelola Usulan</p>
           </div>

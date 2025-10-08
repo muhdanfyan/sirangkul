@@ -56,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       `}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <div className="flex items-center">
-            <Building2 className="h-8 w-8 text-blue-600" />
+            <img src="/logo-sirangkul.png" alt="SiRangkul Logo" className="h-8 w-8" />
             <span className="ml-2 text-xl font-bold text-gray-900">SiRangkul</span>
           </div>
           <button onClick={onClose} className="lg:hidden">

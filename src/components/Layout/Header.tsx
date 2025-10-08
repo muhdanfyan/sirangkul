@@ -20,6 +20,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onLogout }) => {
           >
             <Menu className="h-6 w-6" />
           </button>
+          <div className="hidden lg:flex items-center space-x-3">
+            <img src="/logo-sirangkul.png" alt="SiRangkul Logo" className="h-8 w-8" />
+            <span className="text-lg font-bold text-gray-800">SiRangkul</span>
+          </div>
         </div>
 
         <div className="flex items-center space-x-4">
