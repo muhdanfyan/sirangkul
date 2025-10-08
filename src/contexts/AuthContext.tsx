@@ -37,13 +37,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    console.log('Attempting login for:', email);
     // Mock authentication - in real app, this would call an API
     const foundUser = mockUsers.find(u => u.email === email);
-    if (foundUser) {
+    // For mock authentication, we assume a default password for all users
+    // In a real application, you would hash and compare passwords securely.
+    if (foundUser && password === 'password') {
+      console.log('User found, setting user:', foundUser);
       setUser(foundUser);
       localStorage.setItem('sirangkul_user', JSON.stringify(foundUser));
       return true;
     }
+    console.log('User not found or password incorrect.');
     return false;
   };
 

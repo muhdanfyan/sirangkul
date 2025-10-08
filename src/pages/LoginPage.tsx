@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Building2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -12,11 +14,14 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Login form submitted');
     setIsLoading(true);
     setError('');
 
     const success = await login(email, password);
-    if (!success) {
+    if (success) {
+      navigate('/dashboard'); // Redirect to dashboard on successful login
+    } else {
       setError('Email atau password salah');
     }
     setIsLoading(false);
@@ -103,6 +108,16 @@ const LoginPage: React.FC = () => {
               {isLoading ? 'Sedang masuk...' : 'Masuk'}
             </button>
           </form>
+
+          <div className="mt-4 text-center text-sm">
+            <a href="https://wa.me/6283134086899" target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:text-blue-500">
+              Hubungi Admin
+            </a>
+            <span className="mx-2 text-gray-400">|</span>
+            <a href="/rakm-viewer" className="font-medium text-blue-600 hover:text-blue-500">
+              Lihat RAKM
+            </a>
+          </div>
 
           <div className="mt-8 border-t border-gray-200 pt-6">
             <div className="text-center text-sm text-gray-600 mb-4">

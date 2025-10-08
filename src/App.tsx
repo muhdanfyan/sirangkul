@@ -15,12 +15,28 @@ import AuditLog from './pages/AuditLog';
 import LoginPage from './pages/LoginPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
-function AppContent() {
+import RAKMViewer from './pages/RAKMViewer';
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/rakm-viewer" element={<RAKMViewer />} />
+          <Route path="/*" element={<ProtectedRoute />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
+}
+
+function ProtectedRoute() {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (!user) {
-    return <LoginPage />;
+    return <Navigate to="/login" />;
   }
 
   return (
@@ -48,16 +64,6 @@ function AppContent() {
         </main>
       </div>
     </div>
-  );
-}
-
-function App() {
-  return (
-    <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AuthProvider>
   );
 }
 
