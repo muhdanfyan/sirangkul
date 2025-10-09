@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Pengguna SiRangkul</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .navbar {
+            background-color: #007bff;
+        }
+        .navbar-brand {
+            color: #fff !important;
+            font-weight: bold;
+        }
+        .slider-container {
+            position: relative;
+            max-width: 900px;
+            margin: 50px auto;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        .slides {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .slide {
+            min-width: 100%;
+            box-sizing: border-box;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .slide .card {
+            width: 100%;
+            border: none;
+        }
+        .slide .card-body {
+            padding: 0;
+        }
+        .logo-lg {
+            max-height: 150px;
+            margin-bottom: 20px;
+        }
+        .list-unstyled li {
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            text-align: left;
+        }
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .table {
+            font-size: 0.9rem;
+        }
+        .table th,
+        .table td {
+            vertical-align: middle;
+        }
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 123, 255, 0.7);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            z-index: 100;
+            border-radius: 5px;
+        }
+        .prev-btn {
+            left: 10px;
+        }
+        .next-btn {
+            right: 10px;
+        }
+        .dots-container {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #f1f1f1;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        .dot {
+            height: 12px;
+            width: 12px;
+            margin: 0 5px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        .dot.active {
+            background-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="../../public/logo-sirangkul.png" alt="SiRangkul Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
+                Panduan Pengguna SiRangkul
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="text-center my-4">Panduan Pengguna Aplikasi SiRangkul</h2>
+
+        <div class="slider-container">
+            <div class="slides">
+                <!-- Slide 1: Intro -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <img src="../../public/logo-sirangkul.png" class="logo-lg" alt="SiRangkul Logo">
+                            <h5 class="card-title">✨ SiRangkul: Sistem Informasi Rencana Anggaran dan Kelola Usulan ✨</h5>
+                            <p class="card-text"><i>Meningkatkan Efisiensi, Transparansi, dan Akuntabilitas Pengelolaan Anggaran Madrasah.</i></p>
+                            <p class="card-text mt-3">Klik tombol panah atau indikator di bawah untuk melihat panduan lengkap cara kerja aplikasi.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2: Tentang SiRangkul -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🚀 Tentang SiRangkul</h5>
+                            <p class="card-text">SiRangkul adalah sebuah aplikasi sistem informasi berbasis web yang dirancang untuk memfasilitasi pengelolaan rencana anggaran dan proses pengajuan usulan di lingkungan madrasah atau institusi pendidikan serupa. Aplikasi ini bertujuan untuk meningkatkan efisiensi, transparansi, dan akuntabilitas dalam siklus perencanaan, pengajuan, verifikasi, persetujuan, hingga pelaporan anggaran dan usulan kegiatan.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3: Fungsi Utama -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🎯 Fungsi Utama SiRangkul</h5>
+                            <p class="card-text">Fungsi utama SiRangkul adalah mengotomatisasi dan mendigitalisasi alur kerja terkait Rencana Kegiatan dan Anggaran Madrasah (RKAM) serta berbagai usulan kegiatan lainnya, mulai dari tahap inisiasi oleh pengusul hingga persetujuan akhir oleh pimpinan dan pengelolaan keuangan oleh bendahara.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 4: Fitur-fitur Utama -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">💡 Fitur-fitur Utama</h5>
+                            <ul class="list-unstyled text-start mx-auto" style="max-width: 600px;">
+                                <li>📊 Dashboard</li>
+                                <li>📝 Pengajuan Usulan (Proposal Submission)</li>
+                                <li>🔍 Pelacakan Usulan (Proposal Tracking)</li>
+                                <li>✅ Manajemen Alur Persetujuan (Approval Workflow)</li>
+                                <li>💰 Manajemen RKAM (RKAM Management)</li>
+                                <li>📄 Penampil RKAM (RAKM Viewer)</li>
+                                <li>💳 Manajemen Pembayaran (Payment Management)</li>
+                                <li>📈 Pelaporan (Reporting)</li>
+                                <li>👤 Manajemen Pengguna (User Management)</li>
+                                <li>📜 Log Audit (Audit Log)</li>
+                                <li>💬 Manajemen Umpan Balik (Feedback Management)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 5: Cara Kerja Aplikasi - Pengajuan -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">⚙️ Cara Kerja Aplikasi: 1. Pengajuan</h5>
+                            <p class="card-text">✍️ Pengguna dengan role "Pengusul" membuat dan mengajukan proposal atau rencana kegiatan melalui sistem. Proses ini memastikan semua detail tercatat dengan baik.</p>
+                            <p class="text-muted mt-3"><i>(Gambar screenshot modul pengajuan usulan akan sangat membantu di sini)</i></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 6: Cara Kerja Aplikasi - Verifikasi -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">⚙️ Cara Kerja Aplikasi: 2. Verifikasi</h5>
+                            <p class="card-text">🧐 Usulan yang diajukan akan masuk ke tahap verifikasi oleh "Verifikator" untuk memastikan kelengkapan dan kesesuaian dengan standar yang berlaku.</p>
+                            <p class="text-muted mt-3"><i>(Gambar screenshot tampilan verifikasi oleh Verifikator akan sangat membantu di sini)</i></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 7: Cara Kerja Aplikasi - Persetujuan -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">⚙️ Cara Kerja Aplikasi: 3. Persetujuan</h5>
+                            <p class="card-text">👍 Setelah diverifikasi, usulan akan diteruskan ke "Kepala Madrasah" atau "Komite Madrasah" untuk persetujuan akhir. Ini adalah tahap krusial dalam alur kerja.</p>
+                            <p class="text-muted mt-3"><i>(Gambar screenshot modul persetujuan oleh Kepala Madrasah/Komite akan sangat membantu di sini)</i></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 8: Cara Kerja Aplikasi - Pengelolaan Anggaran -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">⚙️ Cara Kerja Aplikasi: 4. Pengelolaan Anggaran</h5>
+                            <p class="card-text">💸 Usulan yang disetujui akan menjadi bagian dari RKAM dan dikelola oleh "Bendahara" untuk proses pencairan dana dan pencatatan transaksi keuangan.</p>
+                            <p class="text-muted mt-3"><i>(Gambar screenshot modul pengelolaan anggaran oleh Bendahara akan sangat membantu di sini)</i></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 9: Cara Kerja Aplikasi - Pemantauan & Pelaporan -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">⚙️ Cara Kerja Aplikasi: 5. Pemantauan & Pelaporan</h5>
+                            <p class="card-text">📊 Semua proses dapat dipantau melalui dashboard dan laporan yang dihasilkan oleh sistem, serta dicatat dalam log audit untuk akuntabilitas penuh.</p>
+                            <p class="text-muted mt-3"><i>(Gambar screenshot dashboard atau laporan akan sangat membantu di sini)</i></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 10: Role Pengguna - Administrator -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🧑‍💻 Role Pengguna: 👑 Administrator</h5>
+                            <p class="card-text"><strong>Kegunaan:</strong> Mengelola seluruh sistem, termasuk manajemen pengguna, konfigurasi aplikasi, dan pemeliharaan data. Memiliki akses penuh ke semua fitur.</p>
+                            <p class="card-text"><strong>Fungsi:</strong> Menambah/menghapus/mengedit akun pengguna, mengatur hak akses, memantau aktivitas sistem, dan memastikan kelancaran operasional.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 11: Role Pengguna - Pengusul -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🧑‍💻 Role Pengguna: 👨‍💼 Pengusul</h5>
+                            <p class="card-text"><strong>Kegunaan:</strong> Mengajukan proposal kegiatan atau anggaran baru.</p>
+                            <p class="card-text"><strong>Fungsi:</strong> Membuat, mengedit, dan mengirimkan usulan; melacak status usulan yang diajukan; melihat riwayat usulan.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 12: Role Pengguna - Verifikator -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🧑‍💻 Role Pengguna: 👩‍⚖️ Verifikator</h5>
+                            <p class="card-text"><strong>Kegunaan:</strong> Memeriksa dan memverifikasi kelengkapan serta kesesuaian usulan yang diajukan sebelum diteruskan ke tahap persetujuan.</p>
+                            <p class="card-text"><strong>Fungsi:</strong> Meninjau detail usulan, memberikan catatan/komentar, menyetujui atau menolak usulan untuk verifikasi.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 13: Role Pengguna - Kepala Madrasah -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🧑‍💻 Role Pengguna: 👨‍🏫 Kepala Madrasah</h5>
+                            <p class="card-text"><strong>Kegunaan:</strong> Memberikan persetujuan akhir terhadap usulan dan RKAM. Memiliki pandangan menyeluruh terhadap kinerja dan anggaran madrasah.</p>
+                            <p class="card-text"><strong>Fungsi:</strong> Meninjau usulan yang telah diverifikasi, memberikan persetujuan atau penolakan, melihat laporan keuangan dan kegiatan.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 14: Role Pengguna - Bendahara -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🧑‍💻 Role Pengguna: 💰 Bendahara</h5>
+                            <p class="card-text"><strong>Kegunaan:</strong> Mengelola aspek keuangan dari usulan yang disetujui, termasuk pencairan dana dan pencatatan transaksi.</p>
+                            <p class="card-text"><strong>Fungsi:</strong> Memproses pembayaran, mencatat pengeluaran, mengelola RKAM, dan menyiapkan laporan keuangan.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 15: Role Pengguna - Komite Madrasah -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🧑‍💻 Role Pengguna: 🤝 Komite Madrasah</h5>
+                            <p class="card-text"><strong>Kegunaan:</strong> Memberikan persetujuan atau masukan terhadap usulan dan kebijakan anggaran, berperan dalam pengawasan.</p>
+                            <p class="card-text"><strong>Fungsi:</strong> Meninjau usulan penting, memberikan persetujuan atau rekomendasi, memantau implementasi program.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 16: Pemetaan Tugas -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🗺️ Pemetaan Tugas Berdasarkan Role Pengguna</h5>
+                            <p class="card-text">Tabel berikut menunjukkan tahapan pengelolaan aplikasi dan role pengguna yang terlibat dalam setiap tahapan:</p>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Tahapan Pengelolaan Aplikasi</th>
+                                            <th>Administrator</th>
+                                            <th>Pengusul</th>
+                                            <th>Verifikator</th>
+                                            <th>Kepala Madrasah</th>
+                                            <th>Bendahara</th>
+                                            <th>Komite Madrasah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Pengajuan Usulan</td>
+                                            <td></td>
+                                            <td>✅</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Verifikasi Usulan</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>✅</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Persetujuan Usulan</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>✅</td>
+                                            <td></td>
+                                            <td>✅</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pengelolaan RKAM</td>
+                                            <td>✅</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>✅</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pengelolaan Pembayaran</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>✅</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Manajemen Pengguna</td>
+                                            <td>✅</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Melihat Laporan</td>
+                                            <td>✅</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>✅</td>
+                                            <td>✅</td>
+                                            <td>✅</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Melihat Log Audit</td>
+                                            <td>✅</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Manajemen Umpan Balik</td>
+                                            <td>✅</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Konfigurasi Sistem</td>
+                                            <td>✅</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 17: Penutup -->
+                <div class="slide">
+                    <div class="card">
+                        <div class="card-body">
+                            <img src="../../public/logo-sirangkul.png" class="logo-lg" alt="SiRangkul Logo">
+                            <h5 class="card-title">Terima Kasih!</h5>
+                            <p class="card-text">Semoga panduan ini membantu Anda memahami cara kerja aplikasi SiRangkul.</p>
+                            <p class="card-text">Untuk informasi lebih lanjut, silakan merujuk ke dokumentasi lengkap atau hubungi administrator.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="slider-btn prev-btn" onclick="plusSlides(-1)">&#10094;</button>
+            <button class="slider-btn next-btn" onclick="plusSlides(1)">&#10095;</button>
+
+            <div class="dots-container">
+                <!-- Dots will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (for dropdowns, etc., if needed, but not for carousel) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script>
+        let slideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dotsContainer = document.querySelector('.dots-container');
+
+        function createDots() {
+            dotsContainer.innerHTML = ''; // Clear existing dots
+            for (let i = 0; i < slides.length; i++) {
+                const dot = document.createElement('span');
+                dot.classList.add('dot');
+                dot.addEventListener('click', () => currentSlide(i));
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function showSlides(n) {
+            if (n >= slides.length) { slideIndex = 0; }
+            if (n < 0) { slideIndex = slides.length - 1; }
+
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.transform = `translateX(${-slideIndex * 100}%)`;
+            }
+
+            const dots = document.querySelectorAll('.dot');
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].classList.remove('active');
+            }
+            if (dots[slideIndex]) {
+                dots[slideIndex].classList.add('active');
+            }
+        }
+
+        function plusSlides(n) {
+            showSlides(slideIndex += n);
+        }
+
+        function currentSlide(n) {
+            showSlides(slideIndex = n);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createDots();
+            showSlides(slideIndex);
+        });
+    </script>
+</body>
+</html>
