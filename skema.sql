@@ -4,7 +4,7 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(255),
-    role VARCHAR(50) NOT NULL CHECK (role IN ('admin', 'user', 'manager')),
+    role VARCHAR(50) NOT NULL CHECK (role IN ('administrator', 'pengusul', 'verifikator', 'kepala_madrasah', 'bendahara', 'komite_madrasah')),
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -69,4 +69,22 @@ CREATE TABLE approval_workflows (
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ
+);
+
+-- Tabel untuk lampiran proposal
+CREATE TABLE proposal_attachments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    proposal_id UUID REFERENCES proposals(id),
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Tabel untuk notifikasi
+CREATE TABLE notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT now()
 );
