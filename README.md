@@ -10,15 +10,35 @@
 
 --- 
 
+## ✨ Pendahuluan
+
+### **Latar Belakang & Tujuan**
+Proses pengelolaan anggaran dan usulan kegiatan di **MAN 2 Kota Makassar** saat ini masih mengandalkan metode semi-manual. Hal ini seringkali menyebabkan tantangan seperti **keterlambatan** dalam alur persetujuan, **kesulitan pelacakan** status usulan, dan **kurangnya transparansi** dalam penggunaan dana. Menjawab permasalahan tersebut, **SiRangkul** (Sistem Informasi Rencana Anggaran dan Kelola Usulan) dikembangkan sebagai platform digital terintegrasi dengan tujuan utama untuk menciptakan sebuah sistem yang mengedepankan **efisiensi**, **transparansi**, dan **akuntabilitas**.
+
+### **Ruang Lingkup & Fitur Utama**
+Untuk mencapai tujuannya, SiRangkul memperkenalkan serangkaian fitur kunci yang saling terhubung untuk mendigitalisasi seluruh alur kerja. Fitur-fitur tersebut mencakup:
+*   **Dashboard Analitik:** Menyediakan visualisasi data anggaran dan usulan secara *real-time* bagi pimpinan.
+*   **Alur Kerja Persetujuan:** Memastikan setiap usulan melewati proses verifikasi dan validasi yang terstruktur secara berjenjang.
+*   **Pelacakan Status:** Memberikan kejelasan dan transparansi bagi pengusul untuk memantau progres usulan mereka.
+*   **Modul Pelaporan:** Mengotomatisasi pembuatan laporan keuangan yang akurat dan dapat diakses kapan saja.
+
+### **Visualisasi Konsep**
+Seluruh fungsionalitas SiRangkul dibalut dalam **desain antarmuka (UI/UX) yang modern, bersih, dan intuitif**. Prioritas diberikan pada kemudahan penggunaan untuk memastikan adopsi yang lancar oleh semua pengguna, dari staf pengusul hingga jajaran pimpinan.
+
+### **Proyeksi Waktu Pelaksanaan**
+Proyek pengembangan SiRangkul ini memiliki target implementasi yang cepat dan terukur, yaitu selama **60 hari**. Rencana peluncuran sistem untuk dapat digunakan secara penuh ditetapkan pada tanggal **10 November 2025**.
+
+--- 
+
 ## 🚀 Tentang SiRangkul
 
-SiRangkul adalah sebuah aplikasi sistem informasi berbasis web yang dirancang untuk memfasilitasi pengelolaan rencana anggaran dan proses pengajuan usulan di lingkungan madrasah atau institusi pendidikan serupa. Aplikasi ini bertujuan untuk meningkatkan efisiensi, transparansi, dan akuntabilitas dalam siklus perencanaan, pengajuan, verifikasi, persetujuan, hingga pelaporan anggaran dan usulan kegiatan.
+SiRangkul adalah sebuah aplikasi **sistem informasi berbasis web** yang dirancang untuk memfasilitasi pengelolaan rencana anggaran dan proses pengajuan usulan di lingkungan madrasah atau institusi pendidikan serupa. Aplikasi ini bertujuan untuk meningkatkan efisiensi, transparansi, dan akuntabilitas dalam **siklus perencanaan, pengajuan, verifikasi, persetujuan, hingga pelaporan** anggaran dan usulan kegiatan.
 
 --- 
 
 ## 🎯 Fungsi Utama
 
-Fungsi utama SiRangkul adalah mengotomatisasi dan mendigitalisasi alur kerja terkait Rencana Kegiatan dan Anggaran Madrasah (RKAM) serta berbagai usulan kegiatan lainnya, mulai dari tahap inisiasi oleh pengusul hingga persetujuan akhir oleh pimpinan dan pengelolaan keuangan oleh bendahara.
+Fungsi utama SiRangkul adalah **mengotomatisasi dan mendigitalisasi alur kerja** terkait **Rencana Kegiatan dan Anggaran Madrasah (RKAM)** serta berbagai usulan kegiatan lainnya, mulai dari tahap inisiasi oleh pengusul hingga persetujuan akhir oleh pimpinan dan pengelolaan keuangan oleh bendahara.
 
 ---
 
@@ -28,9 +48,9 @@ Manfaat utama dari penerapan SiRANGKUL adalah:
 
 1. **Meningkatkan Efisiensi:** Proses pengajuan, verifikasi, hingga persetujuan proposal kegiatan akan menjadi lebih cepat karena tidak lagi bergantung pada alur dokumen fisik yang memakan waktu.
 
-2. **Meningkatkan Transparansi:** Semua pihak terkait dapat memantau status proposal secara real-time. Pimpinan juga dapat dengan mudah melihat sisa pagu anggaran secara akurat melalui dasbor eksekutif.
+2. **Meningkatkan Transparansi:** Semua pihak terkait dapat memantau status proposal secara **real-time**. Pimpinan juga dapat dengan mudah melihat sisa pagu anggaran secara akurat melalui **dasbor eksekutif**.
 
-3. **Memperkuat Akuntabilitas:** Setiap tahapan persetujuan akan tercatat secara digital (audit trail), sehingga meminimalkan risiko kehilangan dokumen dan mempermudah proses audit.
+3. **Memperkuat Akuntabilitas:** Setiap tahapan persetujuan akan tercatat secara digital (**audit trail**), sehingga meminimalkan risiko kehilangan dokumen dan mempermudah proses audit.
 
 4. **Memudahkan Akses Data dan Pelaporan:** Data realisasi anggaran menjadi terpusat, akurat, dan dapat diakses kapan saja. Hal ini akan mempercepat penyusunan berbagai laporan keuangan yang dibutuhkan.
 

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Pengguna SiRangkul</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 900px;
+        }
+        .pagination .page-link {
+            cursor: pointer;
+        }
+        .guide-section {
+            display: none;
+        }
+        .guide-section.active {
+            display: block;
+        }
+        .card {
+            border: none;
+            border-radius: .75rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,.1);
+        }
+        .accordion-button:not(.collapsed) {
+            color: #fff;
+            background-color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <img src="../public/logo-sirangkul.png" alt="SiRangkul Logo" width="100" class="mb-3 animate__animated animate__fadeInDown">
+            <h1 class="display-4 fw-bold animate__animated animate__fadeInUp">Panduan Pengguna SiRangkul</h1>
+            <p class="lead text-muted animate__animated animate__fadeInUp animate__delay-1s">Berdasarkan Peran Pengguna</p>
+        </div>
+
+        <ul class="pagination justify-content-center flex-wrap nav-pills mb-5" id="guide-pagination">
+            <li class="page-item active" data-section="umum"><a class="page-link"><i class="bi bi-universal-access me-2"></i>Umum</a></li>
+            <li class="page-item" data-section="administrator"><a class="page-link"><i class="bi bi-person-vcard-fill me-2"></i>Administrator</a></li>
+            <li class="page-item" data-section="pengusul"><a class="page-link"><i class="bi bi-pencil-square me-2"></i>Pengusul</a></li>
+            <li class="page-item" data-section="verifikator"><a class="page-link"><i class="bi bi-check-circle-fill me-2"></i>Verifikator</a></li>
+            <li class="page-item" data-section="kepala-madrasah"><a class="page-link"><i class="bi bi-person-fill-check me-2"></i>Kepala Madrasah</a></li>
+            <li class="page-item" data-section="bendahara"><a class="page-link"><i class="bi bi-cash-coin me-2"></i>Bendahara</a></li>
+            <li class="page-item" data-section="komite-madrasah"><a class="page-link"><i class="bi bi-people-fill me-2"></i>Komite Madrasah</a></li>
+        </ul>
+
+        <div id="guide-content" class="mt-4">
+            <div id="umum" class="guide-section active animate__animated animate__fadeIn">
+                <div class="card">
+                    <div class="card-header bg-primary text-white"><h2 class="h4 mb-0"><i class="bi bi-universal-access me-2"></i>Umum (Semua Role)</h2></div>
+                    <div class="card-body">
+                        <div class="accordion" id="accordionUmum">
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUmumOne">Login</button></h2><div id="collapseUmumOne" class="accordion-collapse collapse show"><div class="accordion-body"><ol><li>Buka halaman login.</li><li>Masukkan <strong>email</strong> dan <strong>password</strong> Anda.</li><li>Klik tombol <strong>"Masuk"</strong>.</li><li>Tersedia akun demo yang bisa di-klik untuk mencoba setiap role.</li></ol></div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUmumTwo">Dashboard</button></h2><div id="collapseUmumTwo" class="accordion-collapse collapse"><div class="accordion-body">Setelah login, Anda akan diarahkan ke halaman Dashboard. Halaman ini menampilkan ringkasan statistik seperti jumlah proposal, status approval, dan sisa budget. Anda juga dapat melihat daftar proposal terbaru dan ringkasan penggunaan anggaran.</div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUmumThree">Lacak Proposal</button></h2><div id="collapseUmumThree" class="accordion-collapse collapse"><div class="accordion-body">Gunakan menu ini untuk memantau status semua proposal yang telah diajukan. Anda dapat mencari proposal berdasarkan judul atau ID, serta memfilter berdasarkan status. Klik ikon mata (👁️) untuk melihat detail dan timeline persetujuan proposal.</div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUmumFour">Laporan</button></h2><div id="collapseUmumFour" class="accordion-collapse collapse"><div class="accordion-body">Halaman ini menyediakan analisis data proposal dan anggaran. Anda bisa memfilter laporan berdasarkan rentang tanggal, jenis, dan kategori. Laporan dapat diekspor dalam format <strong>PDF</strong> atau <strong>Excel</strong>.</div></div></div>
+                             <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUmumFive">Lihat RAKM (Publik)</button></h2><div id="collapseUmumFive" class="accordion-collapse collapse"><div class="accordion-body">Dari halaman login, klik link <strong>"Lihat RAKM"</strong> untuk mengakses halaman `/rakm-viewer`. Halaman ini dapat diakses publik tanpa perlu login dan menampilkan daftar dokumen RAKM yang bisa dilihat atau diunduh.</div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="administrator" class="guide-section">
+                <div class="card">
+                    <div class="card-header bg-danger text-white"><h2 class="h4 mb-0"><i class="bi bi-person-vcard-fill me-2"></i>Administrator</h2></div>
+                    <div class="card-body">
+                        <div class="accordion" id="accordionAdmin">
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdminOne">Manajemen User</button></h2><div id="collapseAdminOne" class="accordion-collapse collapse show"><div class="accordion-body"><ol><li>Masuk ke menu <strong>"Manajemen User"</strong>.</li><li>Klik tombol <strong>"Tambah User"</strong> untuk membuat akun baru. Isi nama, email, role, dan password.</li><li>Anda dapat mengedit (✏️), menonaktifkan (👁️‍🗨️), atau menghapus (🗑️) pengguna dari daftar.</li></ol></div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdminTwo">Manajemen RKAM</button></h2><div id="collapseAdminTwo" class="accordion-collapse collapse"><div class="accordion-body"><ol><li>Akses menu <strong>"RKAM"</strong>.</li><li>Klik <strong>"Tambah Item RKAM"</strong> untuk menambahkan rekening anggaran baru.</li><li>Anda dapat melihat, mengedit (✏️), dan memantau pagu, realisasi, serta sisa anggaran dari setiap rekening.</li></ol></div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdminThree">Pembayaran</button></h2><div id="collapseAdminThree" class="accordion-collapse collapse"><div class="accordion-body"><ol><li>Buka menu <strong>"Pembayaran"</strong>.</li><li>Anda dapat melihat semua transaksi pembayaran dan memproses pembayaran baru dengan mengklik <strong>"Proses Pembayaran"</strong>.</li></ol></div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdminFour">Audit Log</button></h2><div id="collapseAdminFour" class="accordion-collapse collapse"><div class="accordion-body"><ol><li>Masuk ke menu <strong>"Audit Log"</strong>.</li><li>Gunakan fitur pencarian dan filter untuk melacak semua aktivitas yang terjadi di dalam sistem.</li></ol></div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdminFive">Feedback</button></h2><div id="collapseAdminFive" class="accordion-collapse collapse"><div class="accordion-body"><ol><li>Akses menu <strong>"Feedback"</strong> untuk melihat dan menanggapi keluhan, saran, atau kritik dari pengguna.</li><li>Klik <strong>"Respons"</strong> untuk memberikan tanggapan.</li></ol></div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div id="pengusul" class="guide-section">
+                <div class="card">
+                    <div class="card-header bg-success text-white"><h2 class="h4 mb-0"><i class="bi bi-pencil-square me-2"></i>Pengusul</h2></div>
+                    <div class="card-body">
+                        <div class="accordion" id="accordionPengusul">
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePengusulOne">Buat Proposal</button></h2><div id="collapsePengusulOne" class="accordion-collapse collapse show"><div class="accordion-body"><ol><li>Klik menu <strong>"Buat Proposal"</strong>.</li><li>Isi formulir secara lengkap: judul, deskripsi, kategori, tingkat urgensi, estimasi anggaran, dan jadwal pelaksanaan.</li><li>Unggah dokumen pendukung seperti RAB atau TOR.</li><li>Klik <strong>"Submit Proposal"</strong> untuk mengirimnya ke alur persetujuan, atau <strong>"Simpan Draft"</strong> untuk menyimpannya sementara.</li></ol></div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePengusulTwo">Aksi Cepat di Dashboard</button></h2><div id="collapsePengusulTwo" class="accordion-collapse collapse"><div class="accordion-body">Gunakan tombol <strong>"Buat Proposal Baru"</strong> untuk langsung menuju halaman pengajuan, dan <strong>"Cek Status"</strong> untuk melacak proposal Anda.</div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="verifikator" class="guide-section">
+                <div class="card">
+                    <div class="card-header bg-info text-white"><h2 class="h4 mb-0"><i class="bi bi-check-circle-fill me-2"></i>Verifikator</h2></div>
+                    <div class="card-body">
+                        <div class="accordion" id="accordionVerifikator">
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVerifikatorOne">Persetujuan</button></h2><div id="collapseVerifikatorOne" class="accordion-collapse collapse show"><div class="accordion-body"><ol><li>Masuk ke menu <strong>"Persetujuan"</strong>.</li><li>Anda akan melihat daftar proposal yang menunggu untuk diverifikasi.</li><li>Pilih satu proposal, lalu tinjau detail dan dokumennya.</li><li>Klik tombol <strong>"Setujui"</strong> untuk meneruskan proposal ke tahap selanjutnya atau <strong>"Tolak"</strong> jika tidak memenuhi syarat. Anda dapat menyertakan catatan pada setiap tindakan.</li></ol></div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="kepala-madrasah" class="guide-section">
+                <div class="card">
+                    <div class="card-header bg-warning text-white"><h2 class="h4 mb-0"><i class="bi bi-person-fill-check me-2"></i>Kepala Madrasah</h2></div>
+                    <div class="card-body">
+                        <div class="accordion" id="accordionKepalaMadrasah">
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKepalaMadrasahOne">Persetujuan</button></h2><div id="collapseKepalaMadrasahOne" class="accordion-collapse collapse show"><div class="accordion-body"><ol><li>Akses menu <strong>"Persetujuan"</strong>.</li><li>Tinjau proposal yang telah lolos verifikasi.</li><li>Berikan persetujuan akhir dengan mengklik <strong>"Setujui"</strong> atau <strong>"Tolak"</strong>.</li></ol></div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKepalaMadrasahTwo">Manajemen RKAM</button></h2><div id="collapseKepalaMadrasahTwo" class="accordion-collapse collapse"><div class="accordion-body">Anda memiliki akses *read-only* ke menu <strong>"RKAM"</strong> untuk memantau kondisi anggaran secara keseluruhan, termasuk pagu, realisasi, dan sisa dana.</div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKepalaMadrasahThree">Feedback</button></h2><div id="collapseKepalaMadrasahThree" class="accordion-collapse collapse"><div class="accordion-body">Sama seperti Administrator, Anda dapat melihat dan menanggapi feedback dari pengguna melalui menu <strong>"Feedback"</strong>.</div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="bendahara" class="guide-section">
+                <div class="card">
+                    <div class="card-header bg-primary text-white"><h2 class="h4 mb-0"><i class="bi bi-cash-coin me-2"></i>Bendahara</h2></div>
+                    <div class="card-body">
+                        <div class="accordion" id="accordionBendahara">
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBendaharaOne">Pembayaran</button></h2><div id="collapseBendaharaOne" class="accordion-collapse collapse show"><div class="accordion-body"><ol><li>Buka menu <strong>"Pembayaran"</strong> untuk melihat daftar proposal yang siap dibayarkan.</li><li>Klik <strong>"Proses Pembayaran"</strong> untuk mencatat transaksi pencairan dana.</li><li>Anda dapat melihat detail setiap pembayaran dan mengubah statusnya.</li></ol></div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBendaharaTwo">Manajemen RKAM</button></h2><div id="collapseBendaharaTwo" class="accordion-collapse collapse"><div class="accordion-body"><ol><li>Akses menu <strong>"RKAM"</strong>.</li><li>Anda dapat menambahkan item RKAM baru dan mengedit data anggaran yang ada untuk memastikan RKAM selalu ter-update sesuai dengan realisasi.</li></ol></div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="komite-madrasah" class="guide-section">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white"><h2 class="h4 mb-0"><i class="bi bi-people-fill me-2"></i>Komite Madrasah</h2></div>
+                    <div class="card-body">
+                        <div class="accordion" id="accordionKomite">
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKomiteOne">Persetujuan</button></h2><div id="collapseKomiteOne" class="accordion-collapse collapse show"><div class="accordion-body"><ol><li>Masuk ke menu <strong>"Persetujuan"</strong>.</li><li>Tinjau proposal yang membutuhkan persetujuan dari Komite.</li><li>Berikan <strong>"Persetujuan"</strong> atau <strong>"Rekomendasi"</strong> pada proposal yang dianggap penting.</li></ol></div></div></div>
+                            <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKomiteTwo">Pemantauan</button></h2><div id="collapseKomiteTwo" class="accordion-collapse collapse"><div class="accordion-body">Gunakan menu <strong>"Lacak Proposal"</strong> dan <strong>"Laporan"</strong> untuk memantau implementasi program dan kesesuaiannya dengan rencana anggaran.</div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pagination = document.getElementById('guide-pagination');
+            const sections = document.querySelectorAll('.guide-section');
+
+            pagination.addEventListener('click', function (e) {
+                const target = e.target.closest('.page-item');
+                if (target) {
+                    const sectionId = target.dataset.section;
+
+                    pagination.querySelector('.active').classList.remove('active');
+                    target.classList.add('active');
+
+                    sections.forEach(section => {
+                        section.classList.remove('active', 'animate__animated', 'animate__fadeIn');
+                        if (section.id === sectionId) {
+                            section.classList.add('active', 'animate__animated', 'animate__fadeIn');
+                        } else {
+                            section.classList.remove('active');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

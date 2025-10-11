@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panduan Pengguna SiRangkul</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f0f2f5;
         }
         .container {
-            max-width: 800px;
+            max-width: 960px;
         }
         .pagination .page-link {
             cursor: pointer;
@@ -21,123 +23,210 @@
         .guide-section.active {
             display: block;
         }
+        .card {
+            border: none;
+            border-radius: .75rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,.05);
+            height: 100%;
+        }
+        .feature-card .card-body {
+            text-align: center;
+        }
+        .feature-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #0d6efd;
+        }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container my-5">
         <div class="text-center mb-5">
-            <img src="../public/logo-sirangkul.png" alt="SiRangkul Logo" width="100" class="mb-3">
-            <h1 class="display-4">Panduan Pengguna SiRangkul</h1>
-            <p class="lead">Sistem Informasi Rencana Anggaran dan Kelola Usulan</p>
+            <img src="../public/logo-sirangkul.png" alt="SiRangkul Logo" width="100" class="mb-3 animate__animated animate__fadeInDown">
+            <h1 class="display-4 fw-bold animate__animated animate__fadeInUp">Panduan Pengguna SiRangkul</h1>
+            <p class="lead text-muted animate__animated animate__fadeInUp animate__delay-1s">Sistem Informasi Rencana Anggaran dan Kelola Usulan</p>
         </div>
 
-        <ul class="pagination justify-content-center flex-wrap" id="guide-pagination">
-            <li class="page-item active" data-section="tentang"><a class="page-link">Tentang</a></li>
-            <li class="page-item" data-section="fungsi"><a class="page-link">Fungsi</a></li>
-            <li class="page-item" data-section="manfaat"><a class="page-link">Manfaat</a></li>
-            <li class="page-item" data-section="fitur"><a class="page-link">Fitur</a></li>
-            <li class="page-item" data-section="cara-kerja"><a class="page-link">Cara Kerja</a></li>
-            <li class="page-item" data-section="role"><a class="page-link">Role</a></li>
-            <li class="page-item" data-section="pemetaan"><a class="page-link">Pemetaan</a></li>
-            <li class="page-item" data-section="panduan"><a class="page-link">Panduan</a></li>
+        <ul class="pagination justify-content-center flex-wrap nav-pills mb-5" id="guide-pagination">
+            <li class="page-item active" data-section="pendahuluan"><a class="page-link"><i class="bi bi-house-door-fill me-2"></i>Pendahuluan</a></li>
+            <li class="page-item" data-section="tentang"><a class="page-link"><i class="bi bi-info-circle-fill me-2"></i>Tentang & Konsep</a></li>
+            <li class="page-item" data-section="manfaat"><a class="page-link"><i class="bi bi-gem me-2"></i>Manfaat</a></li>
+            <li class="page-item" data-section="fitur"><a class="page-link"><i class="bi bi-star-fill me-2"></i>Fitur & Proyeksi</a></li>
+            <li class="page-item" data-section="alur-kerja-peran"><a class="page-link"><i class="bi bi-diagram-3-fill me-2"></i>Alur, Peran & Pemetaan</a></li>
+            <li class="page-item" data-section="developer"><a class="page-link"><i class="bi bi-person-badge me-2"></i>Developer</a></li>
+            <li class="page-item" data-section="panduan"><a class="page-link"><i class="bi bi-book-half me-2"></i>Panduan Detail</a></li>
         </ul>
 
         <div id="guide-content" class="mt-4">
-            <div id="tentang" class="guide-section active">
-                <h2>🚀 Tentang SiRangkul</h2>
-                <p>SiRangkul adalah sebuah aplikasi sistem informasi berbasis web yang dirancang untuk memfasilitasi pengelolaan rencana anggaran dan proses pengajuan usulan di lingkungan madrasah atau institusi pendidikan serupa. Aplikasi ini bertujuan untuk meningkatkan efisiensi, transparansi, dan akuntabilitas dalam siklus perencanaan, pengajuan, verifikasi, persetujuan, hingga pelaporan anggaran dan usulan kegiatan.</p>
+            <div id="pendahuluan" class="guide-section active animate__animated animate__fadeIn">
+                <div class="card">
+                    <div class="card-header bg-primary text-white"><h2 class="h4 mb-0"><i class="bi bi-house-door-fill me-2"></i>Pendahuluan</h2></div>
+                    <div class="card-body p-4">
+                        <h5 class="card-title fw-bold">Latar Belakang & Tujuan</h5>
+                        <p class="card-text">Proses pengelolaan anggaran dan usulan kegiatan di <strong>MAN 2 Kota Makassar</strong> saat ini masih mengandalkan metode semi-manual. Hal ini seringkali menyebabkan tantangan seperti <strong>keterlambatan</strong> dalam alur persetujuan, <strong>kesulitan pelacakan</strong> status usulan, dan <strong>kurangnya transparansi</strong> dalam penggunaan dana. Menjawab permasalahan tersebut, <strong>SiRangkul</strong> (Sistem Informasi Rencana Anggaran dan Kelola Usulan) dikembangkan sebagai platform digital terintegrasi dengan tujuan utama untuk menciptakan sebuah sistem yang mengedepankan <strong>efisiensi</strong>, <strong>transparansi</strong>, dan <strong>akuntabilitas</strong>.</p>
+                    </div>
+                </div>
             </div>
 
-            <div id="fungsi" class="guide-section">
-                <h2>🎯 Fungsi Utama</h2>
-                <p>Fungsi utama SiRangkul adalah mengotomatisasi dan mendigitalisasi alur kerja terkait Rencana Kegiatan dan Anggaran Madrasah (RKAM) serta berbagai usulan kegiatan lainnya, mulai dari tahap inisiasi oleh pengusul hingga persetujuan akhir oleh pimpinan dan pengelolaan keuangan oleh bendahara.</p>
+            <div id="tentang" class="guide-section">
+                <div class="card">
+                    <div class="card-header bg-primary text-white"><h2 class="h4 mb-0"><i class="bi bi-info-circle-fill me-2"></i>Tentang & Konsep</h2></div>
+                    <div class="card-body p-4">
+                        <p class="card-text">SiRangkul adalah sebuah aplikasi <strong>sistem informasi berbasis web</strong> yang dirancang untuk memfasilitasi pengelolaan rencana anggaran dan proses pengajuan usulan di lingkungan madrasah. Aplikasi ini bertujuan untuk meningkatkan <strong>efisiensi, transparansi, dan akuntabilitas</strong> dalam <strong>siklus perencanaan, pengajuan, verifikasi, persetujuan, hingga pelaporan</strong> anggaran dan usulan kegiatan.</p>
+                        <hr>
+                        <h5 class="card-title fw-bold mt-4">Ruang Lingkup & Fitur Utama</h5>
+                        <p class="card-text">Untuk mencapai tujuannya, SiRangkul memperkenalkan serangkaian fitur kunci yang saling terhubung untuk mendigitalisasi seluruh alur kerja. Fitur-fitur tersebut mencakup:</p>
+                        <ul>
+                            <li><strong>Dashboard Analitik:</strong> Menyediakan visualisasi data anggaran dan usulan secara <em>real-time</em> bagi pimpinan.</li>
+                            <li><strong>Alur Kerja Persetujuan:</strong> Memastikan setiap usulan melewati proses verifikasi dan validasi yang terstruktur secara berjenjang.</li>
+                            <li><strong>Pelacakan Status:</strong> Memberikan kejelasan dan transparansi bagi pengusul untuk memantau progres usulan mereka.</li>
+                            <li><strong>Modul Pelaporan:</strong> Mengotomatisasi pembuatan laporan keuangan yang akurat dan dapat diakses kapan saja.</li>
+                        </ul>
+                        <hr>
+                        <h5 class="card-title fw-bold mt-4">Visualisasi Konsep</h5>
+                        <p class="card-text">Seluruh fungsionalitas SiRangkul dibalut dalam <strong>desain antarmuka (UI/UX) yang modern, bersih, dan intuitif</strong>. Prioritas diberikan pada kemudahan penggunaan untuk memastikan adopsi yang lancar oleh semua pengguna, dari staf pengusul hingga jajaran pimpinan.</p>
+                    </div>
+                </div>
             </div>
 
             <div id="manfaat" class="guide-section">
-                <h2>✨ Manfaat Utama</h2>
-                <ol>
-                    <li><strong>Meningkatkan Efisiensi:</strong> Proses pengajuan, verifikasi, hingga persetujuan proposal kegiatan akan menjadi lebih cepat karena tidak lagi bergantung pada alur dokumen fisik yang memakan waktu.</li>
-                    <li><strong>Meningkatkan Transparansi:</strong> Semua pihak terkait dapat memantau status proposal secara real-time. Pimpinan juga dapat dengan mudah melihat sisa pagu anggaran secara akurat melalui dasbor eksekutif.</li>
-                    <li><strong>Memperkuat Akuntabilitas:</strong> Setiap tahapan persetujuan akan tercatat secara digital (audit trail), sehingga meminimalkan risiko kehilangan dokumen dan mempermudah proses audit.</li>
-                    <li><strong>Memudahkan Akses Data dan Pelaporan:</strong> Data realisasi anggaran menjadi terpusat, akurat, dan dapat diakses kapan saja. Hal ini akan mempercepat penyusunan berbagai laporan keuangan yang dibutuhkan.</li>
-                </ol>
+                <div class="card">
+                    <div class="card-header bg-warning text-dark"><h2 class="h4 mb-0"><i class="bi bi-gem me-2"></i>Manfaat Utama</h2></div>
+                    <div class="card-body p-4">
+                        <ul>
+                            <li><strong>Meningkatkan Efisiensi:</strong> Mempercepat proses dari pengajuan hingga persetujuan proposal dengan menghilangkan alur dokumen fisik.</li>
+                            <li><strong>Meningkatkan Transparansi:</strong> Memungkinkan semua pihak memantau status proposal secara <strong>real-time</strong> dan melihat sisa pagu anggaran melalui <strong>dasbor eksekutif</strong>.</li>
+                            <li><strong>Memperkuat Akuntabilitas:</strong> Mencatat setiap tahapan persetujuan secara digital (<strong>audit trail</strong>) untuk mempermudah proses audit.</li>
+                            <li><strong>Memudahkan Akses Data dan Pelaporan:</strong> Memusatkan data realisasi anggaran agar selalu akurat dan dapat diakses kapan saja untuk penyusunan laporan.</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <div id="fitur" class="guide-section">
-                <h2>💡 Fitur-fitur Utama</h2>
-                <ul>
-                    <li>📊 <strong>Dashboard:</strong> Tampilan ringkasan informasi penting dan status terkini dari usulan dan anggaran.</li>
-                    <li>📝 <strong>Pengajuan Usulan (Proposal Submission):</strong> Modul bagi pengguna untuk mengajukan proposal kegiatan atau anggaran baru.</li>
-                    <li>🔍 <strong>Pelacakan Usulan (Proposal Tracking):</strong> Memungkinkan pengusul dan pihak terkait untuk memantau status usulan yang telah diajukan secara real-time.</li>
-                    <li>✅ <strong>Manajemen Alur Persetujuan (Approval Workflow):</strong> Sistem untuk mengelola proses verifikasi dan persetujuan usulan secara berjenjang.</li>
-                    <li>💰 <strong>Manajemen RKAM (RKAM Management):</strong> Fitur khusus untuk pengelolaan Rencana Kegiatan dan Anggaran Madrasah.</li>
-                    <li>📄 <strong>Penampil RKAM (RAKM Viewer):</strong> Memungkinkan pengguna untuk melihat dokumen RKAM yang telah disetujui atau dalam proses.</li>
-                    <li>💳 <strong>Manajemen Pembayaran (Payment Management):</strong> Mengelola proses pembayaran terkait usulan yang telah disetujui.</li>
-                    <li>📈 <strong>Pelaporan (Reporting):</strong> Menghasilkan laporan-laporan terkait anggaran, usulan, dan keuangan.</li>
-                    <li>👤 <strong>Manajemen Pengguna (User Management):</strong> Fitur untuk administrator dalam mengelola akun dan hak akses pengguna.</li>
-                    <li>📜 <strong>Log Audit (Audit Log):</strong> Mencatat setiap aktivitas penting dalam sistem untuk tujuan audit dan akuntabilitas.</li>
-                    <li>💬 <strong>Manajemen Umpan Balik (Feedback Management):</strong> Mengelola umpan balik atau masukan dari pengguna.</li>
-                </ul>
+                <div class="card">
+                    <div class="card-header bg-info text-white"><h2 class="h4 mb-0"><i class="bi bi-star-fill me-2"></i>Fitur & Proyeksi</h2></div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-md-4 mb-4 feature-card"><div class="card"><div class="card-body"><i class="bi bi-speedometer2"></i><h5 class="card-title">Dashboard</h5></div></div></div>
+                            <div class="col-md-4 mb-4 feature-card"><div class="card"><div class="card-body"><i class="bi bi-file-earmark-plus"></i><h5 class="card-title">Pengajuan Usulan</h5></div></div></div>
+                            <div class="col-md-4 mb-4 feature-card"><div class="card"><div class="card-body"><i class="bi bi-search"></i><h5 class="card-title">Pelacakan Usulan</h5></div></div></div>
+                            <div class="col-md-4 mb-4 feature-card"><div class="card"><div class="card-body"><i class="bi bi-check2-circle"></i><h5 class="card-title">Alur Persetujuan</h5></div></div></div>
+                            <div class="col-md-4 mb-4 feature-card"><div class="card"><div class="card-body"><i class="bi bi-wallet2"></i><h5 class="card-title">Manajemen RKAM</h5></div></div></div>
+                            <div class="col-md-4 mb-4 feature-card"><div class="card"><div class="card-body"><i class="bi bi-credit-card"></i><h5 class="card-title">Manajemen Pembayaran</h5></div></div></div>
+                            <div class="col-md-4 mb-4 feature-card"><div class="card"><div class="card-body"><i class="bi bi-file-bar-graph"></i><h5 class="card-title">Pelaporan</h5></div></div></div>
+                            <div class="col-md-4 mb-4 feature-card"><div class="card"><div class="card-body"><i class="bi bi-people"></i><h5 class="card-title">Manajemen Pengguna</h5></div></div></div>
+                            <div class="col-md-4 mb-4 feature-card"><div class="card"><div class="card-body"><i class="bi bi-journal-text"></i><h5 class="card-title">Log Audit</h5></div></div></div>
+                        </div>
+                        <hr>
+                        <h5 class="card-title fw-bold mt-4">Proyeksi Waktu Pelaksanaan</h5>
+                        <p class="card-text">Proyek pengembangan SiRangkul ini memiliki target implementasi yang cepat dan terukur, yaitu selama <strong>60 hari</strong>. Rencana peluncuran sistem untuk dapat digunakan secara penuh ditetapkan pada tanggal <strong>10 November 2025</strong>.</p>
+                    </div>
+                </div>
             </div>
 
-            <div id="cara-kerja" class="guide-section">
-                <h2>⚙️ Cara Kerja Aplikasi</h2>
-                <ol>
-                    <li>✍️ <strong>Pengajuan:</strong> Pengguna dengan role "Pengusul" membuat dan mengajukan proposal atau rencana kegiatan melalui sistem.</li>
-                    <li>🧐 <strong>Verifikasi:</strong> Usulan yang diajukan akan masuk ke tahap verifikasi oleh "Verifikator" untuk memastikan kelengkapan dan kesesuaian.</li>
-                    <li>👍 <strong>Persetujuan:</strong> Setelah diverifikasi, usulan akan diteruskan ke "Kepala Madrasah" atau "Komite Madrasah" untuk persetujuan akhir.</li>
-                    <li>💸 <strong>Pengelolaan Anggaran:</strong> Usulan yang disetujui akan menjadi bagian dari RKAM dan dikelola oleh "Bendahara" untuk proses pencairan dan pembayaran.</li>
-                    <li>📊 <strong>Pemantauan & Pelaporan:</strong> Semua proses dapat dipantau melalui dashboard dan laporan yang dihasilkan oleh sistem, serta dicatat dalam log audit.</li>
-                </ol>
+            <div id="alur-kerja-peran" class="guide-section">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-dark text-white"><h2 class="h5 mb-0"><i class="bi bi-diagram-3-fill me-2"></i>Cara Kerja Aplikasi</h2></div>
+                            <div class="card-body">
+                                <ol class="list-group list-group-flush">
+                                    <li class="list-group-item">✍️ <strong>Pengajuan:</strong> Pengusul membuat proposal melalui sistem.</li>
+                                    <li class="list-group-item">🧐 <strong>Verifikasi:</strong> Verifikator memeriksa kelengkapan usulan.</li>
+                                    <li class="list-group-item">👍 <strong>Persetujuan:</strong> Kepala Madrasah/Komite memberikan persetujuan akhir.</li>
+                                    <li class="list-group-item">💸 <strong>Pengelolaan:</strong> Bendahara mengelola pencairan dana usulan yang disetujui.</li>
+                                    <li class="list-group-item">📊 <strong>Pemantauan:</strong> Semua proses dipantau melalui dashboard dan laporan.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white"><h2 class="h5 mb-0"><i class="bi bi-people-fill me-2"></i>Role Pengguna</h2></div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item"><strong>👑 Administrator:</strong> Mengelola seluruh sistem.</li>
+                                    <li class="list-group-item"><strong>👨‍💼 Pengusul:</strong> Mengajukan proposal baru.</li>
+                                    <li class="list-group-item"><strong>👩‍⚖️ Verifikator:</strong> Memverifikasi kelengkapan proposal.</li>
+                                    <li class="list-group-item"><strong>👨‍🏫 Kepala Madrasah:</strong> Memberikan persetujuan akhir.</li>
+                                    <li class="list-group-item"><strong>💰 Bendahara:</strong> Mengelola keuangan dan pembayaran.</li>
+                                    <li class="list-group-item"><strong>🤝 Komite Madrasah:</strong> Memberikan persetujuan strategis.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <div class="card-header"><h2 class="h4 mb-0"><i class="bi bi-table me-2"></i>Pemetaan Tugas</h2></div>
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light"><tr><th>Tahapan</th><th class="text-center">Admin</th><th class="text-center">Pengusul</th><th class="text-center">Verifikator</th><th class="text-center">Kepala Madrasah</th><th class="text-center">Bendahara</th><th class="text-center">Komite</th></tr></thead>
+                                <tbody><tr><td>Pengajuan Usulan</td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr><tr><td>Verifikasi Usulan</td><td class="text-center"></td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr><tr><td>Persetujuan Usulan</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center">✅</td></tr><tr><td>Pengelolaan RKAM</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center">✅</td><td class="text-center"></td></tr><tr><td>Pengelolaan Pembayaran</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center"></td></tr><tr><td>Manajemen Pengguna</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr><tr><td>Melihat Laporan</td><td class="text-center">✅</td><td class="text-center">✅</td><td class="text-center">✅</td><td class="text-center">✅</td><td class="text-center">✅</td><td class="text-center">✅</td></tr><tr><td>Melihat Log Audit</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr><tr><td>Manajemen Umpan Balik</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td></tr><tr><td>Konfigurasi Sistem</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div id="role" class="guide-section">
-                <h2>🧑‍💻 Role Pengguna</h2>
-                <ul>
-                    <li><strong>👑 Administrator:</strong> Mengelola seluruh sistem, termasuk manajemen pengguna, konfigurasi aplikasi, dan pemeliharaan data.</li>
-                    <li><strong>👨‍💼 Pengusul:</strong> Mengajukan proposal kegiatan atau anggaran baru.</li>
-                    <li><strong>👩‍⚖️ Verifikator:</strong> Memeriksa dan memverifikasi kelengkapan serta kesesuaian usulan.</li>
-                    <li><strong>👨‍🏫 Kepala Madrasah:</strong> Memberikan persetujuan akhir terhadap usulan dan RKAM.</li>
-                    <li><strong>💰 Bendahara:</strong> Mengelola aspek keuangan dari usulan yang disetujui.</li>
-                    <li><strong>🤝 Komite Madrasah:</strong> Memberikan persetujuan atau masukan terhadap usulan dan kebijakan anggaran.</li>
-                </ul>
-            </div>
-
-            <div id="pemetaan" class="guide-section">
-                <h2>🗺️ Pemetaan Tugas Berdasarkan Role Pengguna</h2>
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Tahapan Pengelolaan Aplikasi</th>
-                                <th class="text-center">Administrator</th>
-                                <th class="text-center">Pengusul</th>
-                                <th class="text-center">Verifikator</th>
-                                <th class="text-center">Kepala Madrasah</th>
-                                <th class="text-center">Bendahara</th>
-                                <th class="text-center">Komite Madrasah</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Pengajuan Usulan</td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr>
-                            <tr><td>Verifikasi Usulan</td><td class="text-center"></td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr>
-                            <tr><td>Persetujuan Usulan</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center">✅</td></tr>
-                            <tr><td>Pengelolaan RKAM</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center">✅</td><td class="text-center"></td></tr>
-                            <tr><td>Pengelolaan Pembayaran</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center"></td></tr>
-                            <tr><td>Manajemen Pengguna</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr>
-                            <tr><td>Melihat Laporan</td><td class="text-center">✅</td><td class="text-center">✅</td><td class="text-center">✅</td><td class="text-center">✅</td><td class="text-center">✅</td><td class="text-center">✅</td></tr>
-                            <tr><td>Melihat Log Audit</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr>
-                            <tr><td>Manajemen Umpan Balik</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td></tr>
-                            <tr><td>Konfigurasi Sistem</td><td class="text-center">✅</td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr>
-                        </tbody>
-                    </table>
+            <div id="developer" class="guide-section">
+                <div class="card">
+                    <div class="card-header"><h2 class="h4 mb-0"><i class="bi bi-person-badge me-2"></i>Sekilas Tentang Developer</h2></div>
+                    <div class="card-body p-4">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body text-center p-4">
+                                        <img src="https://visibaubau4.netlify.app/assets/img/sdm/Muhdan%20Fyan%20Syah%20Sofian.png" alt="Foto Muhdan Fyan Syah Sofian" class="rounded-circle mb-3" style="width: 140px; height: 140px; object-fit: cover; border: 4px solid #dee2e6;">
+                                        <h5 class="card-title mb-1">Muhdan Fyan Syah Sofian, S.Kom</h5>
+                                        <p class="text-muted small">Full-Stack Developer | IT Mentor | Lifelong Learner</p>
+                                        <p class="card-text small text-start mt-3">
+                                            Pendiri dan Pengasuh Pondok Informatika serta Pesantren Teknologi. Saat ini sedang menempuh studi Master of Science in Psychology and Islamic Counselling (MSc PIC) di International Open University.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body text-center p-4">
+                                        <img src="https://visibaubau4.netlify.app/assets/img/sdm/Ahmad%20Dahsan.png" alt="Foto Ahmad Dahsan" class="rounded-circle mb-3" style="width: 140px; height: 140px; object-fit: cover; border: 4px solid #dee2e6;">
+                                        <h5 class="card-title mb-1">Ahmad Dahsan</h5>
+                                        <p class="text-muted small">Lead Developer | IT Mentor</p>
+                                        <p class="card-text small text-start mt-3">
+                                            Santri Pondok Informatika Angkatan ke-II, pimpinan departemen akademik dan mentor IT. Berpengalaman membangun aplikasi realtime dan sedang menempuh studi Bachelor of Science in Information Technology (BSc IT) di International Open University.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <p class="fw-bold">Dikembangkan bersama Tim Pondok Informatika</p>
+                            <div class="mt-3">
+                                <a href="https://pondokinformatika.id" class="btn btn-outline-primary m-1" target="_blank">Pondok Informatika</a>
+                                <a href="https://pesantrenteknologi.id" class="btn btn-outline-primary m-1" target="_blank">Pesantren Teknologi</a>
+                                <a href="https://ceksantri.netlify.app/" class="btn btn-outline-secondary m-1" target="_blank">Cek Santri</a>
+                                <a href="https://profilsantri.netlify.app/" class="btn btn-outline-secondary m-1" target="_blank">Profil Santri</a>
+                                <a href="https://instagram.com/pondokinformatika/" class="btn btn-outline-danger m-1" target="_blank"><i class="bi bi-instagram"></i> Instagram</a>
+                                <a href="https://www.facebook.com/pimakassar/" class="btn btn-outline-primary m-1" target="_blank"><i class="bi bi-facebook"></i> Facebook</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div id="panduan" class="guide-section">
-                <h2>📖 Panduan Pengguna</h2>
-                <p>Berikut adalah panduan penggunaan aplikasi SiRangkul berdasarkan peran (role) masing-masing pengguna. Setiap pengguna akan melihat menu yang berbeda sesuai dengan hak aksesnya.</p>
-                <!-- Content from previous user guide can be pasted here, structured with accordions -->
+                <div class="card text-center">
+                    <div class="card-header"><h2 class="h4 mb-0"><i class="bi bi-book-half me-2"></i>Panduan Pengguna Rinci</h2></div>
+                    <div class="card-body p-4">
+                        <p>Panduan lebih detail berdasarkan peran dapat diakses pada halaman terpisah.</p>
+                        <a href="panduan.html" class="btn btn-info text-white mt-2"><i class="bi bi-journal-richtext me-2"></i>Lihat Panduan per Peran</a>
+                        <hr>
+                        <p class="mt-4">Coba aplikasi secara langsung untuk pengalaman terbaik.</p>
+                        <a href="https://sirangkul.netlify.app/" class="btn btn-success mt-2" target="_blank"><i class="bi bi-box-arrow-up-right me-2"></i>Buka Aplikasi SiRangkul</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -149,22 +238,23 @@
             const sections = document.querySelectorAll('.guide-section');
 
             pagination.addEventListener('click', function (e) {
-                const target = e.target.closest('.page-item');
-                if (target) {
-                    const sectionId = target.dataset.section;
+                if (e.target.tagName === 'A') {
+                    const target = e.target.closest('.page-item');
+                    if (target) {
+                        const sectionId = target.dataset.section;
 
-                    // Update active state
-                    pagination.querySelector('.active').classList.remove('active');
-                    target.classList.add('active');
+                        pagination.querySelector('.active').classList.remove('active');
+                        target.classList.add('active');
 
-                    // Show/hide sections
-                    sections.forEach(section => {
-                        if (section.id === sectionId) {
-                            section.classList.add('active');
-                        } else {
-                            section.classList.remove('active');
-                        }
-                    });
+                        sections.forEach(section => {
+                            section.classList.remove('active', 'animate__animated', 'animate__fadeIn');
+                            if (section.id === sectionId) {
+                                section.classList.add('active', 'animate__animated', 'animate__fadeIn');
+                            } else {
+                                section.classList.remove('active');
+                            }
+                        });
+                    }
                 }
             });
         });
