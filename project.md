@@ -1,179 +1,243 @@
-
 # Backend Needs & API Endpoints
 
-This document outlines the backend requirements and a proposed API structure based on the database schema in `skema.sql`.
+This document outlines the backend requirements and estimated API endpoints for the SiRangkul application, based on the database schema and frontend components.
 
-## Backend Needs
+## 1. Authentication
 
-The application requires backend services for the following functionalities:
+- **`POST /api/auth/login`**: User login.
 
-1.  **User Management & Authentication**: Handle user registration, login, roles, and profile management.
-2.  **Proposal Management**: Create, read, update, and delete (CRUD) proposals and manage their lifecycle (draft, submitted, approved, rejected).
-3.  **RKAM Management**: CRUD operations for RKAM items associated with proposals.
-4.  **Payment Management**: Track and manage payments for approved proposals.
-5.  **Feedback System**: Allow users to provide feedback on proposals.
-6.  **Audit Trail**: Log significant user actions for security and compliance.
-7.  **Approval Workflow**: Manage the multi-step approval process for proposals.
-8.  **Reporting**: Generate reports based on proposals, payments, and other data.
-9.  **Notifications**: Inform users about important events (e.g., proposal status changes).
-10. **File Management**: Handle file uploads for proposal attachments.
+  - **Request Body**: `{ "email": "user@example.com", "password": "password" }`
+  - **Response Body**: `{ "token": "jwt_token", "user": { "id": "user_id", "full_name": "User Name", "role": "user_role" } }`
+  - **Database Tables**: `users`
+- **`POST /api/auth/logout`**: User logout.
 
-## API Endpoint Estimations
+  - **Request Body**: None
+  - **Response Body**: `{ "message": "Logout successful" }`
+  - **Database Tables**: None
+- **`GET /api/auth/me`**: Get the currently authenticated user.
 
-### 1. Authentication
+  - **Request Body**: None
+  - **Response Body**: `{ "id": "user_id", "full_name": "User Name", "role": "user_role" }`
+  - **Database Tables**: `users`
 
--   **Table**: `users`
--   **Endpoint**: `POST /api/auth/login`
-    -   **Request**: `{ "email": "user@example.com", "password": "password123" }`
-    -   **Response**: `{ "token": "jwt_token", "user": { "id": "uuid", "full_name": "User Name", "role": "user" } }`
--   **Endpoint**: `POST /api/auth/register`
-    -   **Request**: `{ "email": "newuser@example.com", "password": "password123", "full_name": "New User" }`
-    -   **Response**: `{ "message": "User registered successfully" }`
--   **Endpoint**: `GET /api/auth/me`
-    -   **Request**: (Header: `Authorization: Bearer jwt_token`)
-    -   **Response**: `{ "id": "uuid", "full_name": "User Name", "email": "user@example.com", "role": "user" }`
+## 2. Users
 
-### 2. User Management
+- **`GET /api/users`**: Get a list of users.
 
--   **Table**: `users`
--   **Endpoint**: `GET /api/users`
-    -   **Response**: `[{ "id": "uuid", "full_name": "User Name", "email": "user@example.com", "role": "user" }]`
--   **Endpoint**: `GET /api/users/{id}`
-    -   **Response**: `{ "id": "uuid", "full_name": "User Name", "email": "user@example.com", "role": "user" }`
--   **Endpoint**: `PUT /api/users/{id}`
-    -   **Request**: `{ "full_name": "Updated Name", "role": "manager" }`
-    -   **Response**: `{ "message": "User updated successfully" }`
--   **Endpoint**: `DELETE /api/users/{id}`
-    -   **Response**: `{ "message": "User deleted successfully" }`
+  - **Query Params**: `?role=pengusul`
+  - **Response Body**: `[{ "id": "user_id", "full_name": "User Name", "email": "user@example.com", "role": "user_role" }]`
+  - **Database Tables**: `users`
+- **`POST /api/users`**: Create a new user.
 
-### 3. Proposal Management
+  - **Request Body**: `{ "full_name": "New User", "email": "new@example.com", "password": "password", "role": "pengusul" }`
+  - **Response Body**: `{ "id": "new_user_id", "full_name": "New User", "email": "new@example.com", "role": "pengusul" }`
+  - **Database Tables**: `users`
+- **`GET /api/users/{id}`**: Get a single user by ID.
 
--   **Table**: `proposals`
--   **Endpoint**: `GET /api/proposals`
-    -   **Response**: `[{ "id": "uuid", "title": "Proposal Title", "status": "submitted", "submitted_at": "timestamp" }]`
--   **Endpoint**: `GET /api/proposals/{id}`
-    -   **Response**: `{ "id": "uuid", "title": "Proposal Title", "description": "...", "status": "submitted", "user_id": "uuid", "rkam_items": [], "attachments": [] }`
--   **Endpoint**: `POST /api/proposals`
-    -   **Request**: `{ "title": "New Proposal", "description": "..." }`
-    -   **Response**: `{ "id": "new_proposal_uuid", "message": "Proposal created successfully" }`
--   **Endpoint**: `PUT /api/proposals/{id}`
-    -   **Request**: `{ "title": "Updated Proposal Title", "description": "..." }`
-    -   **Response**: `{ "message": "Proposal updated successfully" }`
--   **Endpoint**: `DELETE /api/proposals/{id}`
-    -   **Response**: `{ "message": "Proposal deleted successfully" }`
+  - **Response Body**: `{ "id": "user_id", "full_name": "User Name", "email": "user@example.com", "role": "user_role" }`
+  - **Database Tables**: `users`
+- **`PUT /api/users/{id}`**: Update a user.
 
-### 4. RKAM Management
+  - **Request Body**: `{ "full_name": "Updated Name" }`
+  - **Response Body**: `{ "id": "user_id", "full_name": "Updated Name", "email": "user@example.com", "role": "user_role" }`
+  - **Database Tables**: `users`
+- **`DELETE /api/users/{id}`**: Delete a user.
 
--   **Table**: `rkam`
--   **Endpoint**: `GET /api/proposals/{proposal_id}/rkam`
-    -   **Response**: `[{ "id": "uuid", "item_name": "Item A", "quantity": 10, "unit_price": 100, "total_price": 1000 }]`
--   **Endpoint**: `POST /api/proposals/{proposal_id}/rkam`
-    -   **Request**: `{ "item_name": "Item B", "quantity": 5, "unit_price": 50 }`
-    -   **Response**: `{ "id": "new_rkam_item_uuid", "message": "RKAM item added" }`
--   **Endpoint**: `PUT /api/rkam/{id}`
-    -   **Request**: `{ "item_name": "Updated Item B", "quantity": 6 }`
-    -   **Response**: `{ "message": "RKAM item updated" }`
--   **Endpoint**: `DELETE /api/rkam/{id}`
-    -   **Response**: `{ "message": "RKAM item deleted" }`
+  - **Response Body**: `{ "message": "User deleted" }`
+  - **Database Tables**: `users`
 
-### 5. Payment Management
+## 3. Proposals
 
--   **Table**: `payments`
--   **Endpoint**: `GET /api/payments`
-    -   **Response**: `[{ "id": "uuid", "proposal_id": "uuid", "amount": 5000, "status": "paid", "payment_date": "timestamp" }]`
--   **Endpoint**: `POST /api/payments`
-    -   **Request**: `{ "proposal_id": "uuid", "amount": 5000, "payment_date": "timestamp" }`
-    -   **Response**: `{ "id": "new_payment_uuid", "message": "Payment recorded" }`
+- **`GET /api/proposals`**: Get a list of proposals.
 
-### 6. Feedback Management
+  - **Query Params**: `?status=submitted`
+  - **Response Body**: `[{ "id": "proposal_id", "title": "Proposal Title", "status": "submitted", "submitted_at": "timestamp" }]`
+  - **Database Tables**: `proposals`
+- **`POST /api/proposals`**: Create a new proposal.
 
--   **Table**: `feedback`
--   **Endpoint**: `GET /api/proposals/{proposal_id}/feedback`
-    -   **Response**: `[{ "id": "uuid", "user_id": "uuid", "message": "This is great!", "created_at": "timestamp" }]`
--   **Endpoint**: `POST /api/proposals/{proposal_id}/feedback`
-    -   **Request**: `{ "message": "This needs improvement." }`
-    -   **Response**: `{ "id": "new_feedback_uuid", "message": "Feedback submitted" }`
+  - **Request Body**: `{ "title": "New Proposal", "description": "Proposal description" }`
+  - **Response Body**: `{ "id": "new_proposal_id", "title": "New Proposal", "status": "draft", ... }`
+  - **Database Tables**: `proposals`
+- **`GET /api/proposals/{id}`**: Get a single proposal by ID.
 
-### 7. Audit Log
+  - **Response Body**: `{ "id": "proposal_id", "title": "Proposal Title", ..., "rkam": [], "attachments": [] }`
+  - **Database Tables**: `proposals`, `rkam`, `proposal_attachments`
+- **`PUT /api/proposals/{id}`**: Update a proposal.
 
--   **Table**: `audit_logs`
--   **Endpoint**: `GET /api/audit-logs`
-    -   **Response**: `[{ "id": "uuid", "user_id": "uuid", "action": "proposal_approved", "details": {}, "created_at": "timestamp" }]`
+  - **Request Body**: `{ "title": "Updated Title" }`
+  - **Response Body**: `{ "id": "proposal_id", "title": "Updated Title", ... }`
+  - **Database Tables**: `proposals`
+- **`DELETE /api/proposals/{id}`**: Delete a proposal.
 
-### 8. Approval Workflow
+  - **Response Body**: `{ "message": "Proposal deleted" }`
+  - **Database Tables**: `proposals`
 
--   **Table**: `approval_workflows`
--   **Endpoint**: `GET /api/proposals/{proposal_id}/approvals`
-    -   **Response**: `[{ "id": "uuid", "approver_id": "uuid", "status": "pending", "notes": "" }]`
--   **Endpoint**: `POST /api/proposals/{proposal_id}/approvals`
-    -   **Request**: `{ "approver_id": "uuid" }`
-    -   **Response**: `{ "message": "Approver added to workflow" }`
--   **Endpoint**: `PUT /api/approvals/{id}`
-    -   **Request**: `{ "status": "approved", "notes": "Looks good." }`
-    -   **Response**: `{ "message": "Approval status updated" }`
+## 4. RKAM (Rencana Kegiatan dan Anggaran Madrasah)
 
-### 9. File Management
+- **`GET /api/proposals/{proposal_id}/rkam`**: Get RKAM items for a proposal.
 
--   **Table**: `proposal_attachments`
--   **Endpoint**: `POST /api/proposals/{proposal_id}/attachments`
-    -   **Request**: (Multipart form data with file)
-    -   **Response**: `{ "id": "new_attachment_uuid", "file_name": "document.pdf", "url": "/files/document.pdf" }`
--   **Endpoint**: `DELETE /api/attachments/{id}`
-    -   **Response**: `{ "message": "Attachment deleted" }`
+  - **Response Body**: `[{ "id": "rkam_id", "item_name": "Item Name", "quantity": 1, "unit_price": 10000, "total_price": 10000 }]`
+  - **Database Tables**: `rkam`
+- **`POST /api/proposals/{proposal_id}/rkam`**: Add an RKAM item to a proposal.
 
-### 10. Notifications
+  - **Request Body**: `{ "item_name": "New Item", "quantity": 2, "unit_price": 5000 }`
+  - **Response Body**: `{ "id": "new_rkam_id", ... }`
+  - **Database Tables**: `rkam`
+- **`PUT /api/rkam/{id}`**: Update an RKAM item.
 
--   **Table**: `notifications`
--   **Endpoint**: `GET /api/notifications`
-    -   **Response**: `[{ "id": "uuid", "message": "Your proposal has been approved.", "is_read": false, "created_at": "timestamp" }]`
--   **Endpoint**: `PUT /api/notifications/{id}/read`
-    -   **Response**: `{ "message": "Notification marked as read" }`
+  - **Request Body**: `{ "quantity": 3 }`
+  - **Response Body**: `{ "id": "rkam_id", "quantity": 3, ... }`
+  - **Database Tables**: `rkam`
+- **`DELETE /api/rkam/{id}`**: Delete an RKAM item.
 
-## Role-Based Access Control (RBAC)
+  - **Response Body**: `{ "message": "RKAM item deleted" }`
+  - **Database Tables**: `rkam`
 
-Based on the roles defined in `README.md`, the API access will be structured as follows:
+## 5. Payments
 
-### 👑 Administrator
-- **User Management (`/api/users`):** Full CRUD access. Can create, read, update, and delete any user.
-- **RKAM Management (`/api/rkam`):** Full CRUD access.
-- **Payment Management (`/api/payments`):** Full CRUD access.
-- **Audit Log (`/api/audit-logs`):** Full read access.
-- **Feedback Management (`/api/feedback`):** Full CRUD access.
-- **System Configuration:** Access to all system configuration endpoints.
-- **All other endpoints:** Full access to all data.
+- **`GET /api/payments`**: Get a list of payments.
 
-### 👨‍💼 Pengusul (Proposer)
-- **Proposal Management (`/api/proposals`):** Can create, read, update, and delete their *own* proposals. Access is restricted to proposals where the `user_id` matches their own.
-- **Proposal Tracking:** Can view the status and approval history of their own proposals.
-- **File Management (`/api/proposals/{proposal_id}/attachments`):** Can upload and delete attachments for their own proposals.
-- **Reporting (`/api/reports`):** Can view reports related to their own proposals.
+  - **Query Params**: `?status=pending`
+  - **Response Body**: `[{ "id": "payment_id", "proposal_id": "proposal_id", "amount": 50000, "status": "pending" }]`
+  - **Database Tables**: `payments`
+- **`POST /api/payments`**: Create a new payment.
 
-### 👩‍⚖️ Verifikator (Verifier)
-- **Approval Workflow (`/api/approvals`):** Can view proposals assigned to them for verification and update their status (verify/reject).
-- **Proposal Viewing:** Can read the details of proposals pending their verification.
-- **Reporting (`/api/reports`):** Can view reports.
+  - **Request Body**: `{ "proposal_id": "proposal_id", "amount": 50000 }`
+  - **Response Body**: `{ "id": "new_payment_id", ... }`
+  - **Database Tables**: `payments`
+- **`GET /api/payments/{id}`**: Get a single payment by ID.
 
-### 👨‍🏫 Kepala Madrasah (Head of School)
-- **Approval Workflow (`/api/approvals`):** Can give final approval or rejection for verified proposals.
-- **RKAM Management (`/api/rkam`):** Read-only access to monitor budgets.
-- **Reporting (`/api/reports`):** Full access to view all reports.
-- **Feedback Management (`/api/feedback`):** Can view and respond to feedback.
-- **Dashboard:** Can view the main analytical dashboard.
+  - **Response Body**: `{ "id": "payment_id", ... }`
+  - **Database Tables**: `payments`
+- **`PUT /api/payments/{id}`**: Update a payment.
 
-### 💰 Bendahara (Treasurer)
-- **Payment Management (`/api/payments`):** Can process and record payments for approved proposals.
-- **RKAM Management (`/api/rkam`):** Can manage and update RKAM data.
-- **Reporting (`/api/reports`):** Can generate and view financial reports.
+  - **Request Body**: `{ "status": "paid" }`
+  - **Response Body**: `{ "id": "payment_id", "status": "paid", ... }`
+  - **Database Tables**: `payments`
 
-### 🤝 Komite Madrasah (School Committee)
-- **Approval Workflow (`/api/approvals`):** Can review and provide approval/recommendations on strategic proposals.
-- **Reporting (`/api/reports`):** Can monitor program implementation and budgets through reports.
-- **Proposal Tracking:** Can track the status of important proposals.
+## 6. Feedback
 
-## Database Schema Recommendations
+- **`GET /api/feedback`**: Get a list of feedback.
 
-The existing `skema.sql` is a good foundation. The following tables should be added to support the full functionality of the application:
+  - **Query Params**: `?proposal_id=...`
+  - **Response Body**: `[{ "id": "feedback_id", "user_id": "user_id", "message": "Feedback message" }]`
+  - **Database Tables**: `feedback`
+- **`POST /api/feedback`**: Create a new feedback.
 
-1.  **`proposal_attachments`**: To handle file uploads associated with proposals.
-2.  **`notifications`**: To provide a notification system for users.
+  - **Request Body**: `{ "proposal_id": "proposal_id", "message": "New feedback" }`
+  - **Response Body**: `{ "id": "new_feedback_id", ... }`
+  - **Database Tables**: `feedback`
 
+## 7. Audit Logs
+
+- **`GET /api/audit-logs`**: Get a list of audit logs.
+  - **Response Body**: `[{ "id": "log_id", "user_id": "user_id", "action": "user_login", "details": {} }]`
+  - **Database Tables**: `audit_logs`
+
+## 8. Approval Workflows
+
+- **`GET /api/proposals/{proposal_id}/approvals`**: Get approval status for a proposal.
+
+  - **Response Body**: `[{ "id": "approval_id", "approver_id": "user_id", "status": "pending" }]`
+  - **Database Tables**: `approval_workflows`
+- **`POST /api/proposals/{proposal_id}/approvals`**: Approve or reject a proposal.
+
+  - **Request Body**: `{ "status": "approved", "notes": "Looks good" }`
+  - **Response Body**: `{ "id": "new_approval_id", ... }`
+  - **Database Tables**: `approval_workflows`
+
+## 9. Proposal Attachments
+
+- **`POST /api/proposals/{proposal_id}/attachments`**: Upload a proposal attachment.
+
+  - **Request Body**: (multipart/form-data with file)
+  - **Response Body**: `{ "id": "attachment_id", "file_name": "file.pdf", "file_path": "/path/to/file.pdf" }`
+  - **Database Tables**: `proposal_attachments`
+- **`DELETE /api/attachments/{id}`**: Delete a proposal attachment.
+
+  - **Response Body**: `{ "message": "Attachment deleted" }`
+  - **Database Tables**: `proposal_attachments`
+
+## 10. Notifications
+
+- **`GET /api/notifications`**: Get notifications for the current user.
+
+  - **Response Body**: `[{ "id": "notification_id", "message": "New proposal submitted", "is_read": false }]`
+  - **Database Tables**: `notifications`
+- **`PUT /api/notifications/{id}/read`**: Mark a notification as read.
+
+  - **Response Body**: `{ "message": "Notification marked as read" }`
+  - **Database Tables**: `notifications`
+
+## 11. General User Endpoint
+
+- **`GET /api/user`**: Get the currently authenticated user's details. This endpoint is similar to `/api/auth/me`.
+
+  - **Response Body**: `{ "id": "user_id", "full_name": "User Name", "email": "user@example.com", "role": "user_role" }`
+  - **Database Tables**: `users`
+
+## How to Access and Use the API
+
+To interact with the API, you will typically use an HTTP client (e.g., Postman, Insomnia, or `curl`).
+
+### Base URL
+
+Your API's base URL is usually `http://127.0.0.1:8000` (or the address where your Laravel development server is running).
+
+### Authentication
+
+1. **Login:** Send a `POST` request to `/api/auth/login` with your `email` and `password` in the request body.
+
+   ```json
+   {
+       "email": "admin@sirangkul.com",
+       "password": "password"
+   }
+   ```
+2. **Obtain Token:** The successful login response will include an `api_token`.
+
+   ```json
+   {
+       "token": "your-api-token",
+       "user": { ... }
+   }
+   ```
+3. **Include Token in Requests:** For all subsequent authenticated requests, include this token in the `Authorization` header as a Bearer token:
+   `Authorization: Bearer <your_api_token>`
+
+   **Using Postman:**
+
+   1. After a successful login, copy the `token` value from the response.
+   2. In a new request in Postman, go to the "Authorization" tab.
+   3. Select "Bearer Token" from the "Type" dropdown.
+   4. Paste the copied token into the "Token" field.
+   5. Postman will automatically add the `Authorization: Bearer <your_token>` header to your request.
+
+### Making API Requests
+
+1. **Construct URL:** Combine the Base URL with the specific endpoint path (e.g., `http://127.0.0.1:8000/api/users`).
+2. **Choose HTTP Method:** Use the appropriate HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) as specified for each endpoint.
+3. **Headers:** Include necessary headers, such as `Content-Type: application/json` for requests with a JSON body.
+4. **Request Body:** For `POST`, `PUT`, and `PATCH` requests, provide the request body in JSON format as described in the endpoint documentation.
+5. **Query Parameters:** For `GET` requests that accept query parameters, append them to the URL (e.g., `/api/users?role=pengusul`).
+
+**Example `curl` command for login:**
+
+```bash
+curl -X POST \
+  http://127.0.0.1:8000/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "email": "admin@sirangkul.com",
+    "password": "password"
+  }'
+```
+
+**Example `curl` command for an authenticated GET request:**
+
+```bash
+curl -X GET \
+  http://127.0.0.1:8000/api/auth/me \
+  -H 'Accept: application/json' \
+  -H 'Authorization: Bearer <your_api_token>'
+```
