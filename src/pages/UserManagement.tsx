@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Search, CreditCard as Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { apiService } from '../services/api';
 
 interface User {
   id: string;
-  name: string;
+  full_name: string;
   email: string;
   role: string;
   status: 'Active' | 'Inactive';
@@ -11,58 +12,27 @@ interface User {
 }
 
 const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'Ahmad Fauzi',
-      email: 'ahmad@madrasah.com',
-      role: 'Pengusul',
-      status: 'Active',
-      createdAt: '2025-01-10'
-    },
-    {
-      id: '2',
-      name: 'Siti Nurhaliza',
-      email: 'siti@madrasah.com',
-      role: 'Verifikator',
-      status: 'Active',
-      createdAt: '2025-01-08'
-    },
-    {
-      id: '3',
-      name: 'Dr. H. Muhammad',
-      email: 'kepala@madrasah.com',
-      role: 'Kepala Madrasah',
-      status: 'Active',
-      createdAt: '2025-01-05'
-    },
-    {
-      id: '4',
-      name: 'Fatimah S.Pd',
-      email: 'bendahara@madrasah.com',
-      role: 'Bendahara',
-      status: 'Active',
-      createdAt: '2025-01-03'
-    },
-    {
-      id: '5',
-      name: 'H. Abdullah',
-      email: 'komite@madrasah.com',
-      role: 'Komite Madrasah',
-      status: 'Inactive',
-      createdAt: '2024-12-28'
-    }
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
+  
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await apiService.getUsers();
+      console.log(response);
+      setUsers(response as unknown as User[]);
+    };
+    fetchUsers();
+  }, []);
 
   const getRoleColor = (role: string) => {
     const colors: { [key: string]: string } = {
@@ -131,6 +101,7 @@ const UserManagement: React.FC = () => {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left py-3 px-6 font-medium text-gray-700">User</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-700">Email</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-700">Role</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-700">Status</th>
                 <th className="text-left py-3 px-6 font-medium text-gray-700">Dibuat</th>
@@ -138,13 +109,18 @@ const UserManagement: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
+              {filteredUsers.length > 0 ? filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="py-4 px-6">
                     <div>
-                      <div className="font-medium text-gray-900">{user.name}</div>
+                      <div className="font-medium text-gray-900">{user.full_name}</div>
                       <div className="text-sm text-gray-600">{user.email}</div>
                     </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role)}`}>
+                      {user.email}
+                    </span>
                   </td>
                   <td className="py-4 px-6">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role)}`}>
@@ -173,7 +149,13 @@ const UserManagement: React.FC = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={5} className="py-4 px-6 text-center text-gray-600">
+                    Tidak ada data
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
