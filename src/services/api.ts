@@ -38,7 +38,12 @@ export interface Laporan {
 export interface Feedback {
   id: string;
   user_id: string;
+  proposal_id: string;
   message: string;
+  status: string;
+  type: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ApiError {
@@ -125,7 +130,7 @@ class ApiService {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...API_BASE_URL(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` })
+        ...(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` })
       }
     });
   }
@@ -135,7 +140,7 @@ class ApiService {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...API_BASE_URL(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` })
+        ...(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` })
       }
     });
   }
