@@ -1,15 +1,13 @@
-Tugas 1 : cek semua pemanggilan data yang ada di folder src, buatkan dalam bentuk data dummy berupa seed laravel pada api-sirangkul untuk dimasukkan di database sirangkul_db, mengikuti referensi skema database di skema.sql dan sesuai dengan Backend Needs & API Endpoints pada file project.md
+backend 
+folder : api-sirangkul
+Server running on [http://127.0.0.1:8000]
 
-Tugas 2 : buatkan seed laravel di untuk user demo pada api-sirangkul berdsarkan user :
-admin@sirangkul.com
-Administrator
-ahmad@madrasah.com
-Pengusul
-siti@madrasah.com
-Verifikator
-kepala@madrasah.com
-Kepala Madrasah
-bendahara@madrasah.com
-Bendahara
-komite@madrasah.com
-Komite Madrasah
+front End : /
+ Local:   http://localhost:5714/
+
+ skema database : skema.sql
+berdasarkan acuan di atas kerjakan tugas di bawah, serta berikan laporan di bawah terkait tugas di atas jika gagal dan tindakannya serta berikan info jika berhasil :
+
+tugas 1 :buatkan di api-doc.md dan di api-sirangkul/api-doc.md  plan kebutuhan api backend berdasarkan halaman  report pada src/pages/Reporting.tsx
+Tugas 2 : serta buat api di folder backend yang menyesuaikan dengan halaman report, 
+Tugas 3 :lalu lakukan testing api tersebut berikan pula script curl jika berhasil ditesting pada kedua api-doc.md 
