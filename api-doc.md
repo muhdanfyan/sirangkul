@@ -82,18 +82,19 @@ Retrieves a list of all users.
   * `Authorization: Bearer <your_api_token>`
 - **Query Parameters:**
   * `role`: (Optional) Filter users by role (e.g., `pengusul`).
-- **Response Body:**
+  - **Response Body:**
   ```json
   [
       {
           "id": "user_id",
           "full_name": "User Name",
           "email": "user@example.com",
-          "role": "user_role"
+          "role": "user_role",
+          "status": "Active",
+          "created_at": "2025-10-30T12:00:00.000000Z"
       }
   ]
   ```
-
 ### 2. Create New User
 
 Creates a new user.
@@ -491,6 +492,24 @@ Updates an existing payment's details.
       "id": "payment_id",
       "status": "paid",
       "...": "other payment details"
+  }
+  ```
+
+### 5. Delete Payment
+
+Deletes a payment by its ID.
+
+- **URL:** `/api/payments/{id}`
+- **Method:** `DELETE`
+- **Headers:**
+  * `Authorization: Bearer <your_api_token>`
+- **URL Parameters:**
+  * `id`: The ID of the payment to delete.
+- **Request Body:** None
+- **Response Body:**
+  ```json
+  {
+      "message": "Payment deleted"
   }
   ```
 
