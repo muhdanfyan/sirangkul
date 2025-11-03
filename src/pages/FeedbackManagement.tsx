@@ -1,21 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import { MessageSquare, User, Calendar, CheckCircle, Clock, AlertCircle, Eye, Reply } from 'lucide-react';
+import { MessageSquare, User, CheckCircle, Clock, AlertCircle, Eye, Reply } from 'lucide-react';
 
-interface FeedbackExample {
-  id: string;
-  name: string;
-  email: string;
-  type: 'Keluhan' | 'Saran' | 'Kritik' | 'Pertanyaan';
-  subject: string;
-  message: string;
-  status: 'Baru' | 'Diproses' | 'Selesai' | 'Ditutup';
-  priority: 'Rendah' | 'Sedang' | 'Tinggi';
-  submittedDate: string;
-  assignedTo?: string;
-  response?: string;
-  responseDate?: string;
-}
 
 interface Feedback {
   id: string;
@@ -29,16 +15,7 @@ interface Feedback {
 }
 
 type User = { id: string, name: string, email: string}
-type Proposal = { id: string, title: string, status: string}
 
-async function getDetail() {
-  const [users, proposals] = await Promise.all([
-    apiService.getUsers(),
-    apiService.getProposals()
-  ])
-
-  return { users, proposals }
-}
 
 const FeedbackManagement: React.FC = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
@@ -60,25 +37,6 @@ const FeedbackManagement: React.FC = () => {
       'Ditutup': 'bg-gray-100 text-gray-800'
     };
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getPriorityColor = (priority: string) => {
-    const colors = {
-      'Tinggi': 'bg-red-100 text-red-800',
-      'Sedang': 'bg-yellow-100 text-yellow-800',
-      'Rendah': 'bg-gray-100 text-gray-800'
-    };
-    return colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getTypeColor = (type: string) => {
-    const colors = {
-      'Keluhan': 'bg-red-100 text-red-800',
-      'Saran': 'bg-green-100 text-green-800',
-      'Kritik': 'bg-orange-100 text-orange-800',
-      'Pertanyaan': 'bg-blue-100 text-blue-800'
-    };
-    return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
   const getStatusIcon = (status: string) => {

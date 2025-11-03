@@ -16,7 +16,6 @@ const UserManagement: React.FC = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   
   const filteredUsers = users.filter(user =>

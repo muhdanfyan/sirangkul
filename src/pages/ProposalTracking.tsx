@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Eye, Download, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Search, Eye, Download, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 interface Proposal {
   id: string;
