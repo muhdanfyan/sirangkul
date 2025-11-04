@@ -95,6 +95,12 @@ class ApiService {
     });
   }
 
+  async getCurrentUser(): Promise<User> {
+    return this.request<User>('/auth/me', {
+      method: 'GET',
+    });
+  }
+
   async getUsers(): Promise<User[]> {
     return this.request<User[]>('/users', {
       method: 'GET',
