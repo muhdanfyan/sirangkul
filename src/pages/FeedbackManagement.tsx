@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import { MessageSquare, User, CheckCircle, Clock, AlertCircle, Eye, Reply } from 'lucide-react';
+import { MessageSquare, User, CheckCircle, Clock, AlertCircle, Eye, Reply, FileArchive, Calendar } from 'lucide-react';
 
 
 interface Feedback {
   id: string;
   user_id: string;
   proposal_id: string;
+  user: {
+    full_name: string;
+  }
+  proposal: {
+    id: string;
+    title: string;
+  };
   message: string;
   status: string;
   type: string;
@@ -15,6 +22,20 @@ interface Feedback {
 }
 
 type User = { id: string, name: string, email: string}
+
+async function getFeedbackDetails() {
+  const [feedbacks, users, proposals] = await Promise.all([
+    apiService.getFeedback(),
+    apiService.getUsers(),
+    apiService.getProposals()
+  ])
+
+  return feedbacks.map(fb => ({
+    ...fb,
+    user: users.find(u => u.id === fb.user_id) || null,
+    proposal: proposals.find(p => p.id === fb.proposal_id) || null
+  }))
+}
 
 
 const FeedbackManagement: React.FC = () => {
@@ -25,9 +46,8 @@ const FeedbackManagement: React.FC = () => {
   const [responseText, setResponseText] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
-  // const [users, proposals] = getDetail();
 
-  // console.log(users, proposals)
+  
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -55,9 +75,9 @@ const FeedbackManagement: React.FC = () => {
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const response = await apiService.getFeedback();
+        const response = await getFeedbackDetails();
         console.log(response)
-        setFeedbacks(response);
+        setFeedbacks(response as unknown as Feedback[]);
       } catch (error) {
         console.error('Gagal mengambil feedback:', error);
       }
@@ -194,10 +214,18 @@ const FeedbackManagement: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                  <div className="flex gap-4 mb-3">
                     <div className="flex items-center text-sm text-gray-600">
                       <User className="h-4 w-4 mr-2" />
-                      {feedback.user_id}
+                      {feedback.user?.full_name || feedback.user_id}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <FileArchive className="h-4 w-4 mr-2" />
+                      {feedback.proposal?.title || feedback.proposal_id}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {new Date(feedback.created_at).toLocaleDateString('id-ID')}
                     </div>
                   </div>
 
