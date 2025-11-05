@@ -46,6 +46,28 @@ export interface Feedback {
   updated_at: string;
 }
 
+export interface RKAM {
+  id: string;
+  proposal_id: string | null;
+  item_name: string;
+  quantity: number;
+  unit_price: string | number; // Backend returns string
+  total_price: string | number; // Backend returns string
+  created_at?: string;
+}
+
+export interface RKAMCreateRequest {
+  item_name: string;
+  quantity: number;
+  unit_price: number;
+}
+
+export interface RKAMUpdateRequest {
+  item_name?: string;
+  quantity?: number;
+  unit_price?: number;
+}
+
 export interface ApiError {
   message: string;
 }
@@ -148,6 +170,46 @@ class ApiService {
         'Content-Type': 'application/json',
         ...(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` })
       }
+    });
+  }
+
+  // RKAM API Methods
+  async getAllRKAM(): Promise<RKAM[]> {
+    try {
+      return this.request<RKAM[]>('/rkam', {
+        method: 'GET',
+      });
+    } catch (err) {
+      // Endpoint belum tersedia di backend
+      // Return empty array untuk sementara
+      console.warn('Endpoint /api/rkam belum tersedia. Menunggu implementasi backend.', err);
+      return [];
+    }
+  }
+
+  async getRKAMByProposal(proposalId: string): Promise<RKAM[]> {
+    return this.request<RKAM[]>(`/proposals/${proposalId}/rkam`, {
+      method: 'GET',
+    });
+  }
+
+  async createRKAM(proposalId: string, data: RKAMCreateRequest): Promise<RKAM> {
+    return this.request<RKAM>(`/proposals/${proposalId}/rkam`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateRKAM(rkamId: string, data: RKAMUpdateRequest): Promise<RKAM> {
+    return this.request<RKAM>(`/rkam/${rkamId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteRKAM(rkamId: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/rkam/${rkamId}`, {
+      method: 'DELETE',
     });
   }
 
