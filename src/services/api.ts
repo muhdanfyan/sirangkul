@@ -48,24 +48,33 @@ export interface Feedback {
 
 export interface RKAM {
   id: string;
-  proposal_id: string | null;
+  kategori: string;
   item_name: string;
-  quantity: number;
-  unit_price: string | number; // Backend returns string
-  total_price: string | number; // Backend returns string
+  pagu: string | number;
+  tahun_anggaran: number;
+  deskripsi: string | null;
+  terpakai: string | number;
+  sisa: string | number;
+  persentase: number;
+  status: 'Normal' | 'Warning' | 'Critical';
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface RKAMCreateRequest {
+  kategori: string;
   item_name: string;
-  quantity: number;
-  unit_price: number;
+  pagu: number;
+  tahun_anggaran: number;
+  deskripsi?: string;
 }
 
 export interface RKAMUpdateRequest {
+  kategori?: string;
   item_name?: string;
-  quantity?: number;
-  unit_price?: number;
+  pagu?: number;
+  tahun_anggaran?: number;
+  deskripsi?: string;
 }
 
 export interface ApiError {
@@ -174,43 +183,60 @@ class ApiService {
   }
 
   // RKAM API Methods
-  async getAllRKAM(): Promise<RKAM[]> {
-    try {
-      return this.request<RKAM[]>('/rkam', {
-        method: 'GET',
-      });
-    } catch (err) {
-      // Endpoint belum tersedia di backend
-      // Return empty array untuk sementara
-      console.warn('Endpoint /api/rkam belum tersedia. Menunggu implementasi backend.', err);
-      return [];
-    }
-  }
-
-  async getRKAMByProposal(proposalId: string): Promise<RKAM[]> {
-    return this.request<RKAM[]>(`/proposals/${proposalId}/rkam`, {
+  async getAllRKAM(params?: { kategori?: string; tahun_anggaran?: number; search?: string }): Promise<RKAM[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.kategori) queryParams.append('kategori', params.kategori);
+    if (params?.tahun_anggaran) queryParams.append('tahun_anggaran', params.tahun_anggaran.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    
+    const queryString = queryParams.toString();
+    const endpoint = queryString ? `/rkam?${queryString}` : '/rkam';
+    
+    const response = await this.request<{ success: boolean; message: string; data: RKAM[] }>(endpoint, {
       method: 'GET',
     });
+    
+    return response.data;
   }
 
-  async createRKAM(proposalId: string, data: RKAMCreateRequest): Promise<RKAM> {
-    return this.request<RKAM>(`/proposals/${proposalId}/rkam`, {
+  async getRKAMById(rkamId: string): Promise<RKAM> {
+    const response = await this.request<{ success: boolean; message: string; data: RKAM }>(`/rkam/${rkamId}`, {
+      method: 'GET',
+    });
+    
+    return response.data;
+  }
+
+  async createRKAM(data: RKAMCreateRequest): Promise<RKAM> {
+    const response = await this.request<{ success: boolean; message: string; data: RKAM }>('/rkam', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    
+    return response.data;
   }
 
   async updateRKAM(rkamId: string, data: RKAMUpdateRequest): Promise<RKAM> {
-    return this.request<RKAM>(`/rkam/${rkamId}`, {
+    const response = await this.request<{ success: boolean; message: string; data: RKAM }>(`/rkam/${rkamId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
+    
+    return response.data;
   }
 
-  async deleteRKAM(rkamId: string): Promise<{ message: string }> {
-    return this.request<{ message: string }>(`/rkam/${rkamId}`, {
+  async deleteRKAM(rkamId: string): Promise<{ success: boolean; message: string }> {
+    return this.request<{ success: boolean; message: string }>(`/rkam/${rkamId}`, {
       method: 'DELETE',
     });
+  }
+
+  async getRKAMProposals(rkamId: string): Promise<{ rkam: RKAM; proposals: Proposal[] }> {
+    const response = await this.request<{ success: boolean; message: string; data: { rkam: RKAM; proposals: Proposal[] } }>(`/rkam/${rkamId}/proposals`, {
+      method: 'GET',
+    });
+    
+    return response.data;
   }
 
   // Add other API methods here as needed
