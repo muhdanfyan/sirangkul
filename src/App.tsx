@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
@@ -13,9 +13,14 @@ import Reporting from './pages/Reporting';
 import FeedbackManagement from './pages/FeedbackManagement';
 import AuditLog from './pages/AuditLog';
 import LoginPage from './pages/LoginPage';
+import MyProposals from './pages/MyProposals';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 import RAKMViewer from './pages/RAKMViewer';
+import ProposalList from './components/widgets/ProposalList';
+import ProposalForm from './components/widgets/ProposalForm';
+import ProposalDetail from './components/widgets/ProposalDetail';
+import ProposalApproval from './pages/ProposalApproval';
 
 function App() {
   return (
@@ -52,8 +57,19 @@ function ProtectedRoute() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<UserManagement />} />
             <Route path="/rkam" element={<RKAMManagement />} />
-            <Route path="/proposals/new" element={<ProposalSubmission />} />
+            
+            {/* Proposal Routes */}
+            <Route path="/proposal-tracking" element={<ProposalList />} />
+            <Route path="/proposal-submission" element={<ProposalSubmission />} />
+            <Route path="/my-proposals" element={<MyProposals />} />
+            <Route path="/proposals/:id" element={<ProposalDetail />} />
+            <Route path="/proposals/:id/approval" element={<ProposalApproval />} />
+            <Route path="/proposals/:id/edit" element={<ProposalForm isEdit={true} />} />
+            
+            {/* Legacy Proposal Routes - Keep for backward compatibility */}
+            <Route path="/proposals/new" element={<ProposalForm />} />
             <Route path="/proposals/tracking" element={<ProposalTracking />} />
+            
             <Route path="/approvals" element={<ApprovalWorkflow />} />
             <Route path="/payments" element={<PaymentManagement />} />
             <Route path="/reports" element={<Reporting />} />

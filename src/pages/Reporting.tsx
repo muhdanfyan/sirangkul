@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, Calendar, Filter, FileText, PieChart, BarChart3, TrendingUp } from 'lucide-react';
+import { Download, Filter, FileText, PieChart, BarChart3, TrendingUp } from 'lucide-react';
 
 const Reporting: React.FC = () => {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });

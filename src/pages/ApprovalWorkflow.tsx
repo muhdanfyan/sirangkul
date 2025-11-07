@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle, XCircle, Eye, MessageSquare, Clock, FileText } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, Clock, FileText } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Proposal {
