@@ -1,5 +1,22 @@
 import React, { useState } from 'react';
-import { Upload, FileText, DollarSign, Save, Send } from 'lucide-react';
+import { Upload, FileText, DollarSign, Save, Send, CheckIcon, ChevronDown, X } from 'lucide-react';
+import { Combobox as HeadlessCombobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react'
+
+
+interface Person {
+  id: number;
+  name: string;
+  email?: string;
+  avatar?: string;
+}
+
+const people: Person[] = [
+  { id: 1, name: 'Durward Reynolds', email: 'durward@example.com', avatar: 'DR' },
+  { id: 2, name: 'Kenton Towne', email: 'kenton@example.com', avatar: 'KT' },
+  { id: 3, name: 'Therese Wunsch', email: 'therese@example.com', avatar: 'TW' },
+  { id: 4, name: 'Benedict Kessler', email: 'benedict@example.com', avatar: 'BK' },
+  { id: 5, name: 'Katelyn Rohan', email: 'katelyn@example.com', avatar: 'KR' },
+];
 
 const ProposalSubmission: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +28,17 @@ const ProposalSubmission: React.FC = () => {
     category: '',
     urgency: 'Normal'
   });
+
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [query, setQuery] = useState('');
+
+  const filteredPeople =
+    query === ''
+      ? people
+      : people.filter((person) => {
+          return person.name.toLowerCase().includes(query.toLowerCase()) || 
+                 person.email?.toLowerCase().includes(query.toLowerCase());
+        });
 
   const [files, setFiles] = useState<File[]>([]);
 
@@ -29,7 +57,7 @@ const ProposalSubmission: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent, asDraft: boolean = false) => {
     e.preventDefault();
-    
+
     if (asDraft) {
       alert('Proposal berhasil disimpan sebagai draft');
     } else {
@@ -57,7 +85,92 @@ const ProposalSubmission: React.FC = () => {
             {/* Basic Information */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Informasi Dasar</h3>
-              
+
+
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Assignee
+                </label>
+                <HeadlessCombobox value={selectedPerson} onChange={setSelectedPerson}>
+                  <div className="relative">
+                    <div className="relative w-full cursor-default overflow-hidden bg-white text-left border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+                      <ComboboxInput
+                        className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0 focus:outline-none"
+                        displayValue={(person: Person) => person?.name || ''}
+                        onChange={(event) => setQuery(event.target.value)}
+                        placeholder="Cari assignee..."
+                        aria-label="Search assignee"
+                      />
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+                        {selectedPerson ? (
+                          <button
+                            type="button"
+                            className="text-gray-400 hover:text-gray-500"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedPerson(null);
+                              setQuery('');
+                            }}
+                          >
+                            <X className="h-4 w-4" aria-hidden="true" />
+                          </button>
+                        ) : null}
+                        <ComboboxButton className="text-gray-400 hover:text-gray-500">
+                          <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                        </ComboboxButton>
+                      </div>
+                    </div>
+                    <ComboboxOptions 
+                      className="absolute z-10 mt-1 max-h-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+                      anchor="bottom"
+                    >
+                      {filteredPeople.length === 0 && query !== '' ? (
+                        <div className="relative cursor-default select-none px-4 py-2 text-gray-700">
+                          Tidak ditemukan
+                        </div>
+                      ) : (
+                        filteredPeople.map((person) => (
+                          <ComboboxOption
+                            key={person.id}
+                            value={person}
+                            className={({ active }) =>
+                              `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                              }`
+                            }
+                          >
+                            {({ selected, active }) => (
+                              <>
+                                <div className="flex items-center">
+                                  <span
+                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-800 text-sm font-medium mr-3`}
+                                  >
+                                    {person.avatar}
+                                  </span>
+                                  <div>
+                                    <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                      {person.name}
+                                    </span>
+                                    <span className={`block text-xs ${active ? 'text-blue-700' : 'text-gray-500'}`}>
+                                      {person.email}
+                                    </span>
+                                  </div>
+                                </div>
+                                {selected ? (
+                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                    <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
+                          </ComboboxOption>
+                        ))
+                      )}
+                    </ComboboxOptions>
+                  </div>
+                </HeadlessCombobox>
+              </div>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -89,52 +202,13 @@ const ProposalSubmission: React.FC = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Kategori *
-                    </label>
-                    <select
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Pilih Kategori</option>
-                      <option value="Infrastruktur">Infrastruktur</option>
-                      <option value="Pendidikan">Pendidikan</option>
-                      <option value="Teknologi">Teknologi</option>
-                      <option value="Kesehatan">Kesehatan</option>
-                      <option value="Kegiatan">Kegiatan</option>
-                      <option value="Pemeliharaan">Pemeliharaan</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Tingkat Urgensi
-                    </label>
-                    <select
-                      name="urgency"
-                      value={formData.urgency}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="Rendah">Rendah</option>
-                      <option value="Normal">Normal</option>
-                      <option value="Tinggi">Tinggi</option>
-                      <option value="Mendesak">Mendesak</option>
-                    </select>
-                  </div>
-                </div>
               </div>
             </div>
 
             {/* Budget and Timeline */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Anggaran & Waktu</h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -192,7 +266,7 @@ const ProposalSubmission: React.FC = () => {
             {/* Document Upload */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Dokumen Pendukung</h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -215,7 +289,7 @@ const ProposalSubmission: React.FC = () => {
                     </div>
                     <p className="text-xs text-gray-500 mt-2">PDF, DOC, XLS up to 10MB</p>
                   </div>
-                  
+
                   {files.length > 0 && (
                     <div className="mt-4 space-y-2">
                       {files.map((file, index) => (

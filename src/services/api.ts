@@ -21,6 +21,7 @@ export interface Proposal {
   title: string;
   status: 'draft' | 'submitted'
   submitted_at: string;
+  user_id: string;
 }
 
 export interface Pembayaran {

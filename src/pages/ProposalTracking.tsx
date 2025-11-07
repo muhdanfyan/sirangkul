@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Eye, Download, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { apiService } from '../services/api';
 
 interface Proposal {
   id: string;
@@ -8,73 +9,33 @@ interface Proposal {
   amount: string;
   status: string;
   currentStage: string;
-  submittedDate: string;
-  lastUpdate: string;
+  submitted_at: string;
+  updated_at: string;
   progress: number;
 }
 
+async function getProposals() {
+  const [proposals, users] = await Promise.all([
+    apiService.getProposals(),
+    apiService.getUsers()
+  ])
+  return proposals.map(prpsl => {
+    const user = users.find(user => user.id === prpsl.user_id) || null;
+    return {
+      ...prpsl,
+      user
+    };
+  });
+}
+
 const ProposalTracking: React.FC = () => {
-  const [proposals] = useState<Proposal[]>([
-    {
-      id: 'PR001',
-      title: 'Renovasi Ruang Kelas 7A',
-      submitter: 'Ahmad Fauzi',
-      amount: 'Rp 15.000.000',
-      status: 'Menunggu Verifikasi',
-      currentStage: 'Verifikator',
-      submittedDate: '2025-01-15',
-      lastUpdate: '2025-01-15',
-      progress: 25
-    },
-    {
-      id: 'PR002',
-      title: 'Pembelian Komputer Lab',
-      submitter: 'Siti Nurhaliza',
-      amount: 'Rp 25.000.000',
-      status: 'Disetujui',
-      currentStage: 'Selesai',
-      submittedDate: '2025-01-10',
-      lastUpdate: '2025-01-14',
-      progress: 100
-    },
-    {
-      id: 'PR003',
-      title: 'Perbaikan Atap Mushalla',
-      submitter: 'Muhammad Ali',
-      amount: 'Rp 8.500.000',
-      status: 'Dalam Review',
-      currentStage: 'Kepala Madrasah',
-      submittedDate: '2025-01-12',
-      lastUpdate: '2025-01-13',
-      progress: 50
-    },
-    {
-      id: 'PR004',
-      title: 'Pengadaan Buku Perpustakaan',
-      submitter: 'Fatimah S.Pd',
-      amount: 'Rp 5.000.000',
-      status: 'Ditolak',
-      currentStage: 'Verifikator',
-      submittedDate: '2025-01-08',
-      lastUpdate: '2025-01-09',
-      progress: 25
-    },
-    {
-      id: 'PR005',
-      title: 'Pelatihan Guru Digital',
-      submitter: 'Ahmad Fauzi',
-      amount: 'Rp 12.000.000',
-      status: 'Siap Bayar',
-      currentStage: 'Bendahara',
-      submittedDate: '2025-01-05',
-      lastUpdate: '2025-01-12',
-      progress: 75
-    }
-  ]);
+  const [proposals, setProposals] = useState<Proposal[]>([])
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
+
+  
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -114,6 +75,20 @@ const ProposalTracking: React.FC = () => {
     if (progress >= 50) return 'bg-yellow-500';
     return 'bg-gray-300';
   };
+
+  useEffect(() => {
+    // TODO: Fetch proposals from API
+    const fetchProposals = async () => {
+      try {
+        const response = await getProposals()
+        setProposals(response as unknown as Proposal[]);
+      } catch (error) {
+        console.error('Failed to fetch proposals:', error);
+      }
+    };
+    
+    fetchProposals();
+  }, []);
 
   const filteredProposals = proposals.filter(proposal => {
     const matchesSearch = proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -189,7 +164,7 @@ const ProposalTracking: React.FC = () => {
                       <div className="font-medium text-gray-900">{proposal.title}</div>
                       <div className="text-sm text-gray-600">ID: {proposal.id}</div>
                       <div className="text-xs text-gray-500">
-                        Diajukan: {proposal.submittedDate} • Update: {proposal.lastUpdate}
+                        Diajukan: {proposal.submitted_at ? new Date(proposal.submitted_at).toLocaleDateString('id-ID') : '-'} • Update: {proposal.updated_at ? new Date(proposal.updated_at).toLocaleDateString('id-ID') : '-'}
                       </div>
                     </div>
                   </td>
