@@ -1,90 +1,100 @@
-import React, { useState } from 'react';
-import { Search, Eye, Download, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-
-interface Proposal {
-  id: string;
-  title: string;
-  submitter: string;
-  amount: string;
-  status: string;
-  currentStage: string;
-  submittedDate: string;
-  lastUpdate: string;
-  progress: number;
-}
+import React, { useState, useEffect } from 'react';
+import { Search, Eye, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { apiService, Proposal } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const ProposalTracking: React.FC = () => {
-  const [proposals] = useState<Proposal[]>([
-    {
-      id: 'PR001',
-      title: 'Renovasi Ruang Kelas 7A',
-      submitter: 'Ahmad Fauzi',
-      amount: 'Rp 15.000.000',
-      status: 'Menunggu Verifikasi',
-      currentStage: 'Verifikator',
-      submittedDate: '2025-01-15',
-      lastUpdate: '2025-01-15',
-      progress: 25
-    },
-    {
-      id: 'PR002',
-      title: 'Pembelian Komputer Lab',
-      submitter: 'Siti Nurhaliza',
-      amount: 'Rp 25.000.000',
-      status: 'Disetujui',
-      currentStage: 'Selesai',
-      submittedDate: '2025-01-10',
-      lastUpdate: '2025-01-14',
-      progress: 100
-    },
-    {
-      id: 'PR003',
-      title: 'Perbaikan Atap Mushalla',
-      submitter: 'Muhammad Ali',
-      amount: 'Rp 8.500.000',
-      status: 'Dalam Review',
-      currentStage: 'Kepala Madrasah',
-      submittedDate: '2025-01-12',
-      lastUpdate: '2025-01-13',
-      progress: 50
-    },
-    {
-      id: 'PR004',
-      title: 'Pengadaan Buku Perpustakaan',
-      submitter: 'Fatimah S.Pd',
-      amount: 'Rp 5.000.000',
-      status: 'Ditolak',
-      currentStage: 'Verifikator',
-      submittedDate: '2025-01-08',
-      lastUpdate: '2025-01-09',
-      progress: 25
-    },
-    {
-      id: 'PR005',
-      title: 'Pelatihan Guru Digital',
-      submitter: 'Ahmad Fauzi',
-      amount: 'Rp 12.000.000',
-      status: 'Siap Bayar',
-      currentStage: 'Bendahara',
-      submittedDate: '2025-01-05',
-      lastUpdate: '2025-01-12',
-      progress: 75
-    }
-  ]);
-
+  const navigate = useNavigate();
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
 
+  useEffect(() => {
+    fetchProposals();
+  }, []);
+
+  const fetchProposals = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await apiService.getAllProposals();
+      setProposals(data);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Gagal memuat proposals';
+      setError(errorMessage);
+      console.error('Error fetching proposals:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper: Calculate progress percentage based on status
+  const getProgress = (status: string): number => {
+    const progressMap: Record<string, number> = {
+      'draft': 0,
+      'submitted': 20,
+      'verified': 40,
+      'approved': 60,
+      'final_approved': 80,
+      'payment_processing': 90,
+      'completed': 100,
+      'rejected': 0,
+    };
+    return progressMap[status] || 0;
+  };
+
+  // Helper: Get current stage name
+  const getCurrentStageName = (status: string): string => {
+    const stageMap: Record<string, string> = {
+      'draft': 'Draft',
+      'submitted': 'Verifikator',
+      'verified': 'Kepala Madrasah',
+      'approved': 'Komite Madrasah',
+      'final_approved': 'Bendahara',
+      'payment_processing': 'Bendahara',
+      'completed': 'Selesai',
+      'rejected': 'Ditolak',
+    };
+    return stageMap[status] || 'Unknown';
+  };
+
+  // Helper: Format rupiah
+  const formatRupiah = (amount: string | number) => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num);
+  };
+
+  // Helper: Format date
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'Disetujui':
+      case 'completed':
+      case 'final_approved':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'Ditolak':
+      case 'rejected':
         return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'Menunggu Verifikasi':
-      case 'Dalam Review':
-      case 'Siap Bayar':
+      case 'draft':
+        return <AlertCircle className="h-4 w-4 text-gray-500" />;
+      case 'submitted':
+      case 'verified':
+      case 'approved':
+      case 'payment_processing':
         return <Clock className="h-4 w-4 text-yellow-500" />;
       default:
         return <AlertCircle className="h-4 w-4 text-gray-500" />;
@@ -92,20 +102,31 @@ const ProposalTracking: React.FC = () => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Disetujui':
-        return 'bg-green-100 text-green-800';
-      case 'Ditolak':
-        return 'bg-red-100 text-red-800';
-      case 'Menunggu Verifikasi':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Dalam Review':
-        return 'bg-blue-100 text-blue-800';
-      case 'Siap Bayar':
-        return 'bg-purple-100 text-purple-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+    const colorMap: Record<string, string> = {
+      'draft': 'bg-gray-100 text-gray-800',
+      'submitted': 'bg-blue-100 text-blue-800',
+      'verified': 'bg-cyan-100 text-cyan-800',
+      'approved': 'bg-purple-100 text-purple-800',
+      'rejected': 'bg-red-100 text-red-800',
+      'final_approved': 'bg-green-100 text-green-800',
+      'payment_processing': 'bg-yellow-100 text-yellow-800',
+      'completed': 'bg-emerald-100 text-emerald-800',
+    };
+    return colorMap[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labelMap: Record<string, string> = {
+      'draft': 'Draft',
+      'submitted': 'Menunggu Verifikasi',
+      'verified': 'Terverifikasi',
+      'approved': 'Disetujui Kepala',
+      'rejected': 'Ditolak',
+      'final_approved': 'Disetujui Akhir',
+      'payment_processing': 'Proses Pembayaran',
+      'completed': 'Selesai',
+    };
+    return labelMap[status] || status;
   };
 
   const getProgressColor = (progress: number) => {
@@ -116,20 +137,34 @@ const ProposalTracking: React.FC = () => {
   };
 
   const filteredProposals = proposals.filter(proposal => {
+    const userName = proposal.user?.name || proposal.user?.full_name || '';
     const matchesSearch = proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         proposal.id.toLowerCase().includes(searchTerm.toLowerCase());
+                         userName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === '' || proposal.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const stages = [
-    { name: 'Submitted', label: 'Diajukan' },
-    { name: 'Verifikator', label: 'Verifikasi' },
-    { name: 'Kepala Madrasah', label: 'Kepala Madrasah' },
-    { name: 'Komite Madrasah', label: 'Komite' },
-    { name: 'Bendahara', label: 'Bendahara' },
-    { name: 'Selesai', label: 'Selesai' }
-  ];
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <p className="text-red-600">Error: {error}</p>
+        <button
+          onClick={fetchProposals}
+          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Coba Lagi
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -158,11 +193,14 @@ const ProposalTracking: React.FC = () => {
             className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Semua Status</option>
-            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
-            <option value="Dalam Review">Dalam Review</option>
-            <option value="Disetujui">Disetujui</option>
-            <option value="Ditolak">Ditolak</option>
-            <option value="Siap Bayar">Siap Bayar</option>
+            <option value="draft">Draft</option>
+            <option value="submitted">Menunggu Verifikasi</option>
+            <option value="verified">Terverifikasi</option>
+            <option value="approved">Disetujui Kepala</option>
+            <option value="rejected">Ditolak</option>
+            <option value="final_approved">Disetujui Akhir</option>
+            <option value="payment_processing">Proses Pembayaran</option>
+            <option value="completed">Selesai</option>
           </select>
         </div>
       </div>
@@ -182,54 +220,84 @@ const ProposalTracking: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredProposals.map((proposal) => (
-                <tr key={proposal.id} className="hover:bg-gray-50">
-                  <td className="py-4 px-6">
-                    <div>
-                      <div className="font-medium text-gray-900">{proposal.title}</div>
-                      <div className="text-sm text-gray-600">ID: {proposal.id}</div>
-                      <div className="text-xs text-gray-500">
-                        Diajukan: {proposal.submittedDate} • Update: {proposal.lastUpdate}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">{proposal.submitter}</td>
-                  <td className="py-4 px-6 text-right font-medium">{proposal.amount}</td>
-                  <td className="py-4 px-6 text-center">
-                    <div className="flex items-center justify-center mb-1">
-                      {getStatusIcon(proposal.status)}
-                    </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(proposal.status)}`}>
-                      {proposal.status}
-                    </span>
-                    <div className="text-xs text-gray-500 mt-1">{proposal.currentStage}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center justify-center">
-                      <div className="w-20 bg-gray-200 rounded-full h-2 mr-2">
-                        <div 
-                          className={`h-2 rounded-full ${getProgressColor(proposal.progress)}`}
-                          style={{ width: `${proposal.progress}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-xs text-gray-600 w-8 text-right">{proposal.progress}%</span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex justify-center space-x-2">
-                      <button 
-                        onClick={() => setSelectedProposal(proposal)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg">
-                        <Download className="h-4 w-4" />
-                      </button>
+              {filteredProposals.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-gray-500">
+                    <div className="flex flex-col items-center">
+                      <Search size={48} className="text-gray-300 mb-3" />
+                      <p className="font-medium">Tidak ada proposal</p>
+                      <p className="text-sm mt-1">
+                        {searchTerm || statusFilter ? 'Coba ubah filter pencarian' : 'Belum ada proposal yang dibuat'}
+                      </p>
                     </div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredProposals.map((proposal) => {
+                  const progress = getProgress(proposal.status);
+                  const currentStage = getCurrentStageName(proposal.status);
+                  
+                  return (
+                    <tr key={proposal.id} className="hover:bg-gray-50">
+                      <td className="py-4 px-6">
+                        <div>
+                          <div className="font-medium text-gray-900">{proposal.title}</div>
+                          <div className="text-sm text-gray-600 truncate max-w-xs">
+                            {proposal.description || '-'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Diajukan: {formatDate(proposal.submitted_at)} • Update: {formatDate(proposal.updated_at)}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6 text-sm text-gray-600">
+                        {proposal.user?.name || proposal.user?.full_name || '-'}
+                      </td>
+                      <td className="py-4 px-6 text-right font-medium">
+                        {formatRupiah(proposal.jumlah_pengajuan)}
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <div className="flex items-center justify-center mb-1">
+                          {getStatusIcon(proposal.status)}
+                        </div>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(proposal.status)}`}>
+                          {getStatusLabel(proposal.status)}
+                        </span>
+                        <div className="text-xs text-gray-500 mt-1">{currentStage}</div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center justify-center">
+                          <div className="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                            <div 
+                              className={`h-2 rounded-full ${getProgressColor(progress)}`}
+                              style={{ width: `${progress}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs text-gray-600 w-8 text-right">{progress}%</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex justify-center space-x-2">
+                          <button 
+                            onClick={() => setSelectedProposal(proposal)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                            title="Lihat Detail"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          <button 
+                            onClick={() => navigate(`/proposals/${proposal.id}/approval`)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg"
+                            title="Lihat Approval"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -253,25 +321,55 @@ const ProposalTracking: React.FC = () => {
               {/* Basic Info */}
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">{selectedProposal.title}</h3>
+                {selectedProposal.description && (
+                  <p className="text-sm text-gray-600 mb-3">{selectedProposal.description}</p>
+                )}
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600">ID:</span>
-                    <span className="ml-2 font-medium">{selectedProposal.id}</span>
+                    <span className="text-gray-600">Pengusul:</span>
+                    <span className="ml-2 font-medium">{selectedProposal.user?.name || selectedProposal.user?.full_name || '-'}</span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Pengusul:</span>
-                    <span className="ml-2 font-medium">{selectedProposal.submitter}</span>
+                    <span className="text-gray-600">Email:</span>
+                    <span className="ml-2 font-medium">{selectedProposal.user?.email || '-'}</span>
                   </div>
                   <div>
                     <span className="text-gray-600">Anggaran:</span>
-                    <span className="ml-2 font-medium">{selectedProposal.amount}</span>
+                    <span className="ml-2 font-medium">{formatRupiah(selectedProposal.jumlah_pengajuan)}</span>
                   </div>
                   <div>
                     <span className="text-gray-600">Status:</span>
                     <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(selectedProposal.status)}`}>
-                      {selectedProposal.status}
+                      {getStatusLabel(selectedProposal.status)}
                     </span>
                   </div>
+                  {selectedProposal.rkam && (
+                    <>
+                      <div>
+                        <span className="text-gray-600">RKAM:</span>
+                        <span className="ml-2 font-medium">{selectedProposal.rkam.item_name}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Kategori:</span>
+                        <span className="ml-2 font-medium">{selectedProposal.rkam.kategori}</span>
+                      </div>
+                    </>
+                  )}
+                  {selectedProposal.requires_committee_approval && (
+                    <div className="col-span-2">
+                      <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                        ⚠️ Memerlukan persetujuan Komite Madrasah (budget &gt; Rp 50.000.000)
+                      </div>
+                    </div>
+                  )}
+                  {selectedProposal.rejection_reason && (
+                    <div className="col-span-2">
+                      <div className="p-2 bg-red-50 border border-red-200 rounded">
+                        <p className="text-xs font-medium text-red-800 mb-1">Alasan Penolakan:</p>
+                        <p className="text-xs text-red-700">{selectedProposal.rejection_reason}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -279,36 +377,102 @@ const ProposalTracking: React.FC = () => {
               <div>
                 <h4 className="font-medium text-gray-900 mb-4">Timeline Persetujuan</h4>
                 <div className="space-y-3">
-                  {stages.map((stage, index) => {
-                    const isCompleted = selectedProposal.progress >= ((index + 1) / stages.length) * 100;
-                    const isCurrent = selectedProposal.currentStage === stage.name;
-                    
-                    return (
-                      <div key={stage.name} className="flex items-center">
-                        <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                          isCompleted 
-                            ? 'bg-green-500 border-green-500' 
-                            : isCurrent 
-                              ? 'bg-blue-500 border-blue-500' 
-                              : 'bg-white border-gray-300'
-                        }`}>
-                          {isCompleted && (
-                            <CheckCircle className="h-3 w-3 text-white" />
-                          )}
-                        </div>
-                        <div className={`text-sm ${
-                          isCompleted || isCurrent ? 'text-gray-900 font-medium' : 'text-gray-500'
-                        }`}>
-                          {stage.label}
-                        </div>
-                        {isCurrent && (
-                          <div className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                            Sedang Diproses
-                          </div>
-                        )}
+                  {/* Draft */}
+                  <div className="flex items-start">
+                    <div className="w-3 h-3 rounded-full bg-gray-400 mt-0.5 mr-3"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">Draft</p>
+                      <p className="text-xs text-gray-600">{formatDate(selectedProposal.created_at)}</p>
+                    </div>
+                  </div>
+
+                  {/* Submitted */}
+                  {selectedProposal.submitted_at && (
+                    <div className="flex items-start">
+                      <div className="w-3 h-3 rounded-full bg-blue-600 mt-0.5 mr-3"></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">Diajukan</p>
+                        <p className="text-xs text-gray-600">{formatDate(selectedProposal.submitted_at)}</p>
                       </div>
-                    );
-                  })}
+                    </div>
+                  )}
+
+                  {/* Verified */}
+                  {selectedProposal.verified_at && (
+                    <div className="flex items-start">
+                      <div className="w-3 h-3 rounded-full bg-cyan-600 mt-0.5 mr-3"></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">Diverifikasi</p>
+                        <p className="text-xs text-gray-600">
+                          {formatDate(selectedProposal.verified_at)}
+                          {selectedProposal.verifier && ` • ${selectedProposal.verifier.full_name}`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Approved */}
+                  {selectedProposal.approved_at && (
+                    <div className="flex items-start">
+                      <div className="w-3 h-3 rounded-full bg-purple-600 mt-0.5 mr-3"></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">Disetujui Kepala Madrasah</p>
+                        <p className="text-xs text-gray-600">
+                          {formatDate(selectedProposal.approved_at)}
+                          {selectedProposal.approver && ` • ${selectedProposal.approver.full_name}`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Final Approved */}
+                  {selectedProposal.final_approved_at && (
+                    <div className="flex items-start">
+                      <div className="w-3 h-3 rounded-full bg-green-600 mt-0.5 mr-3"></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">Disetujui Akhir</p>
+                        <p className="text-xs text-gray-600">
+                          {formatDate(selectedProposal.final_approved_at)}
+                          {selectedProposal.final_approver && ` • ${selectedProposal.final_approver.full_name}`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Completed */}
+                  {selectedProposal.completed_at && (
+                    <div className="flex items-start">
+                      <div className="w-3 h-3 rounded-full bg-emerald-600 mt-0.5 mr-3"></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">Selesai</p>
+                        <p className="text-xs text-gray-600">{formatDate(selectedProposal.completed_at)}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Rejected */}
+                  {selectedProposal.rejected_at && (
+                    <div className="flex items-start">
+                      <div className="w-3 h-3 rounded-full bg-red-600 mt-0.5 mr-3"></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-red-900">Ditolak</p>
+                        <p className="text-xs text-red-700">
+                          {formatDate(selectedProposal.rejected_at)}
+                          {selectedProposal.rejector && ` • ${selectedProposal.rejector.full_name}`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Current Stage Indicator */}
+                  {selectedProposal.status !== 'completed' && selectedProposal.status !== 'rejected' && (
+                    <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded">
+                      <p className="text-xs text-blue-800">
+                        <Clock className="inline h-3 w-3 mr-1" />
+                        Saat ini di: <span className="font-medium">{getCurrentStageName(selectedProposal.status)}</span>
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -320,9 +484,20 @@ const ProposalTracking: React.FC = () => {
                 >
                   Tutup
                 </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                  Download Proposal
+                <button 
+                  onClick={() => navigate(`/proposals/${selectedProposal.id}`)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Lihat Detail Lengkap
                 </button>
+                {selectedProposal.status !== 'draft' && (
+                  <button 
+                    onClick={() => navigate(`/proposals/${selectedProposal.id}/approval`)}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  >
+                    Approval Workflow
+                  </button>
+                )}
               </div>
             </div>
           </div>
