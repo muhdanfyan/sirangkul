@@ -304,8 +304,6 @@ class ApiService {
     });
   }
 
-  async getProposals(): Promise<Proposal[]> {
-    return this.request<Proposal[]>('/proposals', {
   // Payment API Methods
   async getAllPayments(params?: { status?: string; payment_method?: string }): Promise<Payment[]> {
     const queryParams = new URLSearchParams();
