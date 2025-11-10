@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, Download } from 'lucide-react';
 
 const RAKMViewer: React.FC = () => {
-  const [rakmFiles] = useState<{
+  const [rakmFiles, setRakmFiles] = useState<{
     name: string;
     path: string;
   }[]>([
