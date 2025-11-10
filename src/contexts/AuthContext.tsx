@@ -3,9 +3,9 @@ import { apiService, LoginResponse } from '../services/api';
 
 export interface User {
   id: string;
-  name: string;
+  full_name: string;
   email: string;
-  role: 'Administrator' | 'Pengusul' | 'Verifikator' | 'Kepala Madrasah' | 'Bendahara' | 'Komite Madrasah';
+  role: string;
   avatar?: string;
 }
 
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Map API response to frontend user format
       const user: User = {
         id: response.user.id,
-        name: response.user.full_name,
+        full_name: response.user.full_name,
         email: email,
         role: mapApiRoleToFrontendRole(response.user.role),
       };
