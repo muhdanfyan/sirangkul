@@ -3,10 +3,7 @@ import {
   FileText, 
   Clock, 
   CheckCircle, 
-  AlertTriangle, 
-  DollarSign, 
-  TrendingUp,
-  Users,
+  DollarSign,
   PieChart
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';

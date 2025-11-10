@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, DollarSign, Receipt, CheckCircle, Clock, Search, Filter } from 'lucide-react';
+import { CreditCard, DollarSign, Receipt, CheckCircle, Clock, Search } from 'lucide-react';
 
 interface Payment {
   id: string;
