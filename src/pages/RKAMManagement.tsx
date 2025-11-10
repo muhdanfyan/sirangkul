@@ -13,7 +13,7 @@ interface RKAMItem {
 }
 
 const RKAMManagement: React.FC = () => {
-  const [rkamItems] = useState<RKAMItem[]>([
+  const [rkamItems, setRkamItems] = useState<RKAMItem[]>([
     {
       id: '1',
       kodeRekening: '5.1.1.01',

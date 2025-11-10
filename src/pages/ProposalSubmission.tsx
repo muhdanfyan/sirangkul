@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, FileText, DollarSign, Save, Send } from 'lucide-react';
+import { Upload, FileText, Calendar, DollarSign, Save, Send } from 'lucide-react';
 
 const ProposalSubmission: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +13,7 @@ const ProposalSubmission: React.FC = () => {
   });
 
   const [files, setFiles] = useState<File[]>([]);
+  const [isDraft, setIsDraft] = useState(true);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -29,9 +30,10 @@ const ProposalSubmission: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent, asDraft: boolean = false) => {
     e.preventDefault();
+    setIsDraft(asDraft);
     
     if (asDraft) {
-      alert('Proposal berhasil disimpan sebagai draft');
+      alert('Proposal disimpan sebagai draft');
     } else {
       alert('Proposal berhasil disubmit untuk review');
     }
