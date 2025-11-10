@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Search, CreditCard as Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Search, CreditCard as Edit, Trash2, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { apiService } from "../services/api";
 
 interface User {
@@ -20,6 +20,7 @@ const UserManagement: React.FC = () => {
     password: ""
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false)
   const [showModal, setShowModal] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,10 +33,19 @@ const UserManagement: React.FC = () => {
   );
 
   useEffect(() => {
+    
     const fetchUsers = async () => {
-      const response = await apiService.getUsers();
-      console.log(response);
-      setUsers(response as unknown as User[]);
+      try {
+        setLoading(true)
+        const response = await apiService.getUsers();
+        console.log(response);
+        setUsers(response as unknown as User[]);
+      } catch (error) {
+        setError(true)
+        console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchUsers();
   }, []);
@@ -241,7 +251,30 @@ const UserManagement: React.FC = () => {
               )) : (
                 <tr>
                   <td colSpan={5} className="py-4 px-6 text-center text-gray-600">
-                    Tidak ada data
+                    {loading ? (
+                      <div className="flex flex-col items-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                        <p>Memuat data user</p>
+                      </div>
+                    ) : error ? (
+                      <div className="flex flex-col items-center">
+                        <div className="text-red-500 mb-2">Gagal memuat data</div>
+                        <button 
+                          onClick={() => {
+                            setLoading(true);
+                            setError(false);
+                          }}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          Coba lagi
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <AlertCircle className="h-12 w-12 text-gray-400 mb-2" />
+                        <p className="text-gray-500">Tidak ada pengguna ditemukan</p>
+                      </div>
+                    )}
                   </td>
                 </tr>
               )}
