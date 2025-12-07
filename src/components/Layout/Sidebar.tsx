@@ -59,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   );
 
   const filteredProposalSubMenuItems = proposalSubMenuItems.filter(item => 
-    !item.roles || item.roles.includes(user?.role || '')
+    !item.roles || item.roles.some(r => (user?.role || '').toLowerCase() === r.toLowerCase())
   );
 
   return (

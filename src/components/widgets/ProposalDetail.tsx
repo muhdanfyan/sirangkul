@@ -3,6 +3,8 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { apiService, Proposal } from '../../services/api';
 import { ArrowLeft, Edit, Trash2, User, Calendar, FileText, CheckCircle, Send } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import ConfirmModal from '../../components/ConfirmModal';
+import Toast from '../../components/Toast';
 
 const ProposalDetail: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +15,10 @@ const ProposalDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info' | 'warning'; message: string } | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; action: 'delete' | 'submit' | null }>(
+    { isOpen: false, action: null }
+  );
 
   useEffect(() => {
     if (id) {
@@ -35,34 +41,40 @@ const ProposalDetail: React.FC = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!proposal || !window.confirm('Apakah Anda yakin ingin menghapus proposal ini?')) {
-      return;
-    }
+  const handleDeleteRequest = () => {
+    if (!proposal) return;
+    setConfirmModal({ isOpen: true, action: 'delete' });
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!proposal) return;
+    setConfirmModal({ isOpen: false, action: null });
     try {
       await apiService.deleteProposal(proposal.id);
-      alert('Proposal berhasil dihapus');
+      setToast({ type: 'success', message: 'Proposal berhasil dihapus' });
       navigate('/proposal-tracking');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Gagal menghapus proposal';
-      alert(errorMessage);
+      setToast({ type: 'error', message: errorMessage });
     }
   };
 
-  const handleSubmitProposal = async () => {
-    if (!proposal || !window.confirm('Apakah Anda yakin ingin mengajukan proposal ini untuk verifikasi?')) {
-      return;
-    }
+  const handleSubmitRequest = () => {
+    if (!proposal) return;
+    setConfirmModal({ isOpen: true, action: 'submit' });
+  };
 
+  const handleSubmitConfirm = async () => {
+    if (!proposal) return;
+    setConfirmModal({ isOpen: false, action: null });
     try {
       setSubmitting(true);
       const result = await apiService.submitProposal(proposal.id);
-      alert(result.message);
+      setToast({ type: 'success', message: result?.message || 'Proposal berhasil diajukan' });
       await fetchProposal(proposal.id);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Gagal mengajukan proposal';
-      alert(errorMessage);
+      setToast({ type: 'error', message: errorMessage });
     } finally {
       setSubmitting(false);
     }
@@ -172,7 +184,7 @@ const ProposalDetail: React.FC = () => {
           {proposal.status === 'draft' && user?.role === 'Pengusul' && (
             <>
               <button
-                onClick={handleSubmitProposal}
+                onClick={handleSubmitRequest}
                 disabled={submitting}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -187,7 +199,7 @@ const ProposalDetail: React.FC = () => {
                 Edit
               </Link>
               <button
-                onClick={handleDelete}
+                onClick={handleDeleteRequest}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 <Trash2 size={16} />
@@ -197,6 +209,28 @@ const ProposalDetail: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.action === 'delete' ? 'Hapus Proposal' : 'Ajukan Proposal'}
+        message={confirmModal.action === 'delete' ? 'Apakah Anda yakin ingin menghapus proposal ini?' : 'Apakah Anda yakin ingin mengajukan proposal ini untuk verifikasi?'}
+        type={confirmModal.action === 'delete' ? 'danger' : 'warning'}
+        confirmText={confirmModal.action === 'delete' ? 'Ya, Hapus' : 'Ya, Ajukan'}
+        cancelText="Batal"
+        onConfirm={confirmModal.action === 'delete' ? handleDeleteConfirm : handleSubmitConfirm}
+        onCancel={() => setConfirmModal({ isOpen: false, action: null })}
+        loading={submitting}
+      />
+
+      {/* Toast */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       {/* Main Content */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -348,15 +382,7 @@ const ProposalDetail: React.FC = () => {
         )}
       </div>
 
-      {/* Back Link */}
-      <div className="text-center">
-        <Link
-          to="/proposal-tracking"
-          className="text-blue-600 hover:text-blue-800 font-medium"
-        >
-          ← Kembali ke Daftar Proposal
-        </Link>
-      </div>
+      {/* Back Link removed - header has back button */}
     </div>
   );
 };

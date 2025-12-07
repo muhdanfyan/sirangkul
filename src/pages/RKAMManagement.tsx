@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, Plus, Edit2, Trash2, AlertCircle, TrendingUp, DollarSign, Activity } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
+import Toast from '../components/Toast';
 import { apiService } from '../services/api';
 
 interface RKAMItem {
@@ -27,11 +30,15 @@ const RKAMManagement: React.FC = () => {
   const [formData, setFormData] = useState({
     kategori: '',
     item_name: '',
-    pagu: 0,
+    pagu: '',
     tahun_anggaran: 2025,
     deskripsi: '',
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ type: 'success'|'error'|'info'|'warning'; message: string } | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; id: string | null }>(
+    { isOpen: false, id: null }
+  );
 
   // Fetch RKAM data from backend
   const fetchRKAMData = React.useCallback(async () => {
@@ -75,10 +82,12 @@ const RKAMManagement: React.FC = () => {
     try {
       if (editingId) {
         // Update existing RKAM
-        await apiService.updateRKAM(editingId, formData);
+        await apiService.updateRKAM(editingId, { ...formData, pagu: Number(formData.pagu || 0) });
+        setToast({ type: 'success', message: 'RKAM berhasil diperbarui' });
       } else {
         // Create new RKAM
-        await apiService.createRKAM(formData);
+        await apiService.createRKAM({ ...formData, pagu: Number(formData.pagu || 0) });
+        setToast({ type: 'success', message: 'RKAM berhasil ditambahkan' });
       }
       
       // Refresh data and close modal
@@ -86,7 +95,8 @@ const RKAMManagement: React.FC = () => {
       handleCloseModal();
     } catch (err) {
       console.error('Failed to save RKAM:', err);
-      alert('Gagal menyimpan data RKAM. Silakan coba lagi.');
+      const errorMessage = err instanceof Error ? err.message : 'Gagal menyimpan data RKAM. Silakan coba lagi.';
+      setToast({ type: 'error', message: errorMessage });
     }
   };
 
@@ -96,31 +106,33 @@ const RKAMManagement: React.FC = () => {
     setFormData({
       kategori: item.kategori,
       item_name: item.item_name,
-      pagu: item.pagu,
+      pagu: String(item.pagu),
       tahun_anggaran: item.tahun_anggaran,
       deskripsi: item.deskripsi || '',
     });
     setShowModal(true);
   };
 
-  // Handle delete button click
-  const handleDelete = async (id: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus item RKAM ini?')) {
-      return;
-    }
+  // Handle delete button click (open confirm)
+  const handleDeleteRequest = (id: string) => {
+    setConfirmModal({ isOpen: true, id });
+  };
 
+  const handleDeleteConfirm = async () => {
+    const id = confirmModal.id;
+    setConfirmModal({ isOpen: false, id: null });
+    if (!id) return;
     try {
       await apiService.deleteRKAM(id);
+      setToast({ type: 'success', message: 'RKAM berhasil dihapus' });
       await fetchRKAMData();
     } catch (err) {
       console.error('Failed to delete RKAM:', err);
-      
-      // Check if error is because of linked proposals
       const errorMessage = err instanceof Error ? err.message : String(err);
       if (errorMessage.includes('proposals')) {
-        alert('Tidak dapat menghapus RKAM. Masih ada proposal yang terkait dengan RKAM ini.');
+        setToast({ type: 'error', message: 'Tidak dapat menghapus RKAM. Masih ada proposal yang terkait dengan RKAM ini.' });
       } else {
-        alert('Gagal menghapus data RKAM. Silakan coba lagi.');
+        setToast({ type: 'error', message: 'Gagal menghapus data RKAM. Silakan coba lagi.' });
       }
     }
   };
@@ -130,7 +142,7 @@ const RKAMManagement: React.FC = () => {
     setFormData({
       kategori: '',
       item_name: '',
-      pagu: 0,
+      pagu: '',
       tahun_anggaran: 2025,
       deskripsi: '',
     });
@@ -422,7 +434,7 @@ const RKAMManagement: React.FC = () => {
                           <Edit2 size={16} />
                         </button>
                         <button
-                          onClick={() => handleDelete(item.id)}
+                          onClick={() => handleDeleteRequest(item.id)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Hapus"
                         >
@@ -439,9 +451,10 @@ const RKAMManagement: React.FC = () => {
       </div>
 
       {/* Add/Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+      {showModal && createPortal(
+        <div className="fixed inset-0 z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={handleCloseModal} />
+          <div className="fixed z-50 bg-white rounded-lg shadow-xl w-full max-w-md p-6 overflow-auto left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ maxHeight: '90vh' }}>
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               {editingId ? 'Edit RKAM' : 'Tambah RKAM Baru'}
             </h2>
@@ -483,16 +496,17 @@ const RKAMManagement: React.FC = () => {
                   Pagu Anggaran (Rp)
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={formData.pagu}
-                  onChange={(e) => setFormData({ ...formData, pagu: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) => setFormData({ ...formData, pagu: e.target.value.replace(/[^0-9]/g, '') })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="50000000"
-                  min="0"
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  {formData.pagu > 0 ? formatRupiah(formData.pagu) : ''}
+                  {formData.pagu ? formatRupiah(Number(formData.pagu)) : ''}
                 </p>
               </div>
 
@@ -541,7 +555,29 @@ const RKAMManagement: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>, document.body)
+      }
+      {/* Confirm Modal for delete */}
+      {createPortal(
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          title="Hapus RKAM"
+          message="Apakah Anda yakin ingin menghapus item RKAM ini?"
+          type="danger"
+          confirmText="Ya, Hapus"
+          cancelText="Batal"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setConfirmModal({ isOpen: false, id: null })}
+        />, document.body
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );

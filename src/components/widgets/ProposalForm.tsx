@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useToast } from '../../contexts/ToastContext';
 import { apiService, RKAM, ProposalCreateRequest } from '../../services/api';
 import { AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 
@@ -17,6 +18,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
   const [loadingRkams, setLoadingRkams] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
+  const toast = useToast();
+  const location = useLocation();
 
   const [formData, setFormData] = useState<ProposalCreateRequest>({
     rkam_id: '',
@@ -27,10 +30,26 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
 
   useEffect(() => {
     fetchRkams();
-    if (isEdit && id) {
+      if (isEdit && id) {
       fetchProposal(id);
     }
   }, [isEdit, id]);
+
+  // If we've been navigated here with a toast payload, show it once and clear history state
+  useEffect(() => {
+    const state = (location.state as { toast?: { message: string; type?: 'success' | 'error' | 'info' | 'warning' } } | undefined) || undefined;
+    if (state?.toast) {
+      const t = state.toast as { message: string; type?: 'success' | 'error' | 'info' | 'warning' };
+      toast(t.message, t.type ?? 'info');
+      // clear navigation state so the toast doesn't replay if user refreshes
+      try {
+        navigate(location.pathname, { replace: true, state: undefined });
+      } catch {
+        // ignore
+      }
+    }
+  // only run on mount or when location.pathname changes
+  }, [location.pathname, navigate, toast]);
 
   const fetchRkams = async () => {
     try {
@@ -52,6 +71,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
 
   const fetchProposal = async (proposalId: string) => {
     try {
+      setLoadingRkams(true);
       const proposal = await apiService.getProposalById(proposalId);
       setFormData({
         rkam_id: proposal.rkam_id,
@@ -69,6 +89,9 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
     } catch (err) {
       console.error('Error fetching proposal:', err);
       setError('Gagal memuat data proposal');
+    }
+    finally {
+      setLoadingRkams(false);
     }
   };
 
@@ -128,12 +151,13 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
     try {
       if (isEdit && id) {
         await apiService.updateProposal(id, formData);
-        alert('Proposal berhasil diperbarui');
+        toast('Proposal berhasil diperbarui', 'success');
+        navigate('/proposal-tracking', { state: { toast: { message: 'Proposal berhasil diperbarui', type: 'success' } } });
       } else {
         await apiService.createProposal(formData);
-        alert('Proposal berhasil dibuat');
+        toast('Proposal berhasil dibuat', 'success');
+        navigate('/proposal-tracking', { state: { toast: { message: 'Proposal berhasil dibuat', type: 'success' } } });
       }
-      navigate('/proposal-tracking');
     } catch (err) {
       if (err && typeof err === 'object' && 'errors' in err) {
         // Backend validation errors
@@ -142,6 +166,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
       } else {
         const errorMessage = err instanceof Error ? err.message : 'Gagal menyimpan proposal';
         setError(errorMessage);
+        toast(errorMessage, 'error');
       }
     } finally {
       setLoading(false);
@@ -326,6 +351,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
           </button>
         </div>
       </form>
+      {/* toasts are displayed by the global ToastProvider */}
     </div>
   );
 };
