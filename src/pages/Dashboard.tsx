@@ -95,7 +95,7 @@ const Dashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
-        <h1 className="text-3xl font-bold mb-2">Selamat Datang, {user?.name}</h1>
+        <h1 className="text-3xl font-bold mb-2">Selamat Datang, {user?.full_name}</h1>
         <p className="text-blue-100">Dashboard SiRangkul - {user?.role}</p>
       </div>
 

@@ -268,6 +268,42 @@ class ApiService {
     });
   }
 
+  async addUser(userData: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> {
+    return this.request<User>('/users', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` }),
+        
+      },
+    });
+  }
+
+  async updateUser(userId: string, userData: Partial<Omit<User, 'id' | 'created_at' | 'updated_at'>>): Promise<User> {
+    return this.request<User>(`/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` }),
+      },
+    });
+  }
+
+  async delUser(userId: string): Promise<void> {
+    return this.request<void>(`/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` }),
+      },
+    });
+  }
+
   // Payment API Methods
   async getAllPayments(params?: { status?: string; payment_method?: string }): Promise<Payment[]> {
     const queryParams = new URLSearchParams();
@@ -374,6 +410,10 @@ class ApiService {
       }
     });
   }
+  
+  // Add other API methods here as needed
+  // async getProposals() { ... }
+  // async createProposal() { ... }
 
   // RKAM API Methods
   async getAllRKAM(params?: { kategori?: string; tahun_anggaran?: number; search?: string }): Promise<RKAM[]> {
