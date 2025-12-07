@@ -7,6 +7,7 @@ import {
   PieChart
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -87,6 +88,8 @@ const Dashboard: React.FC = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const isPengusul = (user?.role || '').toLowerCase() === 'pengusul';
 
   return (
     <div className="space-y-6">
@@ -196,17 +199,17 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Quick Actions */}
-      {user?.role === 'Pengusul' && (
+      {isPengusul && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Aksi Cepat</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+            <Link to="/proposal-submission" className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
               <FileText className="h-8 w-8 text-blue-600 mr-3" />
               <div className="text-left">
                 <div className="font-medium text-gray-900">Buat Proposal Baru</div>
                 <div className="text-sm text-gray-600">Submit proposal baru</div>
               </div>
-            </button>
+            </Link>
             <button className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
               <Clock className="h-8 w-8 text-green-600 mr-3" />
               <div className="text-left">

@@ -4,7 +4,6 @@ import { apiService, Payment, Proposal, PaymentProcessRequest, PaymentCompleteRe
 import { useAuth } from '../contexts/AuthContext';
 import Toast, { ToastType } from '../components/Toast';
 import InfoModal from '../components/InfoModal';
-import CancelModal from '../components/CancelModal';
 
 const PaymentManagement: React.FC = () => {
   const { user } = useAuth();
@@ -340,8 +339,12 @@ const PaymentManagement: React.FC = () => {
 
   // Filter pending proposals
   const filteredPendingProposals = pendingProposals.filter(proposal =>
-    proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    proposal.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    // Only show proposals that are final_approved (ready for payment)
+    (proposal.status === 'final_approved') &&
+    (
+      proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      proposal.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   if (loading) {
@@ -481,6 +484,11 @@ const PaymentManagement: React.FC = () => {
                       <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">
                         {proposal.status}
                       </span>
+                      {proposal.requires_committee_approval && (
+                        <span className="inline-block ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                          Komite Approved
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">{proposal.user?.full_name || proposal.user?.name || '-'}</div>
@@ -624,8 +632,9 @@ const PaymentManagement: React.FC = () => {
 
       {/* Process Payment Modal */}
       {showProcessModal && selectedProposal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => { setShowProcessModal(false); setSelectedProposal(null); }} />
+          <div className="fixed z-50 bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-auto left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ maxHeight: '90vh' }}>
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Proses Pembayaran</h3>
               <p className="text-sm text-gray-600 mt-1">Isi informasi penerima dan metode pembayaran</p>
@@ -734,8 +743,9 @@ const PaymentManagement: React.FC = () => {
 
       {/* Complete Payment Modal */}
       {showCompleteModal && selectedPayment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => { setShowCompleteModal(false); setSelectedPayment(null); }} />
+          <div className="fixed z-50 bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-auto left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ maxHeight: '90vh' }}>
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Selesaikan Pembayaran</h3>
             </div>
@@ -869,8 +879,9 @@ const PaymentManagement: React.FC = () => {
 
       {/* Detail Modal */}
       {showDetailModal && selectedPayment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => { setShowDetailModal(false); setSelectedPayment(null); }} />
+          <div className="fixed z-50 bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-auto left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ maxHeight: '90vh' }}>
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Detail Pembayaran</h3>
               <button
@@ -959,23 +970,54 @@ const PaymentManagement: React.FC = () => {
       )}
 
       {/* Cancel Payment Modal */}
-      <CancelModal
-        isOpen={cancelModal.isOpen}
-        title="Batalkan Pembayaran"
-        message={`Apakah Anda yakin ingin membatalkan pembayaran untuk proposal "${cancelModal.payment?.proposal?.title}"?`}
-        onConfirm={handleCancelPayment}
-        onCancel={() => setCancelModal({ isOpen: false, payment: null })}
-        loading={actionLoading}
-      />
+      {cancelModal.isOpen && (
+        <div className="fixed inset-0 z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setCancelModal({ isOpen: false, payment: null })} />
+          <div className="fixed z-50 bg-white rounded-lg shadow-xl w-full max-w-md overflow-auto left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ maxHeight: '90vh' }}>
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Batalkan Pembayaran</h3>
+            </div>
+            <div className="p-6">
+              <p className="mb-4 text-gray-700">Apakah Anda yakin ingin membatalkan pembayaran untuk proposal "{cancelModal.payment?.proposal?.title}"?</p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setCancelModal({ isOpen: false, payment: null })}
+                  disabled={actionLoading}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => handleCancelPayment('')}
+                  disabled={actionLoading}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  {actionLoading ? 'Memproses...' : 'Ya, Batalkan'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Info Modal */}
-      <InfoModal
-        isOpen={infoModal.isOpen}
-        title={infoModal.title}
-        message={infoModal.message}
-        type={infoModal.type}
-        onClose={() => setInfoModal({ ...infoModal, isOpen: false })}
-      />
+      {/* Info Modal (Backdrop & Centered) */}
+      {infoModal.isOpen && (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={() => setInfoModal({ ...infoModal, isOpen: false })}
+          />
+          <div className="fixed z-50 w-full max-w-md left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <InfoModal
+              isOpen={infoModal.isOpen}
+              title={infoModal.title}
+              message={infoModal.message}
+              type={infoModal.type}
+              onClose={() => setInfoModal({ ...infoModal, isOpen: false })}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

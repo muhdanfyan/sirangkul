@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { apiService, Proposal } from '../../services/api';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, Info, Edit3, Trash2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import ConfirmModal from '../../components/ConfirmModal';
 
 const ProposalList: React.FC = () => {
+  const { user } = useAuth();
+  const isPengusul = (user?.role || '').toLowerCase() === 'pengusul';
+
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,19 +51,40 @@ const ProposalList: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus proposal ini?')) {
-      return;
-    }
+  const toast = useToast();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [toDeleteId, setToDeleteId] = useState<string | null>(null);
 
+  const handleDeleteRequest = (id: string) => {
+    setToDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!toDeleteId) return;
+    setConfirmOpen(false);
     try {
-      await apiService.deleteProposal(id);
-      alert('Proposal berhasil dihapus');
+      await apiService.deleteProposal(toDeleteId);
+      toast('Proposal berhasil dihapus', 'success');
       fetchProposals(); // Refresh list
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Gagal menghapus proposal';
-      alert(errorMessage);
+      toast(errorMessage, 'error');
+    } finally {
+      setToDeleteId(null);
     }
+  };
+
+  const navigate = useNavigate();
+
+  const handleCreate = () => {
+    const state = { toast: { message: 'Membuka form pembuatan proposal...', type: 'info' } };
+    navigate('/proposal-submission', { state });
+  };
+
+  const handleEditNavigate = (id: string) => {
+    const state = { toast: { message: 'Membuka form edit proposal...', type: 'info' } };
+    navigate(`/proposals/${id}/edit`, { state });
   };
 
   const getStatusBadge = (status: string) => {
@@ -122,21 +149,25 @@ const ProposalList: React.FC = () => {
     );
   }
 
+
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Daftar Proposal</h1>
           <p className="text-gray-600 mt-1">Kelola proposal pengajuan anggaran</p>
         </div>
-        <Link
-          to="/proposal-submission"
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus size={20} />
-          Buat Proposal Baru
-        </Link>
+        {isPengusul && (
+          <button
+            onClick={handleCreate}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={20} />
+            Buat Proposal Baru
+          </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -243,35 +274,22 @@ const ProposalList: React.FC = () => {
                       })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
-                      <Link
-                        to={`/proposals/${proposal.id}`}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                      >
-                        Detail
-                      </Link>
-                      {proposal.status === 'draft' ? (
-                        <>
-                          <Link
-                            to={`/proposals/${proposal.id}/edit`}
-                            className="text-green-600 hover:text-green-900 mr-3"
-                          >
-                            Edit
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(proposal.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Hapus
-                          </button>
-                        </>
-                      ) : (
-                        <Link
-                          to={`/proposals/${proposal.id}/approval`}
-                          className="text-purple-600 hover:text-purple-900"
-                        >
-                          Approval
+                      <div className="flex items-center justify-center gap-2">
+                        <Link to={`/proposals/${proposal.id}`} title="Detail" className="p-2 rounded-md hover:bg-gray-100">
+                          <Info className="h-5 w-5 text-blue-600" />
                         </Link>
-                      )}
+
+                        {proposal.status === 'draft' ? (
+                          <>
+                            <button onClick={() => handleEditNavigate(proposal.id)} title="Edit" className="p-2 rounded-md hover:bg-gray-100">
+                              <Edit3 className="h-5 w-5 text-green-600" />
+                            </button>
+                            <button onClick={() => handleDeleteRequest(proposal.id)} title="Hapus" className="p-2 rounded-md hover:bg-gray-100">
+                              <Trash2 className="h-5 w-5 text-red-600" />
+                            </button>
+                          </>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -280,7 +298,24 @@ const ProposalList: React.FC = () => {
           </table>
         </div>
       </div>
-    </div>
+      </div>
+
+      {/* Confirm Modal */}
+      {confirmOpen && (
+        <ConfirmModal
+          isOpen={confirmOpen}
+          title="Hapus Proposal"
+          message="Apakah Anda yakin ingin menghapus proposal ini? Tindakan ini tidak bisa dibatalkan."
+          type="danger"
+          confirmText="Hapus"
+          cancelText="Batal"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => { setConfirmOpen(false); setToDeleteId(null); }}
+        />
+      )}
+
+      {/* toasts are handled by ToastProvider */}
+    </>
   );
 };
 

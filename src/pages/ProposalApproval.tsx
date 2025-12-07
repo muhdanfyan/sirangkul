@@ -264,7 +264,8 @@ const ProposalApproval: React.FC = () => {
   const canSubmit = user?.role === 'Pengusul' && proposal?.status === 'draft';
   const canVerify = user?.role === 'Verifikator' && proposal?.status === 'submitted';
   const canApprove = user?.role === 'Kepala Madrasah' && proposal?.status === 'verified';
-  const canFinalApprove = user?.role === 'Komite Madrasah' && proposal?.status === 'approved' && proposal?.requires_committee_approval;
+  // Only Komite Madrasah can final approve if committee approval is required
+  const canFinalApprove = user?.role === 'Komite Madrasah' && proposal?.status === 'approved' && proposal?.requires_committee_approval === true;
 
   if (loading) {
     return (
@@ -335,7 +336,7 @@ const ProposalApproval: React.FC = () => {
                 <>
                   <button
                     onClick={() => openModal('approve')}
-                    disabled={actionLoading}
+                    disabled={actionLoading || (canFinalApprove && user?.role !== 'Komite Madrasah')}
                     className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <CheckCircle size={16} />
@@ -561,10 +562,9 @@ const ProposalApproval: React.FC = () => {
               <button
                 onClick={() => {
                   if (modalAction === 'reject' && !notes.trim()) {
-                    alert('Alasan penolakan wajib diisi');
+                    setToast({ message: 'Alasan penolakan wajib diisi', type: 'error' });
                     return;
                   }
-                  
                   if (canVerify) handleVerify();
                   else if (canApprove) handleApprove();
                   else if (canFinalApprove) handleFinalApprove();
