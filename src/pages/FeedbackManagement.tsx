@@ -27,7 +27,7 @@ async function getFeedbackDetails() {
   const [feedbacks, users, proposals] = await Promise.all([
     apiService.getFeedback(),
     apiService.getUsers(),
-    apiService.getProposals()
+    apiService.getMyProposals()
   ])
 
   return feedbacks.map(fb => ({
