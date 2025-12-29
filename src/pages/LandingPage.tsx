@@ -74,38 +74,42 @@ const LandingPage: React.FC = () => {
       </header>
 
       {/* Hero Section with Banner */}
-      <section className="relative overflow-hidden min-h-[500px] flex items-center">
+      <section className="relative overflow-hidden min-h-[600px] flex items-center">
         {/* Banner Background */}
         <div className="absolute inset-0">
           <img 
-            src="https://man2kotamakassar.sch.id/images/banner1.jpg" 
+            src="https://man2kotamakassar.sch.id/images/banner2.jpg" 
             alt="MAN 2 Banner" 
             className="w-full h-full object-cover"
           />
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/80 via-teal-800/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/40 via-transparent to-transparent"></div>
         </div>
 
-        {/* Content positioned on left only */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="max-w-xl">
-            {/* Text with solid background */}
-            <div className="bg-gradient-to-r from-cyan-600 to-teal-600 p-8 rounded-2xl shadow-2xl">
-              <h1 className="text-3xl lg:text-5xl font-bold mb-4 leading-tight text-white">
-                Kelola Anggaran<br/>Madrasah dengan<br/>Mudah & Transparan
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="max-w-2xl">
+            {/* Glass card for text */}
+            <div className="bg-white/10 backdrop-blur-md p-10 rounded-3xl border border-white/20 shadow-2xl">
+              <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight text-white drop-shadow-lg">
+                Kelola Anggaran<br/>Madrasah dengan<br/>
+                <span className="text-cyan-300">Mudah & Transparan</span>
               </h1>
-              <p className="text-lg text-white/95 mb-6">
-                SiRangkul adalah platform digital terintegrasi untuk pengelolaan RKAM dan proses pengajuan usulan.
+              <p className="text-xl text-white/90 mb-8 leading-relaxed">
+                SiRangkul adalah platform digital terintegrasi untuk pengelolaan RKAM dan proses pengajuan usulan yang efisien dan akuntabel.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link 
                   to="/login"
-                  className="inline-flex items-center gap-2 bg-white text-cyan-600 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white px-8 py-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl transition-all text-lg"
                 >
                   Mulai Sekarang
                   <ArrowRight className="h-5 w-5" />
                 </Link>
                 <a 
                   href="/rakm-viewer"
-                  className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-all border border-white/30"
+                  className="inline-flex items-center gap-2 bg-white text-cyan-600 px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all text-lg"
                 >
                   Lihat RKAM
                 </a>
