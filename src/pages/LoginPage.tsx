@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, X, User, Shield, ClipboardCheck, GraduationCap, Wallet, Users } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, X, User, Shield, ClipboardCheck, GraduationCap, Wallet, Users, Home, BookOpen } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -158,13 +158,23 @@ const LoginPage: React.FC = () => {
           </form>
 
           {/* Links */}
-          <div className="mt-6 flex justify-center gap-6 text-sm">
-            <a href="https://wa.me/6283134086899" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-cyan-600 transition-colors">
-              Hubungi Admin
+          <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
+            <Link to="/" className="inline-flex items-center gap-1 text-gray-500 hover:text-cyan-600 transition-colors">
+              <Home className="h-4 w-4" />
+              Beranda
+            </Link>
+            <span className="text-gray-300">|</span>
+            <a href="/user_guide/index.html" className="inline-flex items-center gap-1 text-gray-500 hover:text-cyan-600 transition-colors">
+              <BookOpen className="h-4 w-4" />
+              Panduan
             </a>
             <span className="text-gray-300">|</span>
             <a href="/rakm-viewer" className="text-gray-500 hover:text-cyan-600 transition-colors">
               Lihat RAKM
+            </a>
+            <span className="text-gray-300">|</span>
+            <a href="https://wa.me/6283134086899" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-cyan-600 transition-colors">
+              Hubungi Admin
             </a>
           </div>
         </div>
