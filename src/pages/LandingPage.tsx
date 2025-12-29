@@ -77,7 +77,7 @@ const LandingPage: React.FC = () => {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/90 via-teal-900/85 to-cyan-900/90 z-10"></div>
           <img 
-            src="https://man2kotamakassar.sch.id/images/banner1.jpg" 
+            src="https://man2kotamakassar.sch.id/images/banner3.jpg" 
             alt="MAN 2 Banner" 
             className="w-full h-full object-cover"
           />
