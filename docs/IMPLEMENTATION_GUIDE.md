@@ -177,9 +177,13 @@ php artisan tinker
 ### VPS Credentials
 
 ```
-Server: VPS sirangkul
-User: pi
+Server: VPS Sirangkul (Kassaone)
+IP: 103.191.92.247
+User: kassaone
 Password: Piblajar2020
+Path: /var/www/sirangkul
+SSH: ssh kassaone@103.191.92.247
+Git Remote: ssh://kassaone@103.191.92.247/var/www/sirangkul
 ```
 
 ### Database
