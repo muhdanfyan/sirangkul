@@ -41,9 +41,14 @@ const LoginPage: React.FC = () => {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <img src="/logo-sirangkul.png" alt="SiRangkul Logo" className="mx-auto h-24 w-24 mb-4" />
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <img src="/logo-sirangkul.png" alt="SiRangkul Logo" className="h-20 w-20" />
+              <div className="w-px h-16 bg-gray-300"></div>
+              <img src="https://man2kotamakassar.sch.id/images/logo.png" alt="MAN 2 Makassar Logo" className="h-20 w-20" />
+            </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">SiRangkul</h1>
             <p className="text-gray-600">Sistem Informasi Rencana Anggaran dan Kelola Usulan</p>
+            <p className="text-sm text-gray-500 mt-1">MAN 2 Kota Makassar</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -119,23 +124,25 @@ const LoginPage: React.FC = () => {
             </a>
           </div>
 
-          <div className="mt-8 border-t border-gray-200 pt-6">
-            <div className="text-center text-sm text-gray-600 mb-4">
-              Demo Accounts (Password: password untuk semua)
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <div className="text-center text-xs text-gray-500 mb-3">
+              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">Demo Mode</span>
+              <span className="ml-2">Klik untuk auto-fill • Password: <code className="bg-gray-100 px-1 rounded">password</code></span>
             </div>
-            <div className="grid grid-cols-1 gap-2 text-xs">
+            <div className="grid grid-cols-2 gap-2">
               {demoAccounts.map((account, index) => (
-                <div
+                <button
                   key={index}
+                  type="button"
                   onClick={() => {
                     setEmail(account.email);
                     setPassword('password');
                   }}
-                  className="p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="p-2 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left group"
                 >
-                  <div className="font-medium">{account.email}</div>
-                  <div className="text-gray-500">{account.role}</div>
-                </div>
+                  <div className="text-xs font-semibold text-gray-700 group-hover:text-blue-600">{account.role}</div>
+                  <div className="text-[10px] text-gray-400 truncate">{account.email}</div>
+                </button>
               ))}
             </div>
           </div>
