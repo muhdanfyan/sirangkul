@@ -71,12 +71,16 @@ const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-600 py-24 lg:py-32">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-72 h-72 border-[30px] border-white rounded-full"></div>
-          <div className="absolute bottom-10 right-20 w-96 h-96 border-[30px] border-white rounded-full"></div>
+      {/* Hero Section with Banner */}
+      <section className="relative overflow-hidden py-24 lg:py-32">
+        {/* Banner Background Slideshow */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/90 via-teal-900/85 to-cyan-900/90 z-10"></div>
+          <img 
+            src="https://man2kotamakassar.sch.id/images/banner1.jpg" 
+            alt="MAN 2 Banner" 
+            className="w-full h-full object-cover"
+          />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

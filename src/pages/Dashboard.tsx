@@ -91,12 +91,59 @@ const Dashboard: React.FC = () => {
 
   const isPengusul = (user?.role || '').toLowerCase() === 'pengusul';
 
+  const banners = [
+    'https://man2kotamakassar.sch.id/images/banner1.jpg',
+    'https://man2kotamakassar.sch.id/images/banner2.jpg',
+    'https://man2kotamakassar.sch.id/images/banner3.jpg',
+  ];
+
+  const [currentBanner, setCurrentBanner] = React.useState(0);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="space-y-6">
+      {/* Banner Carousel */}
+      <div className="relative rounded-xl overflow-hidden h-48 md:h-56">
+        {banners.map((banner, index) => (
+          <img
+            key={index}
+            src={banner}
+            alt={`Banner ${index + 1}`}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+              index === currentBanner ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/60 to-transparent"></div>
+        <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+          <div className="text-white">
+            <h2 className="text-2xl font-bold">MAN 2 Kota Makassar</h2>
+            <p className="text-white/80 text-sm">Selamat datang di SiRangkul</p>
+          </div>
+          <div className="flex gap-2">
+            {banners.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentBanner(index)}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  index === currentBanner ? 'bg-white w-6' : 'bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+      <div className="bg-gradient-to-r from-cyan-600 to-teal-600 rounded-xl p-6 text-white">
         <h1 className="text-3xl font-bold mb-2">Selamat Datang, {user?.full_name}</h1>
-        <p className="text-blue-100">Dashboard SiRangkul - {user?.role}</p>
+        <p className="text-cyan-100">Dashboard SiRangkul - {user?.role}</p>
       </div>
 
       {/* Stats Cards */}
