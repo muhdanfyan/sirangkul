@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Pengguna SiRangkul</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        @page {
+            size: A4;
+            margin: 12mm 15mm;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .page-break {
+                page-break-after: always;
+            }
+
+            body {
+                font-size: 10pt !important;
+            }
+
+            .cover-page {
+                height: 100vh;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            background: #fff;
+        }
+
+        .container {
+            max-width: 800px;
+            padding: 0 15px;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            margin: -15px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-page::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 50%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .cover-logos {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cover-logo {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.3));
+        }
+
+        .cover-divider {
+            width: 2px;
+            height: 70px;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.5), transparent);
+        }
+
+        .cover-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cover-subtitle {
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.9;
+            max-width: 420px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cover-institution {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 25px;
+            padding: 10px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cover-version {
+            font-size: 11px;
+            margin-top: 40px;
+            opacity: 0.7;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        h3 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        h4 {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        p {
+            margin-bottom: 6px;
+            font-size: 11px;
+        }
+
+        /* TOC */
+        .toc {
+            padding: 15px 0;
+        }
+
+        .toc h2 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 6px;
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            columns: 2;
+            column-gap: 20px;
+        }
+
+        .toc-list li {
+            padding: 4px 0;
+            border-bottom: 1px dotted #ddd;
+            font-size: 11px;
+        }
+
+        .toc-list a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        /* Section Header */
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .section-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 13px;
+        }
+
+        .section-header.admin {
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+        }
+
+        .section-header.pengusul {
+            background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+        }
+
+        .section-header.verifikator {
+            background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%);
+        }
+
+        .section-header.kepala {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #333;
+        }
+
+        .section-header.kepala h2 {
+            color: #333;
+        }
+
+        .section-header.bendahara {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        }
+
+        .section-header.komite {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+        }
+
+        /* Cards */
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .card-header {
+            background: #f8f9fa;
+            padding: 6px 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .card-header h4 {
+            margin: 0;
+            font-size: 11px;
+        }
+
+        .card-body {
+            padding: 10px;
+        }
+
+        /* Content with Image */
+        .content-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .content-text {
+            flex: 1;
+        }
+
+        .content-img {
+            flex: 0 0 180px;
+        }
+
+        .content-img img {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .content-img-sm {
+            flex: 0 0 140px;
+        }
+
+        .img-caption {
+            font-size: 9px;
+            text-align: center;
+            color: #666;
+            margin-top: 3px;
+            font-style: italic;
+        }
+
+        /* Steps List */
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            counter-reset: step;
+        }
+
+        .step-list li {
+            counter-increment: step;
+            padding: 3px 0 3px 24px;
+            position: relative;
+            font-size: 11px;
+        }
+
+        .step-list li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            width: 18px;
+            height: 18px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        /* Highlight - UI Elements */
+        .ui {
+            background: #fff3cd;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            color: #856404;
+        }
+
+        .btn-ui {
+            background: #d1e7dd;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            color: #0f5132;
+        }
+
+        .menu-ui {
+            background: #cfe2ff;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            color: #084298;
+        }
+
+        /* Flow Chart */
+        .flowchart {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .flowchart h3 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .flow-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .flow-step {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            padding: 6px 10px;
+            text-align: center;
+            min-width: 80px;
+            font-size: 10px;
+        }
+
+        .flow-step.start {
+            background: #198754;
+            color: white;
+            border-color: #198754;
+        }
+
+        .flow-step.end {
+            background: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+
+        .flow-step .role {
+            font-size: 8px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .flow-step.start .role,
+        .flow-step.end .role {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .flow-arrow {
+            font-size: 14px;
+            color: #667eea;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #e7f1ff;
+            border-left: 3px solid #0d6efd;
+            padding: 6px 10px;
+            margin: 6px 0;
+            font-size: 10px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* Demo Table */
+        .demo-table {
+            font-size: 10px;
+            margin: 8px 0;
+        }
+
+        .demo-table th {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+        }
+
+        .demo-table td {
+            padding: 3px 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .print-btn {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            z-index: 1000;
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+
+        /* Compact Grid */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .mini-img {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .mini-img img {
+            width: 100%;
+            display: block;
+            border-radius: 3px;
+        }
+
+        /* Intro section */
+        .intro-box {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 11px;
+        }
+
+        .intro-box h4 {
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .intro-list {
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        .intro-list li {
+            margin-bottom: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="btn btn-primary print-btn no-print" onclick="window.print()">
+        <i class="bi bi-printer me-1"></i>Cetak PDF
+    </button>
+
+    <!-- COVER PAGE -->
+    <div class="cover-page">
+        <div class="cover-logos">
+            <img src="../public/logo-sirangkul.png" alt="Logo SiRangkul" class="cover-logo">
+            <div class="cover-divider"></div>
+            <img src="data:image/png;base64,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"
+                alt="Logo MAN 2 Makassar" class="cover-logo">
+        </div>
+        <h1 class="cover-title">Panduan Pengguna SiRangkul</h1>
+        <p class="cover-subtitle">Sistem Informasi Rancangan Anggaran dan Kegiatan untuk Usulan Layanan</p>
+        <p class="cover-institution">MAN 2 Kota Makassar</p>
+        <p class="cover-version">Versi 1.0 | Desember 2024</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- TABLE OF CONTENTS -->
+    <div class="container">
+        <div class="toc">
+            <h2><i class="bi bi-list-ul me-2"></i>Daftar Isi</h2>
+            <ul class="toc-list">
+                <li><a href="#pendahuluan">1. Pendahuluan</a></li>
+                <li><a href="#overview">2. Alur Proses & Fitur</a></li>
+                <li><a href="#login">3. Login & Akses</a></li>
+                <li><a href="#rkam-viewer">4. RKAM Viewer</a></li>
+                <li><a href="#admin">5. Administrator</a></li>
+                <li><a href="#pengusul">6. Pengusul</a></li>
+                <li><a href="#verifikator">7. Verifikator</a></li>
+                <li><a href="#kepala">8. Kepala Madrasah</a></li>
+                <li><a href="#bendahara">9. Bendahara</a></li>
+                <li><a href="#komite">10. Komite Madrasah</a></li>
+            </ul>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 1: PENDAHULUAN -->
+        <section id="pendahuluan">
+            <div class="section-header">
+                <h2><i class="bi bi-house-door me-2"></i>1. Pendahuluan</h2>
+            </div>
+
+            <div class="intro-box">
+                <h4>Latar Belakang & Tujuan</h4>
+                <p>Proses pengelolaan anggaran dan usulan kegiatan di <strong>MAN 2 Kota Makassar</strong> saat ini
+                    masih mengandalkan metode semi-manual. Hal ini seringkali menyebabkan tantangan seperti
+                    <strong>keterlambatan</strong> dalam alur persetujuan, <strong>kesulitan pelacakan</strong> status
+                    usulan, dan <strong>kurangnya transparansi</strong> dalam penggunaan dana.
+                </p>
+                <p><strong>SiRangkul</strong> (Sistem Informasi Rencana Anggaran dan Kelola Usulan) dikembangkan sebagai
+                    platform digital terintegrasi dengan tujuan utama untuk menciptakan sebuah sistem yang mengedepankan
+                    <strong>efisiensi</strong>, <strong>transparansi</strong>, dan <strong>akuntabilitas</strong>.
+                </p>
+            </div>
+
+            <div class="grid-2">
+                <div class="intro-box">
+                    <h4><i class="bi bi-gem me-1"></i>Manfaat Utama</h4>
+                    <ul class="intro-list">
+                        <li><strong>Efisiensi:</strong> Mempercepat proses dari pengajuan hingga persetujuan</li>
+                        <li><strong>Transparansi:</strong> Memantau status proposal secara <em>real-time</em></li>
+                        <li><strong>Akuntabilitas:</strong> Mencatat setiap tahapan persetujuan (<em>audit trail</em>)
+                        </li>
+                        <li><strong>Akses Data:</strong> Memusatkan data realisasi anggaran</li>
+                    </ul>
+                </div>
+                <div class="intro-box">
+                    <h4><i class="bi bi-diagram-3 me-1"></i>Cara Kerja Aplikasi</h4>
+                    <ul class="intro-list">
+                        <li>✍️ <strong>Pengajuan:</strong> Pengusul membuat proposal</li>
+                        <li>🧐 <strong>Verifikasi:</strong> Verifikator memeriksa kelengkapan</li>
+                        <li>👍 <strong>Persetujuan:</strong> Kepala Madrasah/Komite menyetujui</li>
+                        <li>💸 <strong>Pengelolaan:</strong> Bendahara mencairkan dana</li>
+                        <li>📊 <strong>Pemantauan:</strong> Semua dipantau via dashboard</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: OVERVIEW & FLOW -->
+        <section id="overview" class="mt-3">
+            <div class="section-header">
+                <h2><i class="bi bi-diagram-3 me-2"></i>2. Alur Proses & Fitur Utama</h2>
+            </div>
+
+            <div class="flowchart">
+                <h3>Alur Persetujuan Proposal</h3>
+                <div class="flow-container">
+                    <div class="flow-step start"><strong>Buat Proposal</strong>
+                        <div class="role">Pengusul</div>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step"><strong>Verifikasi</strong>
+                        <div class="role">Verifikator</div>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step"><strong>Persetujuan</strong>
+                        <div class="role">Kepala Madrasah</div>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step"><strong>Review</strong>
+                        <div class="role">Komite</div>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step end"><strong>Pembayaran</strong>
+                        <div class="role">Bendahara</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="intro-box">
+                    <h4><i class="bi bi-person-badge me-1"></i>Role Pengguna</h4>
+                    <ul class="intro-list" style="font-size:10px;">
+                        <li><strong>👑 Administrator:</strong> Mengelola seluruh sistem</li>
+                        <li><strong>👨‍💼 Pengusul:</strong> Mengajukan proposal baru</li>
+                        <li><strong>👩‍⚖️ Verifikator:</strong> Memverifikasi kelengkapan</li>
+                        <li><strong>👨‍🏫 Kepala Madrasah:</strong> Persetujuan akhir</li>
+                        <li><strong>💰 Bendahara:</strong> Mengelola keuangan</li>
+                        <li><strong>🤝 Komite:</strong> Persetujuan strategis</li>
+                    </ul>
+                </div>
+                <div class="intro-box">
+                    <h4><i class="bi bi-star me-1"></i>Fitur Utama</h4>
+                    <ul class="intro-list" style="font-size:10px;">
+                        <li><strong>Dashboard Analitik:</strong> Visualisasi data <em>real-time</em></li>
+                        <li><strong>Workflow Persetujuan:</strong> Multi-level approval</li>
+                        <li><strong>Pelacakan Status:</strong> Pantau progres usulan</li>
+                        <li><strong>Manajemen RKAM:</strong> Kelola anggaran</li>
+                        <li><strong>Pembayaran:</strong> Pencairan dana</li>
+                        <li><strong>Laporan & Audit Log:</strong> Export PDF/Excel</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: DEMO ACCOUNTS -->
+        <section id="demo-accounts" class="mt-3">
+            <div class="section-header">
+                <h2><i class="bi bi-key me-2"></i>3. Akun Demo</h2>
+            </div>
+            <p>Gunakan akun berikut untuk mencoba aplikasi. <strong>Password untuk semua akun: <code
+                        class="ui">password</code></strong></p>
+            <table class="table demo-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Role</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Administrator</td>
+                        <td>admin@sirangkul.com</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Pengusul</td>
+                        <td>ahmad@madrasah.com</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Verifikator</td>
+                        <td>siti@madrasah.com</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Kepala Madrasah</td>
+                        <td>kepala@madrasah.com</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Bendahara</td>
+                        <td>bendahara@madrasah.com</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Komite Madrasah</td>
+                        <td>komite@madrasah.com</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="info-box"><i class="bi bi-info-circle me-1"></i>Di halaman login, klik akun demo untuk auto-fill
+                kredensial.</div>
+        </section>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 4: LOGIN -->
+        <section id="login">
+            <div class="section-header">
+                <h2><i class="bi bi-box-arrow-in-right me-2"></i>4. Login & Akses Sistem</h2>
+            </div>
+            <div class="content-row">
+                <div class="content-text">
+                    <ol class="step-list">
+                        <li>Buka alamat <strong>https://sirangkul.online</strong> di browser</li>
+                        <li>Masukkan <span class="ui">Email</span> dan <span class="ui">Password</span></li>
+                        <li>Klik tombol <span class="btn-ui">Masuk</span></li>
+                        <li>Atau klik akun demo di bagian bawah untuk auto-fill</li>
+                    </ol>
+                    <div class="info-box mt-2">
+                        <strong>Tips:</strong> Gunakan akun demo untuk mencoba semua fitur tanpa mengubah data produksi.
+                    </div>
+                </div>
+                <div class="content-img">
+                    <img src="screenshots/01-login-page.png" alt="Login">
+                    <div class="img-caption">Gambar 4.1: Halaman Login</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: RKAM VIEWER -->
+        <section id="rkam-viewer" class="mt-3">
+            <div class="section-header">
+                <h2><i class="bi bi-file-earmark-text me-2"></i>5. RKAM Viewer (Publik)</h2>
+            </div>
+            <div class="content-row">
+                <div class="content-text">
+                    <p>Halaman RKAM Viewer dapat diakses <strong>tanpa login</strong> untuk transparansi publik.</p>
+                    <ol class="step-list">
+                        <li>Dari halaman login, klik link <span class="menu-ui">Lihat RAKM</span></li>
+                        <li>Anda akan diarahkan ke halaman <code>/rakm-viewer</code></li>
+                        <li>Lihat daftar dokumen RKAM yang tersedia</li>
+                        <li>Klik untuk melihat atau mengunduh dokumen</li>
+                    </ol>
+                </div>
+                <div class="content-img content-img-sm">
+                    <img src="screenshots/10-rkam-viewer-public.png" alt="RKAM Viewer">
+                    <div class="img-caption">Gambar 5.1: RKAM Viewer</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 6: ADMINISTRATOR -->
+        <section id="admin">
+            <div class="section-header admin">
+                <h2><i class="bi bi-person-vcard-fill me-2"></i>6. Administrator</h2>
+            </div>
+
+            <div class="content-row">
+                <div class="content-text">
+                    <h4>6.1 Dashboard Administrator</h4>
+                    <p>Dashboard menampilkan overview lengkap: statistik proposal, anggaran, dan aktivitas terbaru.</p>
+                    <p>Menampilkan <span class="ui">Total Proposal</span>, <span class="ui">Pending Approvals</span>,
+                        <span class="ui">Approved</span>, dan <span class="ui">Remaining Budget</span>.
+                    </p>
+                </div>
+                <div class="content-img content-img-sm">
+                    <img src="screenshots/02-admin-dashboard.png" alt="Dashboard Admin">
+                    <div class="img-caption">Gambar 6.1: Dashboard</div>
+                </div>
+            </div>
+
+            <div class="content-row">
+                <div class="content-text">
+                    <h4>6.2 Manajemen User</h4>
+                    <ol class="step-list">
+                        <li>Masuk ke menu <span class="menu-ui">Manajemen User</span></li>
+                        <li>Klik <span class="btn-ui">Tambah User</span> untuk buat akun baru</li>
+                        <li>Isi nama, email, role, dan password</li>
+                        <li>Gunakan ikon ✏️ edit, 👁️‍🗨️ nonaktif, atau 🗑️ hapus</li>
+                    </ol>
+                </div>
+                <div class="content-img content-img-sm">
+                    <img src="screenshots/03-admin-user-management.png" alt="User Management">
+                    <div class="img-caption">Gambar 6.2: Manajemen User</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <h4>6.3 Manajemen RKAM</h4>
+                    <p>Kelola rekening anggaran: <span class="ui">Pagu</span>, <span class="ui">Terpakai</span>, <span
+                            class="ui">Sisa</span>.</p>
+                    <div class="mini-img"><img src="screenshots/04-admin-rkam.png" alt="RKAM"></div>
+                    <div class="img-caption">Gambar 6.3: RKAM</div>
+                </div>
+                <div>
+                    <h4>6.4 Audit Log</h4>
+                    <p>Lacak semua aktivitas sistem dengan filter dan pencarian.</p>
+                    <div class="mini-img"><img src="screenshots/05-admin-audit-log.png" alt="Audit Log"></div>
+                    <div class="img-caption">Gambar 6.4: Audit Log</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 7: PENGUSUL -->
+        <section id="pengusul">
+            <div class="section-header pengusul">
+                <h2><i class="bi bi-pencil-square me-2"></i>7. Pengusul</h2>
+            </div>
+
+            <div class="content-row">
+                <div class="content-text">
+                    <h4>7.1 Dashboard Pengusul</h4>
+                    <p>Menampilkan statistik proposal yang diajukan dan tombol aksi cepat seperti <span
+                            class="btn-ui">Buat Proposal Baru</span> dan <span class="btn-ui">Cek Status</span>.</p>
+                </div>
+                <div class="content-img content-img-sm">
+                    <img src="screenshots/06-pengusul-dashboard.png" alt="Dashboard Pengusul">
+                    <div class="img-caption">Gambar 7.1: Dashboard</div>
+                </div>
+            </div>
+
+            <div class="content-row">
+                <div class="content-text">
+                    <h4>7.2 Buat Proposal</h4>
+                    <ol class="step-list">
+                        <li>Klik menu <span class="menu-ui">Buat Proposal</span> atau tombol di dashboard</li>
+                        <li>Isi <span class="ui">Judul</span>, <span class="ui">Deskripsi</span>, <span
+                                class="ui">Kategori</span>, <span class="ui">Urgensi</span></li>
+                        <li>Masukkan <span class="ui">Estimasi Anggaran</span> dan <span class="ui">Jadwal</span></li>
+                        <li>Upload dokumen pendukung (RAB/TOR)</li>
+                        <li>Klik <span class="btn-ui">Submit Proposal</span> atau <span class="btn-ui">Simpan
+                                Draft</span></li>
+                    </ol>
+                </div>
+                <div class="content-img content-img-sm">
+                    <img src="screenshots/07-pengusul-create-proposal.png" alt="Buat Proposal">
+                    <div class="img-caption">Gambar 7.2: Form Proposal</div>
+                </div>
+            </div>
+
+            <div class="content-row">
+                <div class="content-text">
+                    <h4>7.3 Lacak Proposal</h4>
+                    <p>Pantau status proposal melalui menu <span class="menu-ui">Lacak Proposal</span>. Lihat timeline
+                        persetujuan dengan klik ikon 👁️.</p>
+                </div>
+                <div class="content-img content-img-sm">
+                    <img src="screenshots/08-pengusul-track-proposal.png" alt="Lacak Proposal">
+                    <div class="img-caption">Gambar 7.3: Lacak Proposal</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 8: VERIFIKATOR -->
+        <section id="verifikator">
+            <div class="section-header verifikator">
+                <h2><i class="bi bi-check-circle-fill me-2"></i>8. Verifikator</h2>
+            </div>
+
+            <div class="content-row">
+                <div class="content-text">
+                    <h4>8.1 Dashboard & Workflow Persetujuan</h4>
+                    <ol class="step-list">
+                        <li>Masuk ke menu <span class="menu-ui">Persetujuan</span></li>
+                        <li>Lihat daftar proposal dengan status <span class="ui">Menunggu Verifikasi</span></li>
+                        <li>Klik <span class="btn-ui">Detail</span> untuk lihat rincian proposal</li>
+                        <li>Periksa dokumen RAB/TOR yang dilampirkan</li>
+                        <li>Klik <span class="btn-ui">Setujui</span> untuk teruskan atau <span
+                                class="btn-ui">Tolak</span> jika tidak lengkap</li>
+                    </ol>
+                </div>
+                <div class="content-img content-img-sm">
+                    <img src="screenshots/11-verifikator-dashboard.png" alt="Dashboard Verifikator">
+                    <div class="img-caption">Gambar 8.1: Dashboard</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="mini-img"><img src="screenshots/12-verifikator-approval.png" alt="Daftar Persetujuan">
+                    </div>
+                    <div class="img-caption">Gambar 8.2: Daftar Proposal</div>
+                </div>
+                <div>
+                    <div class="mini-img"><img src="screenshots/13-verifikator-review.png" alt="Review"></div>
+                    <div class="img-caption">Gambar 8.3: Detail Review</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 9: KEPALA MADRASAH -->
+        <section id="kepala" class="mt-3">
+            <div class="section-header kepala">
+                <h2><i class="bi bi-person-fill-check me-2"></i>9. Kepala Madrasah</h2>
+            </div>
+
+            <div class="content-row">
+                <div class="content-text">
+                    <h4>9.1 Dashboard, Persetujuan & RKAM</h4>
+                    <ol class="step-list">
+                        <li>Akses menu <span class="menu-ui">Persetujuan</span> untuk melihat proposal yang <span
+                                class="ui">Sudah Diverifikasi</span></li>
+                        <li>Tinjau detail proposal dan dokumen pendukung</li>
+                        <li>Klik <span class="btn-ui">Setujui</span> untuk persetujuan akhir atau <span
+                                class="btn-ui">Tolak</span></li>
+                        <li>Pantau <span class="menu-ui">RKAM</span> (read-only) untuk kondisi anggaran</li>
+                    </ol>
+                </div>
+                <div class="content-img content-img-sm">
+                    <img src="screenshots/14-kepala-dashboard.png" alt="Dashboard Kepala">
+                    <div class="img-caption">Gambar 9.1: Dashboard</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="mini-img"><img src="screenshots/15-kepala-approval.png" alt="Persetujuan"></div>
+                    <div class="img-caption">Gambar 9.2: Persetujuan</div>
+                </div>
+                <div>
+                    <div class="mini-img"><img src="screenshots/16-kepala-rkam.png" alt="RKAM"></div>
+                    <div class="img-caption">Gambar 9.3: Monitoring RKAM</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 10: BENDAHARA -->
+        <section id="bendahara">
+            <div class="section-header bendahara">
+                <h2><i class="bi bi-cash-coin me-2"></i>10. Bendahara</h2>
+            </div>
+
+            <div class="content-row">
+                <div class="content-text">
+                    <h4>10.1 Dashboard, Pembayaran & RKAM</h4>
+                    <ol class="step-list">
+                        <li>Buka menu <span class="menu-ui">Pembayaran</span> untuk lihat proposal yang <span
+                                class="ui">Siap Dibayar</span></li>
+                        <li>Klik <span class="btn-ui">Proses Pembayaran</span> untuk catat transaksi pencairan</li>
+                        <li>Lihat riwayat pembayaran yang sudah diproses</li>
+                        <li>Kelola <span class="menu-ui">RKAM</span> untuk update data anggaran</li>
+                    </ol>
+                </div>
+                <div class="content-img content-img-sm">
+                    <img src="screenshots/17-bendahara-dashboard.png" alt="Dashboard Bendahara">
+                    <div class="img-caption">Gambar 10.1: Dashboard</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="mini-img"><img src="screenshots/18-bendahara-pembayaran.png" alt="Pembayaran"></div>
+                    <div class="img-caption">Gambar 10.2: Pembayaran</div>
+                </div>
+                <div>
+                    <div class="mini-img"><img src="screenshots/19-bendahara-rkam.png" alt="RKAM"></div>
+                    <div class="img-caption">Gambar 10.3: RKAM</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 11: KOMITE -->
+        <section id="komite" class="mt-3">
+            <div class="section-header komite">
+                <h2><i class="bi bi-people-fill me-2"></i>11. Komite Madrasah</h2>
+            </div>
+
+            <div class="content-row">
+                <div class="content-text">
+                    <h4>11.1 Dashboard, Review & Pemantauan</h4>
+                    <ol class="step-list">
+                        <li>Masuk ke menu <span class="menu-ui">Persetujuan</span></li>
+                        <li>Tinjau proposal yang membutuhkan persetujuan Komite</li>
+                        <li>Berikan <span class="btn-ui">Persetujuan</span> atau <span class="btn-ui">Rekomendasi</span>
+                        </li>
+                        <li>Gunakan <span class="menu-ui">Lacak Proposal</span> dan <span class="menu-ui">Laporan</span>
+                            untuk pemantauan</li>
+                    </ol>
+                </div>
+                <div class="content-img content-img-sm">
+                    <img src="screenshots/20-komite-dashboard.png" alt="Dashboard Komite">
+                    <div class="img-caption">Gambar 11.1: Dashboard</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="mini-img"><img src="screenshots/21-komite-approval.png" alt="Persetujuan"></div>
+                    <div class="img-caption">Gambar 11.2: Persetujuan</div>
+                </div>
+                <div>
+                    <div class="mini-img"><img src="screenshots/22-komite-review.png" alt="Review"></div>
+                    <div class="img-caption">Gambar 11.3: Detail Review</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <div class="text-center mt-4 pt-3 border-top" style="font-size:9px; color:#666;">
+            <p class="mb-1"><strong>SiRangkul v1.0</strong> - Sistem Informasi Rancangan Anggaran dan Kegiatan untuk
+                Usulan Layanan</p>
+            <p class="mb-0">Dikembangkan oleh Tim Pondok Informatika | © 2024 SiRangkul</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
