@@ -51,9 +51,11 @@ const LandingPage: React.FC = () => {
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <img src="/logo-sirangkul.png" alt="SiRangkul" className="h-10 w-10" />
-              <span className="font-bold text-xl text-gray-800">SiRangkul</span>
+              <div className="w-px h-8 bg-gray-200"></div>
+              <img src="https://man2kotamakassar.sch.id/images/logo.png" alt="MAN 2" className="h-9 w-9" />
+              <span className="font-bold text-xl text-gray-800 hidden sm:block">SiRangkul</span>
             </div>
             <nav className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-gray-600 hover:text-cyan-600 transition-colors">Fitur</a>
@@ -72,10 +74,9 @@ const LandingPage: React.FC = () => {
       </header>
 
       {/* Hero Section with Banner */}
-      <section className="relative overflow-hidden py-24 lg:py-32">
-        {/* Banner Background Slideshow */}
+      <section className="relative overflow-hidden min-h-[500px] flex items-center">
+        {/* Banner Background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/90 via-teal-900/85 to-cyan-900/90 z-10"></div>
           <img 
             src="https://man2kotamakassar.sch.id/images/banner3.jpg" 
             alt="MAN 2 Banner" 
@@ -83,38 +84,31 @@ const LandingPage: React.FC = () => {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="text-white">
-              <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
+        {/* Content positioned on left only */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="max-w-xl">
+            {/* Text with solid background */}
+            <div className="bg-gradient-to-r from-cyan-600 to-teal-600 p-8 rounded-2xl shadow-2xl">
+              <h1 className="text-3xl lg:text-5xl font-bold mb-4 leading-tight text-white">
                 Kelola Anggaran<br/>Madrasah dengan<br/>Mudah & Transparan
               </h1>
-              <p className="text-xl text-white/90 mb-8">
-                SiRangkul adalah platform digital terintegrasi untuk pengelolaan RKAM dan proses pengajuan usulan yang efisien, transparan, dan akuntabel.
+              <p className="text-lg text-white/95 mb-6">
+                SiRangkul adalah platform digital terintegrasi untuk pengelolaan RKAM dan proses pengajuan usulan.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link 
                   to="/login"
-                  className="inline-flex items-center gap-2 bg-white text-cyan-600 px-8 py-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl transition-all"
+                  className="inline-flex items-center gap-2 bg-white text-cyan-600 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
                 >
                   Mulai Sekarang
                   <ArrowRight className="h-5 w-5" />
                 </Link>
                 <a 
                   href="/rakm-viewer"
-                  className="inline-flex items-center gap-2 bg-white/20 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/30 transition-all"
+                  className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-all border border-white/30"
                 >
-                  Lihat RKAM Publik
+                  Lihat RKAM
                 </a>
-              </div>
-            </div>
-            <div className="hidden lg:flex justify-center">
-              <div className="bg-white rounded-3xl p-8 shadow-2xl">
-                <img src="/logo-sirangkul.png" alt="SiRangkul" className="h-48 w-48 mx-auto mb-6" />
-                <div className="flex justify-center">
-                  <img src="https://man2kotamakassar.sch.id/images/logo.png" alt="MAN 2" className="h-20 w-20" />
-                </div>
-                <p className="text-center text-gray-600 mt-4 font-medium">MAN 2 Kota Makassar</p>
               </div>
             </div>
           </div>
