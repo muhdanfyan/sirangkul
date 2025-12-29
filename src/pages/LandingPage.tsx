@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Users, FileText, Shield, BarChart3, Clock, Eye, BookOpen, Download } from 'lucide-react';
+import { ArrowRight, CheckCircle, Users, FileText, Shield, BarChart3, Clock, Eye, BookOpen, Download, LogIn } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
   const features = [
@@ -65,8 +65,9 @@ const LandingPage: React.FC = () => {
             </nav>
             <Link 
               to="/login"
-              className="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white px-6 py-2.5 rounded-xl font-medium shadow-lg shadow-cyan-200 transition-all"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white px-6 py-2.5 rounded-xl font-medium shadow-lg shadow-cyan-200 transition-all"
             >
+              <LogIn className="h-4 w-4" />
               Masuk
             </Link>
           </div>
