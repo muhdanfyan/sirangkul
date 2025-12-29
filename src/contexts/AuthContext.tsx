@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { apiService, LoginResponse } from '../services/api';
+import { apiService as api } from '../services/api';
 
 export interface User {
   id: string;
-  full_name: string;
+  name?: string;
+  full_name?: string;
   email: string;
   role: string;
   avatar?: string;
@@ -18,9 +19,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Helper function to map API role to frontend role
-const mapApiRoleToFrontendRole = (apiRole: string): User['role'] => {
-  const roleMap: Record<string, User['role']> = {
+// Map API role to frontend role
+const mapRole = (apiRole: string): string => {
+  const roleMap: { [key: string]: string } = {
     'administrator': 'Administrator',
     'pengusul': 'Pengusul',
     'verifikator': 'Verifikator',
@@ -28,58 +29,47 @@ const mapApiRoleToFrontendRole = (apiRole: string): User['role'] => {
     'bendahara': 'Bendahara',
     'komite_madrasah': 'Komite Madrasah',
   };
-  
-  return roleMap[apiRole.toLowerCase()] || 'Pengusul';
+  return roleMap[apiRole.toLowerCase()] || apiRole;
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('sirangkul_user');
     const storedToken = localStorage.getItem('sirangkul_token');
-    
     if (storedUser && storedToken) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        // Clear invalid data
-        localStorage.removeItem('sirangkul_user');
-        localStorage.removeItem('sirangkul_token');
-      }
+      setUser(JSON.parse(storedUser));
     }
+    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
     try {
       console.log('Attempting login for:', email);
+      const response = await api.login({ email, password });
       
-      const response: LoginResponse = await apiService.login({ email, password });
-      
-      // Map API response to frontend user format
-      const user: User = {
-        id: response.user.id,
-        full_name: response.user.full_name,
-        email: email,
-        role: mapApiRoleToFrontendRole(response.user.role),
-      };
-
-      console.log('Login successful, setting user:', user);
-      
-      // Store user data and token
-      setUser(user);
-      localStorage.setItem('sirangkul_user', JSON.stringify(user));
-      localStorage.setItem('sirangkul_token', response.token);
-      
-      return true;
+      if (response.token && response.user) {
+        const mappedRole = mapRole(response.user.role);
+        const userData: User = {
+          id: response.user.id,
+          name: response.user.full_name,
+          full_name: response.user.full_name,
+          email: email,
+          role: mappedRole,
+        };
+        
+        localStorage.setItem('sirangkul_token', response.token);
+        localStorage.setItem('sirangkul_user', JSON.stringify(userData));
+        setUser(userData);
+        console.log('Login successful:', userData);
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error('Login failed:', error);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -96,7 +86,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// @refresh reset
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

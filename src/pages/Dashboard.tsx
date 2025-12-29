@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   FileText, 
   Clock, 
-  CheckCircle, 
+  CheckCircle,
   DollarSign,
   PieChart
 } from 'lucide-react';
