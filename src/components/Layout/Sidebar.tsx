@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -12,7 +12,10 @@ import {
   MessageSquare, 
   History,
   X,
-  Building2
+  ChevronDown,
+  ChevronRight,
+  ListChecks,
+  FilePlus,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -23,13 +26,20 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
+  const location = useLocation();
+  const [proposalMenuOpen, setProposalMenuOpen] = useState(false);
+
+  // Auto-expand Proposal menu if user is on a proposal page
+  useEffect(() => {
+    if (location.pathname.includes('/proposal')) {
+      setProposalMenuOpen(true);
+    }
+  }, [location.pathname]);
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Users, label: 'Manajemen User', path: '/users', roles: ['Administrator'] },
     { icon: PiggyBank, label: 'RKAM', path: '/rkam', roles: ['Administrator', 'Bendahara', 'Kepala Madrasah'] },
-    { icon: FileText, label: 'Buat Proposal', path: '/proposals/new', roles: ['Pengusul'] },
-    { icon: Search, label: 'Lacak Proposal', path: '/proposals/tracking' },
     { icon: CheckCircle, label: 'Persetujuan', path: '/approvals', roles: ['Verifikator', 'Kepala Madrasah', 'Komite Madrasah'] },
     { icon: CreditCard, label: 'Pembayaran', path: '/payments', roles: ['Bendahara', 'Administrator'] },
     { icon: FileBarChart, label: 'Laporan', path: '/reports' },
@@ -37,8 +47,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { icon: History, label: 'Audit Log', path: '/audit', roles: ['Administrator'] },
   ];
 
+  const proposalSubMenuItems = [
+    { icon: ListChecks, label: 'List Proposal', path: '/proposal-tracking' },
+    { icon: FilePlus, label: 'Buat Proposal', path: '/proposal-submission', roles: ['Pengusul'] },
+    { icon: FileText, label: 'Proposal Saya', path: '/my-proposals', roles: ['Pengusul'] },
+    { icon: Search, label: 'Lacak Proposal', path: '/proposals/tracking' },
+  ];
+
   const filteredMenuItems = menuItems.filter(item => 
     !item.roles || item.roles.includes(user?.role || '')
+  );
+
+  const filteredProposalSubMenuItems = proposalSubMenuItems.filter(item => 
+    !item.roles || item.roles.some(r => (user?.role || '').toLowerCase() === r.toLowerCase())
   );
 
   return (
@@ -82,6 +103,47 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               {item.label}
             </NavLink>
           ))}
+
+          {/* Proposal Menu with Submenu */}
+          <div className="mb-1">
+            <button
+              onClick={() => setProposalMenuOpen(!proposalMenuOpen)}
+              className="flex items-center justify-between w-full px-3 py-3 text-sm font-medium rounded-lg transition-colors duration-150 text-gray-700 hover:bg-gray-100"
+            >
+              <div className="flex items-center">
+                <FileText className="h-5 w-5 mr-3" />
+                <span>Proposal</span>
+              </div>
+              {proposalMenuOpen ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </button>
+
+            {/* Submenu */}
+            {proposalMenuOpen && (
+              <div className="ml-6 mt-1 space-y-1">
+                {filteredProposalSubMenuItems.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150 ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-700'
+                          : 'text-gray-600 hover:bg-gray-50'
+                      }`
+                    }
+                    onClick={onClose}
+                  >
+                    <item.icon className="h-4 w-4 mr-2" />
+                    {item.label}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="absolute bottom-0 w-full p-4 border-t border-gray-200">

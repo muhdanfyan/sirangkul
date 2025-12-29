@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { apiService, LoginResponse } from '../services/api';
 
 export interface User {
   id: string;
-  name: string;
+  full_name: string;
   email: string;
-  role: 'Administrator' | 'Pengusul' | 'Verifikator' | 'Kepala Madrasah' | 'Bendahara' | 'Komite Madrasah';
+  role: string;
   avatar?: string;
 }
 
@@ -12,58 +13,90 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user data
-const mockUsers: User[] = [
-  { id: '1', name: 'Admin Sistem', email: 'admin@sirangkul.com', role: 'Administrator' },
-  { id: '2', name: 'Ahmad Fauzi', email: 'ahmad@madrasah.com', role: 'Pengusul' },
-  { id: '3', name: 'Siti Nurhaliza', email: 'siti@madrasah.com', role: 'Verifikator' },
-  { id: '4', name: 'Dr. H. Muhammad', email: 'kepala@madrasah.com', role: 'Kepala Madrasah' },
-  { id: '5', name: 'Fatimah S.Pd', email: 'bendahara@madrasah.com', role: 'Bendahara' },
-  { id: '6', name: 'H. Abdullah', email: 'komite@madrasah.com', role: 'Komite Madrasah' },
-];
+// Helper function to map API role to frontend role
+const mapApiRoleToFrontendRole = (apiRole: string): User['role'] => {
+  const roleMap: Record<string, User['role']> = {
+    'administrator': 'Administrator',
+    'pengusul': 'Pengusul',
+    'verifikator': 'Verifikator',
+    'kepala_madrasah': 'Kepala Madrasah',
+    'bendahara': 'Bendahara',
+    'komite_madrasah': 'Komite Madrasah',
+  };
+  
+  return roleMap[apiRole.toLowerCase()] || 'Pengusul';
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('sirangkul_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedToken = localStorage.getItem('sirangkul_token');
+    
+    if (storedUser && storedToken) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Failed to parse stored user:', error);
+        // Clear invalid data
+        localStorage.removeItem('sirangkul_user');
+        localStorage.removeItem('sirangkul_token');
+      }
     }
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    console.log('Attempting login for:', email);
-    // Mock authentication - in real app, this would call an API
-    const foundUser = mockUsers.find(u => u.email === email);
-    // For mock authentication, we assume a default password for all users
-    // In a real application, you would hash and compare passwords securely.
-    if (foundUser && password === 'password') {
-      console.log('User found, setting user:', foundUser);
-      setUser(foundUser);
-      localStorage.setItem('sirangkul_user', JSON.stringify(foundUser));
+    setIsLoading(true);
+    try {
+      console.log('Attempting login for:', email);
+      
+      const response: LoginResponse = await apiService.login({ email, password });
+      
+      // Map API response to frontend user format
+      const user: User = {
+        id: response.user.id,
+        full_name: response.user.full_name,
+        email: email,
+        role: mapApiRoleToFrontendRole(response.user.role),
+      };
+
+      console.log('Login successful, setting user:', user);
+      
+      // Store user data and token
+      setUser(user);
+      localStorage.setItem('sirangkul_user', JSON.stringify(user));
+      localStorage.setItem('sirangkul_token', response.token);
+      
       return true;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-    console.log('User not found or password incorrect.');
-    return false;
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('sirangkul_user');
+    localStorage.removeItem('sirangkul_token');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
+// @refresh reset
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
