@@ -78,7 +78,7 @@ const LandingPage: React.FC = () => {
         {/* Banner Background */}
         <div className="absolute inset-0">
           <img 
-            src="https://man2kotamakassar.sch.id/images/banner3.jpg" 
+            src="https://man2kotamakassar.sch.id/images/banner1.jpg" 
             alt="MAN 2 Banner" 
             className="w-full h-full object-cover"
           />
