@@ -13,6 +13,7 @@ import Reporting from './pages/Reporting';
 import FeedbackManagement from './pages/FeedbackManagement';
 import AuditLog from './pages/AuditLog';
 import LoginPage from './pages/LoginPage';
+import LandingPage from './pages/LandingPage';
 import MyProposals from './pages/MyProposals';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -27,6 +28,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/rakm-viewer" element={<RAKMViewer />} />
           <Route path="/*" element={<ProtectedRoute />} />
