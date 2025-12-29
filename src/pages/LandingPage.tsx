@@ -54,7 +54,7 @@ const LandingPage: React.FC = () => {
             <div className="flex items-center gap-4">
               <img src="/logo-sirangkul.png" alt="SiRangkul" className="h-10 w-10" />
               <div className="w-px h-8 bg-gray-200"></div>
-              <img src="https://man2kotamakassar.sch.id/images/logo.png" alt="MAN 2" className="h-9 w-9" />
+              <img src="https://man2kotamakassar.sch.id/images/logo.png" alt="MAN 2" className="h-9 object-contain" />
               <span className="font-bold text-xl text-gray-800 hidden sm:block">SiRangkul</span>
             </div>
             <nav className="hidden md:flex items-center gap-8">
