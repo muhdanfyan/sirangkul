@@ -40,6 +40,39 @@
             color: #fff;
             background-color: #0d6efd;
         }
+
+        /* Highlight - UI Elements */
+        .ui {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #856404;
+        }
+
+        .btn-ui {
+            background: #d1e7dd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #0f5132;
+        }
+
+        .menu-ui {
+            background: #cfe2ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #084298;
+        }
+
+        .info-box {
+            background: #e7f1ff;
+            border-left: 4px solid #0d6efd;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 6px 6px 0;
+        }
     </style>
 </head>
 
@@ -83,12 +116,23 @@
                                         data-bs-toggle="collapse" data-bs-target="#collapseUmumOne">Login</button></h2>
                                 <div id="collapseUmumOne" class="accordion-collapse collapse show">
                                     <div class="accordion-body">
-                                        <ol>
-                                            <li>Buka halaman login.</li>
-                                            <li>Masukkan <strong>email</strong> dan <strong>password</strong> Anda.</li>
-                                            <li>Klik tombol <strong>"Masuk"</strong>.</li>
-                                            <li>Tersedia akun demo yang bisa di-klik untuk mencoba setiap role.</li>
-                                        </ol>
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <ol>
+                                                    <li>Buka halaman login.</li>
+                                                    <li>Masukkan <strong>email</strong> dan <strong>password</strong>
+                                                        Anda.</li>
+                                                    <li>Klik tombol <strong>"Masuk"</strong>.</li>
+                                                    <li>Tersedia akun demo yang bisa di-klik untuk mencoba setiap role.
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/01-login-page.png" alt="Halaman Login"
+                                                    class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Halaman Login</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -122,7 +166,8 @@
                                     <div class="accordion-body">Halaman ini menyediakan analisis data proposal dan
                                         anggaran. Anda bisa memfilter laporan berdasarkan rentang tanggal, jenis, dan
                                         kategori. Laporan dapat diekspor dalam format <strong>PDF</strong> atau
-                                        <strong>Excel</strong>.</div>
+                                        <strong>Excel</strong>.
+                                    </div>
                                 </div>
                             </div>
                             <div class="accordion-item">
@@ -130,10 +175,23 @@
                                         data-bs-toggle="collapse" data-bs-target="#collapseUmumFive">Lihat RAKM
                                         (Publik)</button></h2>
                                 <div id="collapseUmumFive" class="accordion-collapse collapse">
-                                    <div class="accordion-body">Dari halaman login, klik link <strong>"Lihat
-                                            RAKM"</strong> untuk mengakses halaman `/rakm-viewer`. Halaman ini dapat
-                                        diakses publik tanpa perlu login dan menampilkan daftar dokumen RAKM yang bisa
-                                        dilihat atau diunduh.</div>
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <p>Dari halaman login, klik link <strong>"Lihat
+                                                        RAKM"</strong> untuk mengakses halaman `/rakm-viewer`. Halaman
+                                                    ini dapat
+                                                    diakses publik tanpa perlu login dan menampilkan daftar dokumen RAKM
+                                                    yang bisa
+                                                    dilihat atau diunduh.</p>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/10-rkam-viewer-public.png" alt="RKAM Viewer"
+                                                    class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">RKAM Viewer Publik</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -152,15 +210,24 @@
                                 <h2 class="accordion-header"><button class="accordion-button" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#collapseAdminOne">Manajemen
                                         User</button></h2>
-                                <div id="collapseAdminOne" class="accordion-collapse collapse show">
-                                    <div class="accordion-body">
-                                        <ol>
-                                            <li>Masuk ke menu <strong>"Manajemen User"</strong>.</li>
-                                            <li>Klik tombol <strong>"Tambah User"</strong> untuk membuat akun baru. Isi
-                                                nama, email, role, dan password.</li>
-                                            <li>Anda dapat mengedit (✏️), menonaktifkan (👁️‍🗨️), atau menghapus (🗑️)
-                                                pengguna dari daftar.</li>
-                                        </ol>
+                                <div class="accordion-body">
+                                    <div class="row">
+                                        <div class="col-md-7">
+                                            <ol>
+                                                <li>Masuk ke menu <span class="menu-ui">Manajemen User</span>.</li>
+                                                <li>Klik tombol <span class="btn-ui">Tambah User</span> untuk membuat
+                                                    akun baru.
+                                                    Isi nama, email, role, dan password.</li>
+                                                <li>Anda dapat mengedit (✏️), menonaktifkan (👁️‍🗨️), atau menghapus
+                                                    (🗑️)
+                                                    pengguna dari daftar.</li>
+                                            </ol>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <img src="screenshots/03-admin-user-management.png" alt="Manajemen User"
+                                                class="img-fluid rounded shadow-sm">
+                                            <p class="text-muted small text-center mt-1">Manajemen User</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -170,13 +237,26 @@
                                         RKAM</button></h2>
                                 <div id="collapseAdminTwo" class="accordion-collapse collapse">
                                     <div class="accordion-body">
-                                        <ol>
-                                            <li>Akses menu <strong>"RKAM"</strong>.</li>
-                                            <li>Klik <strong>"Tambah Item RKAM"</strong> untuk menambahkan rekening
-                                                anggaran baru.</li>
-                                            <li>Anda dapat melihat, mengedit (✏️), dan memantau pagu, realisasi, serta
-                                                sisa anggaran dari setiap rekening.</li>
-                                        </ol>
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <ol>
+                                                    <li>Akses menu <span class="menu-ui">RKAM</span>.</li>
+                                                    <li>Klik <span class="btn-ui">Tambah Item RKAM</span> untuk
+                                                        menambahkan rekening
+                                                        anggaran baru.</li>
+                                                    <li>Anda dapat melihat, mengedit (✏️), dan memantau <span
+                                                            class="ui">pagu</span>, <span class="ui">realisasi</span>,
+                                                        serta
+                                                        <span class="ui">sisa anggaran</span> dari setiap rekening.
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/04-admin-rkam.png" alt="RKAM"
+                                                    class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Manajemen RKAM</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -200,11 +280,21 @@
                                 </h2>
                                 <div id="collapseAdminFour" class="accordion-collapse collapse">
                                     <div class="accordion-body">
-                                        <ol>
-                                            <li>Masuk ke menu <strong>"Audit Log"</strong>.</li>
-                                            <li>Gunakan fitur pencarian dan filter untuk melacak semua aktivitas yang
-                                                terjadi di dalam sistem.</li>
-                                        </ol>
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <ol>
+                                                    <li>Masuk ke menu <span class="menu-ui">Audit Log</span>.</li>
+                                                    <li>Gunakan fitur <span class="ui">pencarian</span> dan <span
+                                                            class="ui">filter</span> untuk melacak semua aktivitas yang
+                                                        terjadi di dalam sistem.</li>
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/05-admin-audit-log.png" alt="Audit Log"
+                                                    class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Audit Log</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -215,9 +305,11 @@
                                 <div id="collapseAdminFive" class="accordion-collapse collapse">
                                     <div class="accordion-body">
                                         <ol>
-                                            <li>Akses menu <strong>"Feedback"</strong> untuk melihat dan menanggapi
+                                            <li>Akses menu <span class="menu-ui">Feedback</span> untuk melihat dan
+                                                menanggapi
                                                 keluhan, saran, atau kritik dari pengguna.</li>
-                                            <li>Klik <strong>"Respons"</strong> untuk memberikan tanggapan.</li>
+                                            <li>Klik <span class="btn-ui">Respons</span> untuk memberikan tanggapan.
+                                            </li>
                                         </ol>
                                     </div>
                                 </div>
@@ -239,15 +331,30 @@
                                         Proposal</button></h2>
                                 <div id="collapsePengusulOne" class="accordion-collapse collapse show">
                                     <div class="accordion-body">
-                                        <ol>
-                                            <li>Klik menu <strong>"Buat Proposal"</strong>.</li>
-                                            <li>Isi formulir secara lengkap: judul, deskripsi, kategori, tingkat
-                                                urgensi, estimasi anggaran, dan jadwal pelaksanaan.</li>
-                                            <li>Unggah dokumen pendukung seperti RAB atau TOR.</li>
-                                            <li>Klik <strong>"Submit Proposal"</strong> untuk mengirimnya ke alur
-                                                persetujuan, atau <strong>"Simpan Draft"</strong> untuk menyimpannya
-                                                sementara.</li>
-                                        </ol>
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <ol>
+                                                    <li>Klik menu <span class="menu-ui">Buat Proposal</span>.</li>
+                                                    <li>Isi formulir secara lengkap: <span class="ui">judul</span>,
+                                                        <span class="ui">deskripsi</span>, <span
+                                                            class="ui">kategori</span>, tingkat
+                                                        urgensi, estimasi anggaran, dan jadwal pelaksanaan.
+                                                    </li>
+                                                    <li>Unggah dokumen pendukung seperti <span class="ui">RAB</span>
+                                                        atau <span class="ui">TOR</span>.</li>
+                                                    <li>Klik <span class="btn-ui">Submit Proposal</span> untuk
+                                                        mengirimnya ke alur
+                                                        persetujuan, atau <span class="btn-ui">Simpan Draft</span> untuk
+                                                        menyimpannya
+                                                        sementara.</li>
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/07-pengusul-create-proposal.png"
+                                                    alt="Buat Proposal" class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Form Buat Proposal</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -256,9 +363,21 @@
                                         data-bs-toggle="collapse" data-bs-target="#collapsePengusulTwo">Aksi Cepat di
                                         Dashboard</button></h2>
                                 <div id="collapsePengusulTwo" class="accordion-collapse collapse">
-                                    <div class="accordion-body">Gunakan tombol <strong>"Buat Proposal Baru"</strong>
-                                        untuk langsung menuju halaman pengajuan, dan <strong>"Cek Status"</strong> untuk
-                                        melacak proposal Anda.</div>
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <p>Gunakan tombol <span class="btn-ui">Buat Proposal Baru</span>
+                                                    untuk langsung menuju halaman pengajuan, dan <span
+                                                        class="btn-ui">Cek Status</span> untuk
+                                                    melacak proposal Anda.</p>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/06-pengusul-dashboard.png"
+                                                    alt="Dashboard Pengusul" class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Dashboard Pengusul</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -278,14 +397,27 @@
                                         data-bs-target="#collapseVerifikatorOne">Persetujuan</button></h2>
                                 <div id="collapseVerifikatorOne" class="accordion-collapse collapse show">
                                     <div class="accordion-body">
-                                        <ol>
-                                            <li>Masuk ke menu <strong>"Persetujuan"</strong>.</li>
-                                            <li>Anda akan melihat daftar proposal yang menunggu untuk diverifikasi.</li>
-                                            <li>Pilih satu proposal, lalu tinjau detail dan dokumennya.</li>
-                                            <li>Klik tombol <strong>"Setujui"</strong> untuk meneruskan proposal ke
-                                                tahap selanjutnya atau <strong>"Tolak"</strong> jika tidak memenuhi
-                                                syarat. Anda dapat menyertakan catatan pada setiap tindakan.</li>
-                                        </ol>
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <ol>
+                                                    <li>Masuk ke menu <span class="menu-ui">Persetujuan</span>.</li>
+                                                    <li>Anda akan melihat daftar proposal yang menunggu untuk
+                                                        diverifikasi.</li>
+                                                    <li>Pilih satu proposal, lalu tinjau detail dan dokumennya.</li>
+                                                    <li>Klik tombol <span class="btn-ui">Setujui</span> untuk meneruskan
+                                                        proposal ke
+                                                        tahap selanjutnya atau <span class="btn-ui">Tolak</span> jika
+                                                        tidak memenuhi
+                                                        syarat. Anda dapat menyertakan catatan pada setiap tindakan.
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/11-verifikator-dashboard.png"
+                                                    alt="Dashboard Verifikator" class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Dashboard Verifikator</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -306,12 +438,23 @@
                                         data-bs-target="#collapseKepalaMadrasahOne">Persetujuan</button></h2>
                                 <div id="collapseKepalaMadrasahOne" class="accordion-collapse collapse show">
                                     <div class="accordion-body">
-                                        <ol>
-                                            <li>Akses menu <strong>"Persetujuan"</strong>.</li>
-                                            <li>Tinjau proposal yang telah lolos verifikasi.</li>
-                                            <li>Berikan persetujuan akhir dengan mengklik <strong>"Setujui"</strong>
-                                                atau <strong>"Tolak"</strong>.</li>
-                                        </ol>
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <ol>
+                                                    <li>Akses menu <span class="menu-ui">Persetujuan</span>.</li>
+                                                    <li>Tinjau proposal yang telah lolos verifikasi.</li>
+                                                    <li>Berikan persetujuan akhir dengan mengklik <span
+                                                            class="btn-ui">Setujui</span>
+                                                        atau <span class="btn-ui">Tolak</span>.</li>
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/14-kepala-dashboard.png"
+                                                    alt="Dashboard Kepala Madrasah" class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Dashboard Kepala Madrasah
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -320,9 +463,24 @@
                                         data-bs-toggle="collapse" data-bs-target="#collapseKepalaMadrasahTwo">Manajemen
                                         RKAM</button></h2>
                                 <div id="collapseKepalaMadrasahTwo" class="accordion-collapse collapse">
-                                    <div class="accordion-body">Anda memiliki akses *read-only* ke menu
-                                        <strong>"RKAM"</strong> untuk memantau kondisi anggaran secara keseluruhan,
-                                        termasuk pagu, realisasi, dan sisa dana.</div>
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <p>Anda memiliki akses <span class="ui">read-only</span> ke menu
+                                                    <span class="menu-ui">RKAM</span> untuk memantau kondisi anggaran
+                                                    secara keseluruhan,
+                                                    termasuk <span class="ui">pagu</span>, <span
+                                                        class="ui">realisasi</span>, dan <span class="ui">sisa
+                                                        dana</span>.
+                                                </p>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/16-kepala-rkam.png" alt="RKAM Kepala Madrasah"
+                                                    class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Monitoring RKAM</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="accordion-item">
@@ -331,7 +489,8 @@
                                         data-bs-target="#collapseKepalaMadrasahThree">Feedback</button></h2>
                                 <div id="collapseKepalaMadrasahThree" class="accordion-collapse collapse">
                                     <div class="accordion-body">Sama seperti Administrator, Anda dapat melihat dan
-                                        menanggapi feedback dari pengguna melalui menu <strong>"Feedback"</strong>.
+                                        menanggapi feedback dari pengguna melalui menu <span
+                                            class="menu-ui">Feedback</span>.
                                     </div>
                                 </div>
                             </div>
@@ -352,13 +511,25 @@
                                         data-bs-target="#collapseBendaharaOne">Pembayaran</button></h2>
                                 <div id="collapseBendaharaOne" class="accordion-collapse collapse show">
                                     <div class="accordion-body">
-                                        <ol>
-                                            <li>Buka menu <strong>"Pembayaran"</strong> untuk melihat daftar proposal
-                                                yang siap dibayarkan.</li>
-                                            <li>Klik <strong>"Proses Pembayaran"</strong> untuk mencatat transaksi
-                                                pencairan dana.</li>
-                                            <li>Anda dapat melihat detail setiap pembayaran dan mengubah statusnya.</li>
-                                        </ol>
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <ol>
+                                                    <li>Buka menu <span class="menu-ui">Pembayaran</span> untuk melihat
+                                                        daftar proposal
+                                                        yang <span class="ui">siap dibayarkan</span>.</li>
+                                                    <li>Klik <span class="btn-ui">Proses Pembayaran</span> untuk
+                                                        mencatat transaksi
+                                                        pencairan dana.</li>
+                                                    <li>Anda dapat melihat detail setiap pembayaran dan mengubah
+                                                        statusnya.</li>
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/18-bendahara-pembayaran.png" alt="Pembayaran"
+                                                    class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Halaman Pembayaran</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -368,12 +539,22 @@
                                         RKAM</button></h2>
                                 <div id="collapseBendaharaTwo" class="accordion-collapse collapse">
                                     <div class="accordion-body">
-                                        <ol>
-                                            <li>Akses menu <strong>"RKAM"</strong>.</li>
-                                            <li>Anda dapat menambahkan item RKAM baru dan mengedit data anggaran yang
-                                                ada untuk memastikan RKAM selalu ter-update sesuai dengan realisasi.
-                                            </li>
-                                        </ol>
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <ol>
+                                                    <li>Akses menu <span class="menu-ui">RKAM</span>.</li>
+                                                    <li>Anda dapat menambahkan item RKAM baru dan mengedit data anggaran
+                                                        yang
+                                                        ada untuk memastikan RKAM selalu ter-update sesuai dengan
+                                                        realisasi.</li>
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/19-bendahara-rkam.png" alt="RKAM Bendahara"
+                                                    class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Manajemen RKAM</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -394,12 +575,23 @@
                                         data-bs-target="#collapseKomiteOne">Persetujuan</button></h2>
                                 <div id="collapseKomiteOne" class="accordion-collapse collapse show">
                                     <div class="accordion-body">
-                                        <ol>
-                                            <li>Masuk ke menu <strong>"Persetujuan"</strong>.</li>
-                                            <li>Tinjau proposal yang membutuhkan persetujuan dari Komite.</li>
-                                            <li>Berikan <strong>"Persetujuan"</strong> atau
-                                                <strong>"Rekomendasi"</strong> pada proposal yang dianggap penting.</li>
-                                        </ol>
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <ol>
+                                                    <li>Masuk ke menu <span class="menu-ui">Persetujuan</span>.</li>
+                                                    <li>Tinjau proposal yang membutuhkan persetujuan dari Komite.</li>
+                                                    <li>Berikan <span class="btn-ui">Persetujuan</span> atau
+                                                        <span class="btn-ui">Rekomendasi</span> pada proposal yang
+                                                        dianggap penting.
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <img src="screenshots/20-komite-dashboard.png" alt="Dashboard Komite"
+                                                    class="img-fluid rounded shadow-sm">
+                                                <p class="text-muted small text-center mt-1">Dashboard Komite</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -410,7 +602,8 @@
                                 <div id="collapseKomiteTwo" class="accordion-collapse collapse">
                                     <div class="accordion-body">Gunakan menu <strong>"Lacak Proposal"</strong> dan
                                         <strong>"Laporan"</strong> untuk memantau implementasi program dan kesesuaiannya
-                                        dengan rencana anggaran.</div>
+                                        dengan rencana anggaran.
+                                    </div>
                                 </div>
                             </div>
                         </div>
