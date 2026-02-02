@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  VITE_API_BASE_URL = "https://api.sirangkul.online"
+  VITE_API_BASE_URL = "https://api.sirangkul.online/api"
 
 [[redirects]]
   from = "/*"
