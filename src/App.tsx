@@ -39,8 +39,16 @@ function App() {
 }
 
 function ProtectedRoute() {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600"></div>
+      </div>
+    );
+  }
 
   if (!user) {
     return <Navigate to="/login" />;
