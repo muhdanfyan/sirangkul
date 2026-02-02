@@ -100,45 +100,49 @@ const Dashboard: React.FC = () => {
   const [currentBanner, setCurrentBanner] = React.useState(0);
 
   React.useEffect(() => {
+    if (banners.length === 0) return;
+    
     const timer = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % banners.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [banners.length]);
 
   return (
     <div className="space-y-6">
       {/* Banner Carousel */}
-      <div className="relative rounded-xl overflow-hidden h-48 md:h-56">
-        {banners.map((banner, index) => (
-          <img
-            key={index}
-            src={banner}
-            alt={`Banner ${index + 1}`}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-              index === currentBanner ? 'opacity-100' : 'opacity-0'
-            }`}
-          />
-        ))}
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/60 to-transparent"></div>
-        <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-          <div className="text-white">
-            <h2 className="text-2xl font-bold">MAN 2 Kota Makassar</h2>
-            <p className="text-white/80 text-sm">Selamat datang di SiRangkul</p>
-          </div>
-          <div className="flex gap-2">
-            {banners.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentBanner(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  index === currentBanner ? 'bg-white w-6' : 'bg-white/50'
-                }`}
-              />
-            ))}
+      {banners.length > 0 && (
+        <div className="relative rounded-xl overflow-hidden h-48 md:h-56">
+          {banners.map((banner, index) => (
+            <img
+              key={index}
+              src={banner}
+              alt={`Banner ${index + 1}`}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                index === currentBanner ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          ))}
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/60 to-transparent"></div>
+          <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+            <div className="text-white">
+              <h2 className="text-2xl font-bold">MAN 2 Kota Makassar</h2>
+              <p className="text-white/80 text-sm">Selamat datang di SiRangkul</p>
+            </div>
+            <div className="flex gap-2">
+              {banners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentBanner(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === currentBanner ? 'bg-white w-6' : 'bg-white/50'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Header */}
       <div className="bg-gradient-to-r from-cyan-600 to-teal-600 rounded-xl p-6 text-white">
