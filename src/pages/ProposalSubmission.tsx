@@ -299,12 +299,12 @@ const ProposalSubmission: React.FC = () => {
                       required
                     >
                       <option value="">Pilih Kategori</option>
-                      <option value="Infrastruktur">Infrastruktur</option>
-                      <option value="Pendidikan">Pendidikan</option>
-                      <option value="Teknologi">Teknologi</option>
-                      <option value="Kesehatan">Kesehatan</option>
-                      <option value="Kegiatan">Kegiatan</option>
-                      <option value="Pemeliharaan">Pemeliharaan</option>
+                      <option value="Kurikulum">Kurikulum</option>
+                      <option value="Kantor">Kantor</option>
+                      <option value="Sarana Prasarana">Sarana Prasarana</option>
+                      <option value="Humas">Humas</option>
+                      <option value="Kesiswaan">Kesiswaan</option>
+                      <option value="Komite">Komite</option>
                     </select>
                   </div>
 

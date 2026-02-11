@@ -4,6 +4,7 @@ import { apiService, Payment, Proposal, PaymentProcessRequest, PaymentCompleteRe
 import { useAuth } from '../contexts/AuthContext';
 import Toast, { ToastType } from '../components/Toast';
 import InfoModal from '../components/InfoModal';
+import RejectionModal from '../components/RejectionModal';
 
 const PaymentManagement: React.FC = () => {
   const { user } = useAuth();
@@ -64,6 +65,12 @@ const PaymentManagement: React.FC = () => {
     message: '',
     type: 'info'
   });
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [rejectionTarget, setRejectionTarget] = useState<{
+    type: 'proposal' | 'payment';
+    id: string;
+    title: string;
+  } | null>(null);
 
   // Fetch data on mount
   useEffect(() => {
@@ -219,11 +226,60 @@ const PaymentManagement: React.FC = () => {
     }
   };
 
-  const openCancelConfirm = (payment: Payment) => {
-    setCancelModal({
-      isOpen: true,
-      payment: payment
+  // NEW: Handle rejection with improvement suggestions
+  const handleRejectWithImprovements = async (reason: string, improvements: string) => {
+    if (!rejectionTarget) return;
+
+    try {
+      setActionLoading(true);
+      
+      if (rejectionTarget.type === 'proposal') {
+        // Reject proposal (prevent payment processing)
+        const result = await apiService.rejectProposal(rejectionTarget.id, {
+          rejection_reason: reason,
+          improvement_suggestions: improvements
+        });
+        setToast({ message: result.message, type: 'success' });
+      } else {
+        // Reject payment
+        const result = await apiService.rejectPayment(rejectionTarget.id, {
+          rejection_reason: reason,
+          improvement_suggestions: improvements
+        });
+        setToast({ message: result.message, type: 'success' });
+      }
+      
+      setShowRejectionModal(false);
+      setRejectionTarget(null);
+      await fetchData();
+    } catch (err: unknown) {
+      setToast({
+        message: `Gagal menolak: ${err instanceof Error ? err.message : 'Terjadi kesalahan'}`,
+        type: 'error'
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Open rejection modal for proposal
+  const openRejectProposal = (proposal: Proposal) => {
+    setRejectionTarget({
+      type: 'proposal',
+      id: proposal.id,
+      title: proposal.title
     });
+    setShowRejectionModal(true);
+  };
+
+  // Open rejection modal for payment
+  const openRejectPayment = (payment: Payment) => {
+    setRejectionTarget({
+      type: 'payment',
+      id: payment.id,
+      title: payment.proposal?.title || `Payment ${payment.id.substring(0, 8)}`
+    });
+    setShowRejectionModal(true);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -503,20 +559,30 @@ const PaymentManagement: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => {
-                          setSelectedProposal(proposal);
-                          setProcessForm(prev => ({
-                            ...prev,
-                            recipient_name: proposal.user?.full_name || proposal.user?.name || ''
-                          }));
-                          setShowProcessModal(true);
-                        }}
-                        disabled={actionLoading}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                      >
-                        Proses Pembayaran
-                      </button>
+                      <div className="flex gap-2 justify-end">
+                        <button
+                          onClick={() => {
+                            setSelectedProposal(proposal);
+                            setProcessForm(prev => ({
+                              ...prev,
+                              recipient_name: proposal.user?.full_name || proposal.user?.name || ''
+                            }));
+                            setShowProcessModal(true);
+                          }}
+                          disabled={actionLoading}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                        >
+                          Proses Pembayaran
+                        </button>
+                        <button
+                          onClick={() => openRejectProposal(proposal)}
+                          disabled={actionLoading}
+                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                          title="Tolak Proposal"
+                        >
+                          Tolak
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -599,25 +665,50 @@ const PaymentManagement: React.FC = () => {
                         >
                           <FileText className="h-5 w-5" />
                         </button>
+                        
                         {payment.status === 'processing' && (
-                          <button
-                            onClick={() => {
-                              setSelectedPayment(payment);
-                              setShowCompleteModal(true);
-                            }}
-                            disabled={actionLoading}
-                            className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
-                          >
-                            Selesaikan
-                          </button>
+                          <>
+                            <button
+                              onClick={() => {
+                                setSelectedPayment(payment);
+                                setShowCompleteModal(true);
+                              }}
+                              className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                              title="Selesaikan Pembayaran"
+                            >
+                              Selesaikan
+                            </button>
+                            <button
+                              onClick={() => openRejectPayment(payment)}
+                              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                              title="Tolak Pembayaran"
+                            >
+                              Tolak
+                            </button>
+                          </>
                         )}
-                        {(payment.status === 'pending' || payment.status === 'processing') && (
+                        
+                        {payment.status === 'completed' && payment.payment_proof_file && (
                           <button
-                            onClick={() => openCancelConfirm(payment)}
-                            disabled={actionLoading}
-                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
+                            onClick={async () => {
+                              try {
+                                const blob = await apiService.downloadPaymentProof(payment.id);
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `payment_proof_${payment.id}.pdf`;
+                                document.body.appendChild(a);
+                                a.click();
+                                window.URL.revokeObjectURL(url);
+                                document.body.removeChild(a);
+                              } catch {
+                                setToast({ message: 'Gagal mengunduh bukti pembayaran', type: 'error' });
+                              }
+                            }}
+                            className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+                            title="Unduh Bukti"
                           >
-                            Batalkan
+                            Unduh
                           </button>
                         )}
                       </div>
@@ -1018,6 +1109,19 @@ const PaymentManagement: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Rejection Modal */}
+      <RejectionModal
+        isOpen={showRejectionModal}
+        onClose={() => {
+          setShowRejectionModal(false);
+          setRejectionTarget(null);
+        }}
+        onConfirm={handleRejectWithImprovements}
+        proposalTitle={rejectionTarget?.title || ''}
+        isLoading={actionLoading}
+        userRole="bendahara"
+      />
     </div>
   );
 };

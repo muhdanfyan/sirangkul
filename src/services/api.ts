@@ -41,6 +41,8 @@ export interface Proposal {
   rejected_by?: string | null;
   final_approved_by?: string | null;
   rejection_reason?: string | null;
+  improvement_suggestions?: string | null;  // NEW: Improvements suggestions when rejected
+  rejected_by_role?: string | null;  // NEW: Role of rejector
   
   // Committee flag
   requires_committee_approval?: boolean;
@@ -143,6 +145,16 @@ export interface PaymentCompleteRequest {
   admin_notes?: string;
 }
 
+export interface ProposalRejectRequest {
+  rejection_reason: string;
+  improvement_suggestions: string;
+}
+
+export interface PaymentRejectRequest {
+  rejection_reason: string;
+  improvement_suggestions: string;
+}
+
 export interface ProposalStats {
   total: number;
   draft: number;
@@ -221,6 +233,10 @@ class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const token = localStorage.getItem('sirangkul_token');
 
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -228,19 +244,45 @@ class ApiService {
         ...options.headers,
       },
       ...options,
+      signal: controller.signal,
     };
 
     try {
+      console.log(`🌐 API Request: ${endpoint}`);
       const response = await fetch(url, config);
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData: ApiError = await response.json();
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        // Check if response is JSON before parsing
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData: ApiError = await response.json();
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+          } catch (jsonError) {
+            // If JSON parsing fails, throw generic error
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+        } else {
+          // Non-JSON response (likely HTML error page)
+          const textError = await response.text();
+          console.error('Server returned non-JSON error:', textError.substring(0, 200));
+          throw new Error(`Server error (${response.status}): Terjadi kesalahan pada server. Silakan periksa backend API.`);
+        }
       }
 
+      console.log(`✅ API Response: ${endpoint} - OK`);
       return await response.json();
     } catch (error) {
-      console.error('API request failed:', error);
+      clearTimeout(timeoutId);
+      
+      // Handle abort error (timeout)
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('❌ API Request timeout:', endpoint);
+        throw new Error('Request timeout: Server tidak merespons dalam 30 detik. Silakan coba lagi.');
+      }
+      
+      console.error('❌ API request failed:', error);
       throw error;
     }
   }
@@ -591,7 +633,7 @@ class ApiService {
     });
   }
 
-  async rejectProposal(proposalId: string, rejection_reason: string): Promise<{
+  async rejectProposal(proposalId: string, data: ProposalRejectRequest): Promise<{
     success: boolean;
     message: string;
     data: {
@@ -599,14 +641,35 @@ class ApiService {
       status: string;
       rejected_at: string;
       rejected_by: string;
+      rejected_by_role: string;
       rejection_reason: string;
+      improvement_suggestions: string;
       status_badge: string;
       status_label: string;
     };
   }> {
     return this.request(`/proposals/${proposalId}/reject`, {
       method: 'POST',
-      body: JSON.stringify({ rejection_reason }),
+      body: JSON.stringify(data),
+    });
+  }
+
+  // NEW: Reject payment (for Bendahara)
+  async rejectPayment(paymentId: string, data: PaymentRejectRequest): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      payment_id: string;
+      payment_status: string;
+      proposal_id: string;
+      proposal_status: string;
+      rejection_reason: string;
+      improvement_suggestions: string;
+    };
+  }> {
+    return this.request(`/payments/${paymentId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 

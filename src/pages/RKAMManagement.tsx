@@ -470,10 +470,13 @@ const RKAMManagement: React.FC = () => {
                   required
                 >
                   <option value="">Pilih Kategori</option>
-                  <option value="Renovasi">Renovasi</option>
-                  <option value="Pengadaan">Pengadaan</option>
-                  <option value="Pelatihan">Pelatihan</option>
-                  <option value="Operasional">Operasional</option>
+                  <option value="Kurikulum">Kurikulum</option>
+                  <option value="Kantor">Kantor</option>
+                  <option value="Sarana">Sarana</option>
+                  <option value="Prasarana">Prasarana</option>
+                  <option value="Humas">Humas</option>
+                  <option value="Kemahasiswaan">Kemahasiswaan</option>
+                  <option value="Komite">Komite</option>
                 </select>
               </div>
 

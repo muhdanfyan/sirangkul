@@ -524,7 +524,23 @@ const MyProposals: React.FC = () => {
                         >
                           <Info className="h-5 w-5" />
                         </button>
-                        {proposal.status === 'rejected' && proposal.rejection_reason && (
+                        {(proposal.status?.toLowerCase() === 'draft' || proposal.status?.toLowerCase() === 'rejected') && (
+                          <button
+                            onClick={() => {
+                              console.log('✏️ Edit button clicked in MyProposals:', {
+                                proposalId: proposal.id,
+                                status: proposal.status,
+                                title: proposal.title
+                              });
+                              window.location.href = `/proposals/${proposal.id}/edit`;
+                            }}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            title={proposal.status?.toLowerCase() === 'rejected' ? 'Edit & Perbaiki Proposal' : 'Edit Proposal'}
+                          >
+                            <ExternalLink className="h-5 w-5" />
+                          </button>
+                        )}
+                        {proposal.status?.toLowerCase() === 'rejected' && proposal.rejection_reason && (
                           <button
                             onClick={() => showRejectionReason(proposal)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"

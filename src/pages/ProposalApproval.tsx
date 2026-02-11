@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle, XCircle, Send, FileText, User, Calendar, Clock 
 import { useAuth } from '../contexts/AuthContext';
 import Toast, { ToastType } from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
+import RejectionModal from '../components/RejectionModal';
 
 const ProposalApproval: React.FC = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const ProposalApproval: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalAction, setModalAction] = useState<'approve' | 'reject'>('approve');
   const [notes, setNotes] = useState('');
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
 
   // Toast & Confirm Modal states
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
@@ -100,15 +102,6 @@ const ProposalApproval: React.FC = () => {
         const result = await apiService.verifyProposal(proposal.id, {});
         console.log('✅ Verify success:', result);
         setToast({ message: result.message, type: 'success' });
-      } else {
-        // Call reject endpoint separately
-        if (!notes.trim()) {
-          setToast({ message: 'Alasan penolakan harus diisi', type: 'error' });
-          return;
-        }
-        const result = await apiService.rejectProposal(proposal.id, notes);
-        console.log('✅ Reject success:', result);
-        setToast({ message: result.message, type: 'success' });
       }
       
       setShowModal(false);
@@ -129,6 +122,29 @@ const ProposalApproval: React.FC = () => {
     }
   };
 
+  // Handle Rejection with improvements (by Verifikator)
+  const handleRejectWithImprovements = async (reason: string, improvements: string) => {
+    if (!proposal) return;
+
+    try {
+      setActionLoading(true);
+      const result = await apiService.rejectProposal(proposal.id, {
+        rejection_reason: reason,
+        improvement_suggestions: improvements
+      });
+      console.log('✅ Reject success:', result);
+      setToast({ message: result.message, type: 'success' });
+      setShowRejectionModal(false);
+      await fetchProposal(proposal.id);
+    } catch (err) {
+      console.error('❌ Reject failed:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Gagal menolak proposal';
+      setToast({ message: errorMessage, type: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // Approve Proposal (by Kepala Madrasah)
   const handleApprove = async () => {
     if (!proposal) return;
@@ -142,14 +158,6 @@ const ProposalApproval: React.FC = () => {
         // Call approve endpoint (no action field needed)
         const result = await apiService.approveProposal(proposal.id, {});
         console.log('✅ Approve success:', result);
-        setToast({ message: result.message, type: 'success' });
-      } else {
-        // Call reject endpoint separately
-        if (!notes.trim()) {
-          setToast({ message: 'Alasan penolakan harus diisi', type: 'error' });
-          return;
-        }
-        const result = await apiService.rejectProposal(proposal.id, notes);
         setToast({ message: result.message, type: 'success' });
       }
       
@@ -185,14 +193,6 @@ const ProposalApproval: React.FC = () => {
         const result = await apiService.finalApproveProposal(proposal.id, {});
         console.log('✅ Final approve success:', result);
         setToast({ message: result.message, type: 'success' });
-      } else {
-        // Call reject endpoint separately
-        if (!notes.trim()) {
-          setToast({ message: 'Alasan penolakan harus diisi', type: 'error' });
-          return;
-        }
-        const result = await apiService.rejectProposal(proposal.id, notes);
-        setToast({ message: result.message, type: 'success' });
       }
       
       setShowModal(false);
@@ -215,7 +215,11 @@ const ProposalApproval: React.FC = () => {
 
   const openModal = (action: 'approve' | 'reject') => {
     setModalAction(action);
-    setShowModal(true);
+    if (action === 'reject') {
+      setShowRejectionModal(true);
+    } else {
+      setShowModal(true);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -490,20 +494,29 @@ const ProposalApproval: React.FC = () => {
               </div>
             )}
             
-            {proposal.rejected_at && (
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-red-600"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-red-900">Ditolak</p>
-                  <p className="text-xs text-red-600">{formatDate(proposal.rejected_at)}</p>
-                  {proposal.rejection_reason && (
-                    <p className="text-xs text-red-700 mt-1 bg-red-50 p-2 rounded">
-                      Alasan: {proposal.rejection_reason}
-                    </p>
-                  )}
+              {proposal.rejected_at && (
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-red-600"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-red-900">Ditolak</p>
+                    <p className="text-xs text-red-600">{formatDate(proposal.rejected_at)}</p>
+                    {proposal.rejection_reason && (
+                      <div className="mt-2 space-y-2">
+                        <div className="text-xs text-red-700 bg-red-50 p-2 rounded">
+                          <p className="font-semibold mb-1">Alasan Penolakan:</p>
+                          <p>{proposal.rejection_reason}</p>
+                        </div>
+                        {proposal.improvement_suggestions && (
+                          <div className="text-xs text-blue-700 bg-blue-50 p-2 rounded">
+                            <p className="font-semibold mb-1">Saran Perbaikan:</p>
+                            <p>{proposal.improvement_suggestions}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
 
@@ -531,20 +544,19 @@ const ProposalApproval: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-bold text-gray-900 mb-4">
-              {modalAction === 'approve' ? 'Setujui Proposal' : 'Tolak Proposal'}
+              Setujui Proposal
             </h3>
             
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Catatan {modalAction === 'reject' && <span className="text-red-500">*</span>}
+                Catatan (Opsional)
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={4}
-                placeholder={modalAction === 'approve' ? 'Catatan opsional...' : 'Alasan penolakan wajib diisi'}
-                required={modalAction === 'reject'}
+                placeholder="Catatan opsional..."
               />
             </div>
 
@@ -561,25 +573,34 @@ const ProposalApproval: React.FC = () => {
               </button>
               <button
                 onClick={() => {
-                  if (modalAction === 'reject' && !notes.trim()) {
-                    setToast({ message: 'Alasan penolakan wajib diisi', type: 'error' });
-                    return;
-                  }
                   if (canVerify) handleVerify();
                   else if (canApprove) handleApprove();
                   else if (canFinalApprove) handleFinalApprove();
                 }}
                 disabled={actionLoading}
-                className={`px-4 py-2 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed ${
-                  modalAction === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
-                }`}
+                className="px-4 py-2 rounded-lg text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {actionLoading ? 'Memproses...' : modalAction === 'approve' ? 'Ya, Setujui' : 'Ya, Tolak'}
+                {actionLoading ? 'Memproses...' : 'Ya, Setujui'}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Rejection Modal */}
+      <RejectionModal
+        isOpen={showRejectionModal}
+        onClose={() => setShowRejectionModal(false)}
+        onConfirm={handleRejectWithImprovements}
+        proposalTitle={proposal?.title || ''}
+        isLoading={actionLoading}
+        userRole={
+          canVerify ? 'verifikator' :
+          canApprove ? 'kepala_madrasah' :
+          canFinalApprove ? 'komite_madrasah' :
+          'verifikator'
+        }
+      />
 
       {/* Toast Notification */}
       {toast && (
