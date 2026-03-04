@@ -1,0 +1,41 @@
+#!/usr/bin/expect -f
+
+set timeout 600
+set user "sirangkul"
+set host "89.233.105.92"
+set password "Sfgxjs4H38DQb7K"
+set workdir "/home/sirangkul/sirangkul"
+
+# 1. Upload Frontend Build
+spawn scp -r -o StrictHostKeyChecking=accept-new /Users/pondokit/Herd/sirangkul/dist $user@$host:$workdir/dist
+expect "password:"
+send "$password\r"
+expect eof
+
+# 2. Upload Database Dump
+spawn scp -o StrictHostKeyChecking=accept-new /Users/pondokit/Herd/sirangkul/sirangkul_backup.sql $user@$host:$workdir/sirangkul_backup.sql
+expect "password:"
+send "$password\r"
+expect eof
+
+# 3. Setup on VPS
+spawn ssh -o StrictHostKeyChecking=accept-new $user@$host
+expect "password:"
+send "$password\r"
+
+expect -re "(\\\$|#) $"
+send "cd $workdir/api-sirangkul\r"
+
+# Backend Dependencies (assuming composer is available, or use a local vendor upload if not)
+expect -re "(\\\$|#) $"
+send "composer install --no-dev --optimize-autoloader\r"
+
+# Import Database
+expect -re "(\\\$|#) $"
+send "mysql -u root -p1234567890 -e \"CREATE DATABASE IF NOT EXISTS sirangkul;\" \r"
+expect -re "(\\\$|#) $"
+send "mysql -u root -p1234567890 sirangkul < $workdir/sirangkul_backup.sql\r"
+
+expect -re "(\\\$|#) $"
+send "exit\r"
+expect eof
