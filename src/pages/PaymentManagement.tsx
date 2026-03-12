@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, DollarSign, Receipt, CheckCircle, Clock, Search, AlertCircle, XCircle, FileText } from 'lucide-react';
+import { CreditCard, DollarSign, Receipt, CheckCircle, Clock, Search, AlertCircle, XCircle, FileText, Eye, Download } from 'lucide-react';
 import { apiService, Payment, Proposal, PaymentProcessRequest, PaymentCompleteRequest } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Toast, { ToastType } from '../components/Toast';
@@ -44,6 +44,11 @@ const PaymentManagement: React.FC = () => {
   // File upload state
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofPreview, setProofPreview] = useState<string | null>(null);
+
+  // Proof preview (Detail modal)
+  const [proofPreviewBlobUrl, setProofPreviewBlobUrl] = useState<string | null>(null);
+  const [proofPreviewMimeType, setProofPreviewMimeType] = useState<string>('');
+  const [proofPreviewLoading, setProofPreviewLoading] = useState(false);
 
   // Toast & Modal states
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
@@ -156,11 +161,20 @@ const PaymentManagement: React.FC = () => {
     try {
       setActionLoading(true);
 
+      // Compress file before uploading (gzip via browser's CompressionStream)
+      let fileToUpload: Blob | null = null;
+      let proofOriginalName = '';
+      if (proofFile) {
+        fileToUpload = await apiService.compressFile(proofFile);
+        proofOriginalName = proofFile.name;
+      }
+
       // Create FormData for file upload
       const formData = new FormData();
       
-      if (proofFile) {
-        formData.append('payment_proof_file', proofFile);
+      if (fileToUpload && proofOriginalName) {
+        formData.append('payment_proof_file', fileToUpload, proofOriginalName + '.gz');
+        formData.append('proof_original_name', proofOriginalName);
       }
       
       if (completeForm.payment_proof_url) {
@@ -286,11 +300,11 @@ const PaymentManagement: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
       setToast({
-        message: 'Ukuran file terlalu besar! Maksimal 10MB.',
+        message: 'Ukuran file terlalu besar! Maksimal 5MB.',
         type: 'error'
       });
       return;
@@ -871,8 +885,8 @@ const PaymentManagement: React.FC = () => {
                       Klik untuk upload atau drag and drop
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      PNG, JPG, PDF (maksimal 10MB)
-                    </p>
+                        PNG, JPG, PDF (maksimal 5MB)
+                      </p>
                   </label>
                 </div>
 
@@ -971,7 +985,12 @@ const PaymentManagement: React.FC = () => {
       {/* Detail Modal */}
       {showDetailModal && selectedPayment && (
         <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => { setShowDetailModal(false); setSelectedPayment(null); }} />
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => {
+            setShowDetailModal(false);
+            setSelectedPayment(null);
+            if (proofPreviewBlobUrl) { URL.revokeObjectURL(proofPreviewBlobUrl); setProofPreviewBlobUrl(null); }
+            setProofPreviewMimeType('');
+          }} />
           <div className="fixed z-50 bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-auto left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ maxHeight: '90vh' }}>
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Detail Pembayaran</h3>
@@ -979,6 +998,8 @@ const PaymentManagement: React.FC = () => {
                 onClick={() => {
                   setShowDetailModal(false);
                   setSelectedPayment(null);
+                  if (proofPreviewBlobUrl) { URL.revokeObjectURL(proofPreviewBlobUrl); setProofPreviewBlobUrl(null); }
+                  setProofPreviewMimeType('');
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -1034,6 +1055,89 @@ const PaymentManagement: React.FC = () => {
                   <p className="text-sm text-gray-900">{selectedPayment.notes}</p>
                 </div>
               )}
+
+              {/* Bukti Pembayaran section */}
+              {selectedPayment.payment_proof_file && (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FileText className="h-4 w-4 text-gray-500" />
+                    <h4 className="font-medium text-gray-900">Bukti Pembayaran</h4>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex gap-2 mb-3">
+                    <button
+                      onClick={async () => {
+                        if (proofPreviewBlobUrl) {
+                          // Toggle off
+                          URL.revokeObjectURL(proofPreviewBlobUrl);
+                          setProofPreviewBlobUrl(null);
+                          setProofPreviewMimeType('');
+                          return;
+                        }
+                        setProofPreviewLoading(true);
+                        try {
+                          const result = await apiService.fetchPaymentProofBlobUrl(selectedPayment.id);
+                          setProofPreviewBlobUrl(result.url);
+                          setProofPreviewMimeType(result.mimeType);
+                        } catch (err) {
+                          setToast({ message: err instanceof Error ? err.message : 'Gagal memuat bukti', type: 'error' });
+                        } finally {
+                          setProofPreviewLoading(false);
+                        }
+                      }}
+                      disabled={proofPreviewLoading}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {proofPreviewLoading
+                        ? <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        : <Eye className="h-4 w-4" />}
+                      {proofPreviewBlobUrl ? 'Sembunyikan' : 'Lihat Bukti'}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const blob = await apiService.downloadPaymentProof(selectedPayment.id);
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = selectedPayment.payment_proof_file?.split('/').pop() || 'bukti_pembayaran';
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          document.body.removeChild(a);
+                        } catch {
+                          setToast({ message: 'Gagal mengunduh bukti pembayaran', type: 'error' });
+                        }
+                      }}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+                    >
+                      <Download className="h-4 w-4" />
+                      Unduh
+                    </button>
+                  </div>
+
+                  {/* Inline preview */}
+                  {proofPreviewBlobUrl && (
+                    <div className="rounded-lg overflow-hidden border border-gray-200">
+                      {proofPreviewMimeType === 'application/pdf' ? (
+                        <iframe
+                          src={proofPreviewBlobUrl}
+                          className="w-full"
+                          style={{ height: '400px' }}
+                          title="Bukti Pembayaran"
+                        />
+                      ) : (
+                        <img
+                          src={proofPreviewBlobUrl}
+                          alt="Bukti Pembayaran"
+                          className="w-full max-h-96 object-contain bg-gray-50"
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="px-6 py-4 border-t border-gray-200">
@@ -1041,6 +1145,8 @@ const PaymentManagement: React.FC = () => {
                 onClick={() => {
                   setShowDetailModal(false);
                   setSelectedPayment(null);
+                  if (proofPreviewBlobUrl) { URL.revokeObjectURL(proofPreviewBlobUrl); setProofPreviewBlobUrl(null); }
+                  setProofPreviewMimeType('');
                 }}
                 className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
               >
