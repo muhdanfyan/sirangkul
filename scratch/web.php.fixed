@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RkamController;
+
+Route::get('/', function () {
+    return response()->json([
+        'message' => 'SiRangkul API Server',
+        'version' => '1.0.0',
+        'api_url' => url('/api'),
+        'api_docs' => url('/api-docs'),
+        'endpoints' => [
+            'health' => url('/api/health'),
+            'login' => url('/api/auth/login'),
+        ],
+        'status' => 'running'
+    ]);
+});
+
+// Public RKAM Routes (Moved from api.php to avoid Laravel 11 auto-prefixing issue)
+Route::get('/api/public/rkam', [RkamController::class, 'publicIndex']);
+Route::get('/api/public/rkam/options', [RkamController::class, 'getOptions']);

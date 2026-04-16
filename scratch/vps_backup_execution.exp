@@ -1,0 +1,35 @@
+#!/usr/bin/expect -f
+set timeout 300
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+set db_pass "jUSlAmnIagcSUz4"
+set timestamp [clock format [clock seconds] -format {%Y%m%d_%H%M%S}]
+
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$pass\r"
+expect "$ "
+
+# 1. Create backup directory
+send "mkdir -p /home/sirangkul/backups\r"
+expect "$ "
+
+# 2. Database Backup
+puts "\n--- Backing up database ---"
+send "mysqldump -u sirangkul -p$db_pass sirangkul > /home/sirangkul/backups/db_backup_$timestamp.sql\r"
+expect "$ "
+
+# 3. Code Backup (using cp -r into a backup folder)
+puts "\n--- Backing up code ---"
+send "cp -r /home/sirangkul/apps/sirangkul /home/sirangkul/apps/sirangkul_backup_$timestamp\r"
+expect "$ "
+
+# Verify backups exists
+send "ls -lh /home/sirangkul/backups/db_backup_$timestamp.sql\r"
+expect "$ "
+send "ls -d /home/sirangkul/apps/sirangkul_backup_$timestamp\r"
+expect "$ "
+
+send "exit\r"
+expect eof

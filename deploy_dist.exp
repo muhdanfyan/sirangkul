@@ -1,0 +1,10 @@
+#!/usr/bin/expect -f
+set timeout 300
+set user "sirangkul"
+set host "89.233.105.92"
+set password "Sfgxjs4H38DQb7K"
+
+spawn scp -r -o StrictHostKeyChecking=accept-new /Users/pondokit/Herd/sirangkul/dist $user@$host:/home/sirangkul/apps/sirangkul/
+expect "password:"
+send "$password\r"
+expect eof

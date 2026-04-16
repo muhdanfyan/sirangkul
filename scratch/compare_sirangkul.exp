@@ -1,0 +1,40 @@
+#!/usr/bin/expect -f
+set timeout 60
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$pass\r"
+expect "$ "
+
+# 1. Backend Code Comparison (Key Files)
+puts "\n--- BACKEND CHECKSUMS ---"
+send "md5sum apps/sirangkul/api-sirangkul/app/Http/Controllers/ReportingController.php\r"
+expect "$ "
+send "md5sum apps/sirangkul/api-sirangkul/database/seeders/RkamSeeder.php\r"
+expect "$ "
+send "md5sum apps/sirangkul/api-sirangkul/bootstrap/app.php\r"
+expect "$ "
+
+# 2. Frontend Code Comparison (Key Files)
+puts "\n--- FRONTEND CHECKSUMS ---"
+send "md5sum apps/sirangkul/src/pages/Dashboard.tsx\r"
+expect "$ "
+send "md5sum apps/sirangkul/src/services/api.ts\r"
+expect "$ "
+
+# 3. Database Comparison (Counts)
+puts "\n--- DATABASE COUNTS ---"
+# Need to find DB credentials from .env first
+send "grep 'DB_' apps/sirangkul/api-sirangkul/.env\r"
+expect "$ "
+
+# Assuming we can find the DB name, usually it's sirangkul
+# Taking a guess or checking .env content from previous turns
+send "mysql -u sirangkul -pSfgxjs4H38DQb7K -e 'SELECT COUNT(*) FROM sirangkul.rkams; SELECT COUNT(*) FROM sirangkul.proposals; SELECT COUNT(*) FROM sirangkul.users;' 2>/dev/null\r"
+expect "$ "
+
+send "exit\r"
+expect eof

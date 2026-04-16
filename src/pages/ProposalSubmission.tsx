@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, DollarSign, Save, Send } from 'lucide-react';
+import { Upload, FileText, DollarSign, Save, Send, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiService, RKAM } from '../services/api';
 import Toast, { ToastType } from '../components/Toast';
@@ -20,22 +20,40 @@ const ProposalSubmission: React.FC = () => {
 
   const [files, setFiles] = useState<File[]>([]);
   const [rkams, setRkams] = useState<RKAM[]>([]);
+  const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
   const [selectedRkam, setSelectedRkam] = useState<RKAM | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   // Toast state
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
   useEffect(() => {
     fetchRkams();
+    fetchOptions();
   }, []);
+
+  const fetchOptions = async () => {
+    try {
+      const options = await apiService.getRKAMOptions();
+      if (options.success && options.data?.categories) {
+        setCategories(options.data.categories);
+      }
+    } catch (err) {
+      console.error('Error fetching options:', err);
+    }
+  };
 
   const fetchRkams = async () => {
     try {
-      const data = await apiService.getAllRKAM();
+      const response = await apiService.getAllRKAM();
+      // Robust array check for both direct array and wrapped response
+      const data = Array.isArray(response) ? response : (response.data || []);
+      
       // Only show RKAM items that have budget remaining
-      const availableRkams = data.filter(rkam => {
+      const availableRkams = data.filter((rkam: RKAM) => {
         const sisa = typeof rkam.sisa === 'string' ? parseFloat(rkam.sisa) : rkam.sisa;
         return sisa > 0;
       });
@@ -52,15 +70,33 @@ const ProposalSubmission: React.FC = () => {
     });
   };
 
-  const handleRkamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const rkamId = e.target.value;
+  const handleRkamSelect = (rkamId: string) => {
     const rkam = rkams.find(r => r.id === rkamId);
     setSelectedRkam(rkam || null);
+    
+    // Automatically set the category if an RKAM is selected
     setFormData({
       ...formData,
-      rkam_id: rkamId
+      rkam_id: rkamId,
+      category: rkam ? rkam.kategori : formData.category
     });
+    
+    setIsDropdownOpen(false);
+    setSearchTerm(''); // Reset search on select
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.rkam-dropdown-container')) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -110,20 +146,31 @@ const ProposalSubmission: React.FC = () => {
       const proposalData = {
         rkam_id: formData.rkam_id,
         title: formData.title,
-        description: formData.description,
-        jumlah_pengajuan: parseInt(formData.budget)
+        description: formData.description || '',
+        jumlah_pengajuan: parseInt(formData.budget),
+        urgency: formData.urgency,
+        start_date: formData.startDate,
+        end_date: formData.endDate
       };
 
       const createdProposal = await apiService.createProposal(proposalData);
       
-      if (asDraft) {
-        setToast({ message: 'Proposal berhasil disimpan sebagai draft', type: 'success' });
-      } else {
-        setToast({ 
-          message: `Proposal berhasil dibuat!\nID: ${createdProposal.id}`, 
-          type: 'success' 
-        });
+      let successMessage = asDraft 
+        ? 'Proposal berhasil disimpan sebagai draft' 
+        : 'Proposal berhasil dibuat';
+
+      // Automatically submit if not saving as draft
+      if (!asDraft) {
+        try {
+          await apiService.submitProposal(createdProposal.id);
+          successMessage = 'Proposal berhasil diajukan untuk verifikasi!';
+        } catch (submitErr) {
+          console.error('Error auto-submitting proposal:', submitErr);
+          successMessage = 'Proposal berhasil dibuat, namun gagal diajukan otomatis. Silahkan ajukan manual dari daftar proposal.';
+        }
       }
+
+      setToast({ message: successMessage, type: asDraft ? 'success' : 'info' });
 
       // Reset form
       setFormData({
@@ -144,32 +191,35 @@ const ProposalSubmission: React.FC = () => {
         navigate('/proposal-tracking');
       }, 1500);
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error creating proposal:', err);
       
-      // Handle validation errors from backend
-      const error = err as { response?: { data?: { errors?: Record<string, string> } } } & Error;
+      const errorResponse = err.response?.data;
       
-      if (error.response?.data?.errors) {
-        setErrors(error.response.data.errors);
+      if (errorResponse?.errors) {
+        // Flatten validation errors that might be arrays
+        const flattenedErrors: Record<string, string> = {};
+        Object.entries(errorResponse.errors).forEach(([key, val]: [string, any]) => {
+          flattenedErrors[key] = Array.isArray(val) ? val[0] : String(val);
+        });
+        setErrors(flattenedErrors);
         setToast({ 
           message: 'Terdapat kesalahan validasi. Silahkan periksa form Anda.', 
           type: 'error' 
         });
-      } else if (error instanceof Error) {
-        setErrors({ general: error.message });
-        setToast({ message: `Gagal membuat proposal: ${error.message}`, type: 'error' });
       } else {
-        setErrors({ general: 'Terjadi kesalahan yang tidak diketahui' });
-        setToast({ message: 'Gagal membuat proposal. Silahkan coba lagi.', type: 'error' });
+        const message = errorResponse?.message || err.message || 'Terjadi kesalahan saat pengiriman proposal';
+        setErrors({ general: message });
+        setToast({ message, type: 'error' });
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const formatRupiah = (value: string) => {
-    const number = value.replace(/[^\d]/g, '');
+  const formatRupiah = (value: string | number) => {
+    const stringValue = typeof value === 'number' ? String(value) : (value || '0');
+    const number = stringValue.replace(/[^\d]/g, '');
     return new Intl.NumberFormat('id-ID').format(parseInt(number) || 0);
   };
 
@@ -202,31 +252,99 @@ const ProposalSubmission: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Informasi Dasar</h3>
               
               <div className="space-y-4">
-                {/* RKAM Selection - NEW */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                {/* RKAM Selection - Custom Searchable Dropdown */}
+                <div className="relative rkam-dropdown-container">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Pilih RKAM <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    name="rkam_id"
-                    value={formData.rkam_id}
-                    onChange={handleRkamChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
+                  
+                  {/* Pseudo-Select Trigger */}
+                  <div 
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className={`w-full px-4 py-2.5 border rounded-lg cursor-pointer flex items-center justify-between transition-all ${
+                      isDropdownOpen ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-300 hover:border-gray-400'
+                    } bg-white`}
                   >
-                    <option value="">-- Pilih RKAM --</option>
-                    {rkams.map((rkam) => {
-                      const sisaAmount = typeof rkam.sisa === 'string' ? rkam.sisa : String(rkam.sisa);
-                      return (
-                        <option key={rkam.id} value={rkam.id}>
-                          {rkam.kategori} - {rkam.item_name} (Sisa: Rp {formatRupiah(sisaAmount)})
-                        </option>
-                      );
-                    })}
-                  </select>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Pilih item RKAM yang akan digunakan untuk proposal ini
-                  </p>
+                    <span className={`text-sm ${!selectedRkam ? 'text-gray-400' : 'text-gray-900'}`}>
+                      {selectedRkam 
+                        ? `${selectedRkam.kategori} - ${selectedRkam.item_name}` 
+                        : '-- Pilih RKAM --'}
+                    </span>
+                    <Search className={`h-4 w-4 transition-colors ${isDropdownOpen ? 'text-blue-500' : 'text-gray-400'}`} />
+                  </div>
+
+                  {/* Dropdown Menu */}
+                  {isDropdownOpen && (
+                    <div className="absolute z-[60] left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                      {/* Internal Search Box */}
+                      <div className="p-3 border-b border-gray-100 bg-gray-50/50">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Cari kegiatan atau kategori..."
+                            autoFocus
+                            value={searchTerm}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Options List */}
+                      <div className="max-h-[300px] overflow-y-auto">
+                        {rkams.filter(rkam => 
+                          !searchTerm || 
+                          (rkam.item_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (rkam.kategori || '').toLowerCase().includes(searchTerm.toLowerCase())
+                        ).length > 0 ? (
+                          rkams
+                            .filter(rkam => 
+                              !searchTerm || 
+                              (rkam.item_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              (rkam.kategori || '').toLowerCase().includes(searchTerm.toLowerCase())
+                            )
+                            .map((rkam) => {
+                              const sisaAmount = rkam.sisa !== undefined && rkam.sisa !== null ? String(rkam.sisa) : '0';
+                              const isSelected = formData.rkam_id === rkam.id;
+                              
+                              return (
+                                <div
+                                  key={rkam.id}
+                                  onClick={() => handleRkamSelect(rkam.id)}
+                                  className={`px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors border-b border-gray-50 last:border-0 ${
+                                    isSelected ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-start">
+                                    <div className="flex-1 pr-4">
+                                      <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-0.5">
+                                        {rkam.kategori}
+                                      </p>
+                                      <p className={`text-sm font-medium ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
+                                        {rkam.item_name}
+                                      </p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-[10px] text-gray-400 uppercase font-semibold">Sisa Pagu</p>
+                                      <p className="text-xs font-bold text-green-600">
+                                        Rp {formatRupiah(sisaAmount)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                        ) : (
+                          <div className="p-8 text-center">
+                            <Search className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                            <p className="text-sm text-gray-500">Tidak ada kegiatan yang cocok</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* RKAM Info Display - NEW */}
@@ -287,27 +405,6 @@ const ProposalSubmission: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Kategori *
-                    </label>
-                    <select
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Pilih Kategori</option>
-                      <option value="Kurikulum">Kurikulum</option>
-                      <option value="Kantor">Kantor</option>
-                      <option value="Sarana Prasarana">Sarana Prasarana</option>
-                      <option value="Humas">Humas</option>
-                      <option value="Kesiswaan">Kesiswaan</option>
-                      <option value="Komite">Komite</option>
-                    </select>
-                  </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Tingkat Urgensi

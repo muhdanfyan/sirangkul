@@ -1,0 +1,16 @@
+#!/usr/bin/expect -f
+set timeout 30
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$pass\r"
+expect "$ "
+
+send "mysql -u sirangkul -pjUSlAmnIagcSUz4 -D sirangkul -e 'SELECT \"RKAMS\", COUNT(*) FROM rkams; SELECT \"PROPOSALS\", COUNT(*) FROM proposals; SELECT \"USERS\", COUNT(*) FROM users;'\r"
+expect "$ "
+
+send "exit\r"
+expect eof

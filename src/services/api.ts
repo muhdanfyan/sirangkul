@@ -24,7 +24,7 @@ export interface Proposal {
   description?: string;
   jumlah_pengajuan: string | number;
   status: 'draft' | 'submitted' | 'verified' | 'approved' | 'rejected' | 'final_approved' | 'payment_processing' | 'completed';
-  
+
   // Timestamps
   submitted_at?: string | null;
   verified_at?: string | null;
@@ -34,7 +34,7 @@ export interface Proposal {
   completed_at?: string | null;
   created_at: string;
   updated_at: string;
-  
+
   // Approver IDs
   verified_by?: string | null;
   approved_by?: string | null;
@@ -43,10 +43,10 @@ export interface Proposal {
   rejection_reason?: string | null;
   improvement_suggestions?: string | null;  // NEW: Improvements suggestions when rejected
   rejected_by_role?: string | null;  // NEW: Role of rejector
-  
+
   // Committee flag
   requires_committee_approval?: boolean;
-  
+
   // Relations
   user?: {
     id: string;
@@ -122,13 +122,37 @@ export interface Payment {
   processed_by?: string | null;
   created_at: string;
   updated_at: string;
-  
-  // Relations
-  proposal?: Proposal;
+
+  payment?: Payment;
   processedByUser?: {
     id: string;
     full_name?: string;
   };
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string | null;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PaginatedResponse<T> {
+  current_page: number;
+  data: T[];
+  first_page_url: string;
+  from: number;
+  last_page: number;
+  last_page_url: string;
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number;
+  total: number;
 }
 
 export interface PaymentProcessRequest {
@@ -168,6 +192,16 @@ export interface ProposalStats {
   total_amount_completed: number;
 }
 
+export interface DashboardSummary {
+  totalProposals: number;
+  approvedProposals: number;
+  rejectedProposals: number;
+  pendingProposals: number;
+  totalBudget: number;
+  usedBudget: number;
+  remainingBudget: number;
+}
+
 export interface Laporan {
   id: string;
   // no api endpoint
@@ -186,34 +220,45 @@ export interface Feedback {
 
 export interface RKAM {
   id: string;
-  kategori: string;
+  category_id: string;
+  kategori: string; // for compatibility
   item_name: string;
-  pagu: string | number;
+  pagu: number;
+  volume: number;
+  satuan: string;
+  unit_price: number;
+  dana_bos: number;
+  dana_komite: number;
   tahun_anggaran: number;
   deskripsi: string | null;
-  terpakai: string | number;
-  sisa: string | number;
+  terpakai: number;
+  sisa: number;
   persentase: number;
   status: 'Normal' | 'Warning' | 'Critical';
+  
+  // Scoped computed fields (if timeframe filter active)
+  terpakai_filtered?: number;
+  sisa_filtered?: number;
+  persentase_filtered?: number;
+  
   created_at?: string;
   updated_at?: string;
+  category?: Category;
 }
 
 export interface RKAMCreateRequest {
-  kategori: string;
+  category_id: string;
   item_name: string;
-  pagu: number;
+  volume: number;
+  satuan: string;
+  unit_price: number;
+  dana_bos?: number;
+  dana_komite?: number;
   tahun_anggaran: number;
   deskripsi?: string;
 }
 
-export interface RKAMUpdateRequest {
-  kategori?: string;
-  item_name?: string;
-  pagu?: number;
-  tahun_anggaran?: number;
-  deskripsi?: string;
-}
+export interface RKAMUpdateRequest extends Partial<RKAMCreateRequest> {}
 
 export interface ApiError {
   message: string;
@@ -233,9 +278,11 @@ class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const token = localStorage.getItem('sirangkul_token');
 
-    // Create AbortController for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeout = 15000; // 15 seconds
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, timeout);
 
     const config: RequestInit = {
       headers: {
@@ -256,11 +303,12 @@ class ApiService {
         // Check if response is JSON before parsing
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
-          try {
-            const errorData: ApiError = await response.json();
-            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            const errorData = await response.json();
+            const error = new Error(errorData.message || `HTTP error! status: ${response.status}`) as any;
+            error.response = { data: errorData }; // Mock axios structure for easier transition
+            throw error;
           } catch (jsonError) {
-            // If JSON parsing fails, throw generic error
+            if (jsonError instanceof Error && (jsonError as any).response) throw jsonError;
             throw new Error(`HTTP error! status: ${response.status}`);
           }
         } else {
@@ -275,13 +323,13 @@ class ApiService {
       return await response.json();
     } catch (error) {
       clearTimeout(timeoutId);
-      
+
       // Handle abort error (timeout)
       if (error instanceof Error && error.name === 'AbortError') {
         console.error('❌ API Request timeout:', endpoint);
         throw new Error('Request timeout: Server tidak merespons dalam 30 detik. Silakan coba lagi.');
       }
-      
+
       console.error('❌ API request failed:', error);
       throw error;
     }
@@ -300,49 +348,53 @@ class ApiService {
     });
   }
 
-  async getUsers(): Promise<User[]> {
-    return this.request<User[]>('/users', {
+  async getUsers(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    role?: string;
+    sort_by?: string;
+    order?: string;
+    no_paginate?: boolean;
+  }): Promise<PaginatedResponse<User> | User[]> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== 'all') {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const queryString = queryParams.toString();
+    const endpoint = queryString ? `/users?${queryString}` : '/users';
+
+    const response = await this.request<{ success: boolean; data: PaginatedResponse<User> | User[] }>(endpoint, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` }),
-      },
     });
+
+    return response.data;
   }
 
-  async addUser(userData: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> {
-    return this.request<User>('/users', {
+  async addUser(userData: any): Promise<User> {
+    const response = await this.request<{ success: boolean; data: User }>('/users', {
       method: 'POST',
       body: JSON.stringify(userData),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        ...(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` }),
-        
-      },
     });
+    return response.data;
   }
 
-  async updateUser(userId: string, userData: Partial<Omit<User, 'id' | 'created_at' | 'updated_at'>>): Promise<User> {
-    return this.request<User>(`/users/${userId}`, {
+  async updateUser(userId: string, userData: any): Promise<User> {
+    const response = await this.request<{ success: boolean; data: User }>(`/users/${userId}`, {
       method: 'PUT',
       body: JSON.stringify(userData),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        ...(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` }),
-      },
     });
+    return response.data;
   }
 
-  async delUser(userId: string): Promise<void> {
-    return this.request<void>(`/users/${userId}`, {
+  async delUser(userId: string): Promise<{ success: boolean; message: string }> {
+    return this.request<{ success: boolean; message: string }>(`/users/${userId}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        ...(localStorage.getItem('sirangkul_token') && { Authorization: `Bearer ${localStorage.getItem('sirangkul_token')}` }),
-      },
     });
   }
 
@@ -351,14 +403,14 @@ class ApiService {
     const queryParams = new URLSearchParams();
     if (params?.status) queryParams.append('status', params.status);
     if (params?.payment_method) queryParams.append('payment_method', params.payment_method);
-    
+
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/payments?${queryString}` : '/payments';
-    
+
     const response = await this.request<{ success: boolean; message: string; data: Payment[] }>(endpoint, {
       method: 'GET',
     });
-    
+
     return response.data;
   }
 
@@ -366,7 +418,7 @@ class ApiService {
     const response = await this.request<{ success: boolean; message: string; data: Proposal[] }>('/payments/pending', {
       method: 'GET',
     });
-    
+
     return response.data;
   }
 
@@ -374,7 +426,7 @@ class ApiService {
     const response = await this.request<{ success: boolean; message: string; data: Payment }>(`/payments/${paymentId}`, {
       method: 'GET',
     });
-    
+
     return response.data;
   }
 
@@ -452,25 +504,48 @@ class ApiService {
       }
     });
   }
-  
+
   // Add other API methods here as needed
   // async getProposals() { ... }
   // async createProposal() { ... }
 
   // RKAM API Methods
-  async getAllRKAM(params?: { kategori?: string; tahun_anggaran?: number; search?: string }): Promise<RKAM[]> {
+  async getAllRKAM(params?: { 
+    category_id?: string; 
+    tahun_anggaran?: number; 
+    search?: string;
+    page?: number;
+    per_page?: number;
+    start_date?: string;
+    end_date?: string;
+    preset?: string;
+    sort_by?: string;
+    order?: string;
+    no_paginate?: boolean;
+  }): Promise<PaginatedResponse<RKAM> | RKAM[]> {
     const queryParams = new URLSearchParams();
-    if (params?.kategori) queryParams.append('kategori', params.kategori);
-    if (params?.tahun_anggaran) queryParams.append('tahun_anggaran', params.tahun_anggaran.toString());
-    if (params?.search) queryParams.append('search', params.search);
-    
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== 'all') {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/rkam?${queryString}` : '/rkam';
-    
-    const response = await this.request<{ success: boolean; message: string; data: RKAM[] }>(endpoint, {
+
+    const response = await this.request<{ success: boolean; message: string; data: PaginatedResponse<RKAM> | RKAM[] }>(endpoint, {
       method: 'GET',
     });
-    
+
+    return response.data;
+  }
+
+  async getRKAMOptions(): Promise<{ categories: Category[]; units: string[] }> {
+    const response = await this.request<{ success: boolean; data: { categories: Category[]; units: string[] } }>('/rkam/options', {
+      method: 'GET',
+    });
     return response.data;
   }
 
@@ -478,7 +553,7 @@ class ApiService {
     const response = await this.request<{ success: boolean; message: string; data: RKAM }>(`/rkam/${rkamId}`, {
       method: 'GET',
     });
-    
+
     return response.data;
   }
 
@@ -487,7 +562,7 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    
+
     return response.data;
   }
 
@@ -496,7 +571,7 @@ class ApiService {
       method: 'PUT',
       body: JSON.stringify(data),
     });
-    
+
     return response.data;
   }
 
@@ -510,8 +585,38 @@ class ApiService {
     const response = await this.request<{ success: boolean; message: string; data: { rkam: RKAM; proposals: Proposal[] } }>(`/rkam/${rkamId}/proposals`, {
       method: 'GET',
     });
-    
+
     return response.data;
+  }
+
+  // Category API Methods
+  async getAllCategories(): Promise<Category[]> {
+    const response = await this.request<{ success: boolean; data: Category[] }>('/categories', {
+      method: 'GET',
+    });
+    return response.data;
+  }
+
+  async createCategory(data: Partial<Category>): Promise<Category> {
+    const response = await this.request<{ success: boolean; data: Category }>('/categories', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return response.data;
+  }
+
+  async updateCategory(id: string, data: Partial<Category>): Promise<Category> {
+    const response = await this.request<{ success: boolean; data: Category }>(`/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.data;
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    await this.request(`/categories/${id}`, {
+      method: 'DELETE',
+    });
   }
 
   // Proposal API Methods
@@ -519,14 +624,14 @@ class ApiService {
     const queryParams = new URLSearchParams();
     if (params?.status) queryParams.append('status', params.status);
     if (params?.rkam_id) queryParams.append('rkam_id', params.rkam_id);
-    
+
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/proposals?${queryString}` : '/proposals';
-    
+
     const response = await this.request<{ success: boolean; message: string; data: Proposal[] }>(endpoint, {
       method: 'GET',
     });
-    
+
     return response.data;
   }
 
@@ -534,7 +639,7 @@ class ApiService {
     const response = await this.request<{ success: boolean; message: string; data: Proposal }>(`/proposals/${proposalId}`, {
       method: 'GET',
     });
-    
+
     return response.data;
   }
 
@@ -543,7 +648,7 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    
+
     return response.data;
   }
 
@@ -552,7 +657,7 @@ class ApiService {
       method: 'PUT',
       body: JSON.stringify(data),
     });
-    
+
     return response.data;
   }
 
@@ -715,7 +820,7 @@ class ApiService {
     const response = await this.request<{ success: boolean; message: string; data: Proposal[] }>('/proposals/my-proposals', {
       method: 'GET',
     });
-    
+
     return response.data;
   }
 
@@ -724,7 +829,7 @@ class ApiService {
     const response = await this.request<{ success: boolean; message: string; data: ProposalStats }>('/proposals/statistics', {
       method: 'GET',
     });
-    
+
     return response.data;
   }
 
@@ -753,12 +858,78 @@ class ApiService {
     const response = await this.request<{ success: boolean; message: string; data: Payment[] }>('/payments/my-payments', {
       method: 'GET',
     });
-    
+
     return response.data;
   }
 
-}
+  // NEW: Download reporting export
+  async downloadReportExport(format: string = 'csv', filters?: any): Promise<Blob> {
+    const url = new URL(`${this.baseURL}/reporting/export`);
+    url.searchParams.append('format', format);
 
-  
+    if (filters) {
+      Object.keys(filters).forEach(key => {
+        if (filters[key] && filters[key] !== 'all') {
+          url.searchParams.append(key, filters[key]);
+        }
+      });
+    }
+
+    const token = localStorage.getItem('sirangkul_token');
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.blob();
+  }
+
+  async getDashboardSummary(): Promise<DashboardSummary> {
+    return this.request<DashboardSummary>('/reporting/summary', {
+      method: 'GET',
+    });
+  }
+
+  // PUBLIC VIEWER METHODS
+  async getPublicRKAM(params: any): Promise<PaginatedResponse<RKAM>> {
+    const url = new URL(`${this.baseURL}/public/rkam`);
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null) {
+        url.searchParams.append(key, params[key]);
+      }
+    });
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.data; // Laravel wraps in { success, data: { ...paginate } }
+  }
+
+  async getPublicRKAMOptions(): Promise<{ categories: Category[]; units: string[] }> {
+    const response = await fetch(`${this.baseURL}/public/rkam/options`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.data; // Laravel wraps in { success, data: { categories, units } }
+  }
+
+}
 
 export const apiService = new ApiService();

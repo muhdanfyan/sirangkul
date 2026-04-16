@@ -1,0 +1,25 @@
+#!/usr/bin/expect -f
+set timeout 60
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+
+# 1. Upload Nginx Config
+spawn scp -o StrictHostKeyChecking=no scratch/sirangkul_nginx_v3.conf $user@$host:/home/sirangkul/tmp/
+expect "password:"
+send "$pass\r"
+expect eof
+
+# 2. Apply and Reload
+spawn ssh -t -o StrictHostKeyChecking=no $user@$host "cp /home/sirangkul/tmp/sirangkul_nginx_v3.conf /etc/nginx/sites-enabled/sirangkul && sudo nginx -t && sudo systemctl reload nginx"
+expect {
+    "password:" {
+        send "$pass\r"
+        exp_continue
+    }
+    "password for" {
+        send "$pass\r"
+        exp_continue
+    }
+    eof { }
+}

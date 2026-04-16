@@ -1,0 +1,18 @@
+#!/usr/bin/expect -f
+set timeout 60
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+
+spawn ssh -o StrictHostKeyChecking=no $user@$host "sudo systemctl restart nginx"
+expect {
+    "password for" {
+        send "$pass\r"
+        expect {
+            "Sorry" { puts "Sudo failed."; exit 1 }
+            eof { puts "Success."; exit 0 }
+            "$ " { puts "Success."; exit 0 }
+        }
+    }
+    eof { }
+}

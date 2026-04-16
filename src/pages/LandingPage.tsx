@@ -52,7 +52,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
-              <img src="https://man2kotamakassar.sch.id/images/logo.png" alt="MAN 2" className="h-9 object-contain" />
+              <img src="/logo-man2.png" alt="MAN 2" className="h-9 object-contain" />
               <div className="w-px h-8 bg-gray-200"></div>
               <img src="/logo-sirangkul.png" alt="SiRangkul" className="h-10 w-10" />
               <span className="font-bold text-xl text-gray-800 hidden sm:block">SiRangkul</span>
@@ -324,7 +324,7 @@ const LandingPage: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center gap-4 mb-4">
-                <img src="https://man2kotamakassar.sch.id/images/logo.png" alt="MAN 2" className="h-10 object-contain" />
+                <img src="/logo-man2.png" alt="MAN 2" className="h-10 object-contain" />
                 <div className="w-px h-8 bg-gray-700"></div>
                 <img src="/logo-sirangkul.png" alt="SiRangkul" className="h-10 w-10" />
                 <span className="font-bold text-xl">SiRangkul</span>

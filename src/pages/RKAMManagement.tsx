@@ -1,442 +1,451 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, Plus, Edit2, Trash2, AlertCircle, TrendingUp, DollarSign, Activity } from 'lucide-react';
+import { 
+  Search, Plus, Edit2, Trash2, AlertCircle, TrendingUp, 
+  DollarSign, Activity, Printer, Settings, ChevronLeft, 
+  ChevronRight, Calendar, Filter, ArrowUpDown, ChevronUp, ChevronDown, X as XIcon
+} from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import Toast from '../components/Toast';
-import { apiService } from '../services/api';
-
-interface RKAMItem {
-  id: string;
-  kategori: string;
-  item_name: string;
-  pagu: number;
-  terpakai: number;
-  sisa: number;
-  persentase: number;
-  status: 'Normal' | 'Warning' | 'Critical';
-  tahun_anggaran: number;
-  deskripsi: string | null;
-}
+import { apiService, RKAM, Category } from '../services/api';
+import CategoryManagementModal from '../components/CategoryManagementModal';
+import RKAMPrintTemplate from './RKAMPrintTemplate';
 
 const RKAMManagement: React.FC = () => {
-  const [rkamItems, setRkamItems] = useState<RKAMItem[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [selectedKategori, setSelectedKategori] = useState<string>('all');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Data States
+  const [rkamItems, setRkamItems] = useState<RKAM[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [units, setUnits] = useState<string[]>([]);
   
-  // Form state for add/edit
+  // UI States
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
+  
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [paginationData, setPaginationData] = useState({
+    total: 0,
+    from: 0,
+    to: 0,
+    last_page: 1
+  });
+
+  // Sorting State
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({
+    key: 'created_at',
+    direction: 'desc'
+  });
+
+  // Filter States
+  const [timeframe, setTimeframe] = useState<'all' | 'year' | 'month' | 'week' | 'custom'>('all');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+
+  // Form State
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    kategori: '',
+    category_id: '',
     item_name: '',
-    pagu: '',
-    tahun_anggaran: 2025,
+    volume: '',
+    satuan: '',
+    unit_price: '',
+    dana_bos: '',
+    dana_komite: '',
+    tahun_anggaran: new Date().getFullYear(),
     deskripsi: '',
   });
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ type: 'success'|'error'|'info'|'warning'; message: string } | null>(null);
-  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; id: string | null }>(
-    { isOpen: false, id: null }
-  );
 
-  // Fetch RKAM data from backend
-  const fetchRKAMData = React.useCallback(async () => {
+  // Other States
+  const [toast, setToast] = useState<{ type: 'success'|'error'|'info'|'warning'; message: string } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [isPreparingPrint, setIsPreparingPrint] = useState(false);
+  const [fullDataForPrint, setFullDataForPrint] = useState<RKAM[]>([]);
+
+  // Auto-calculated pagu in form
+  const computedPagu = useMemo(() => {
+    return Number(formData.volume || 0) * Number(formData.unit_price || 0);
+  }, [formData.volume, formData.unit_price]);
+
+  // Fetch Options (Categories & Units)
+  const fetchOptions = useCallback(async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-      const data = await apiService.getAllRKAM();
-      
-      // Transform backend data to frontend format
-      const transformedData = data.map(item => ({
-        id: item.id,
-        kategori: item.kategori,
-        item_name: item.item_name,
-        pagu: typeof item.pagu === 'string' ? parseFloat(item.pagu) : item.pagu,
-        terpakai: typeof item.terpakai === 'string' ? parseFloat(item.terpakai) : item.terpakai,
-        sisa: typeof item.sisa === 'string' ? parseFloat(item.sisa) : item.sisa,
-        persentase: item.persentase,
-        status: item.status,
-        tahun_anggaran: item.tahun_anggaran,
-        deskripsi: item.deskripsi,
-      }));
-      
-      setRkamItems(transformedData);
+      const { categories, units } = await apiService.getRKAMOptions();
+      setCategories(categories);
+      setUnits(units);
     } catch (err) {
-      console.error('Failed to fetch RKAM data:', err);
-      setError('Gagal memuat data RKAM. Silakan coba lagi.');
-    } finally {
-      setIsLoading(false);
+      console.error('Failed to fetch options:', err);
     }
   }, []);
 
-  // Fetch data on mount
+  // Fetch Paginated RKAM Data
+  const fetchRKAMData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      
+      // Prepare timeframe filters
+      let start_date = dateRange.start;
+      let end_date = dateRange.end;
+      let preset = timeframe;
+
+      const response = await apiService.getAllRKAM({
+        page: currentPage,
+        per_page: perPage,
+        category_id: selectedCategoryId,
+        search: searchTerm,
+        tahun_anggaran: timeframe === 'year' ? new Date().getFullYear() : undefined,
+        start_date,
+        end_date,
+        preset: timeframe !== 'custom' ? timeframe : undefined,
+        sort_by: sortConfig.key,
+        order: sortConfig.direction
+      });
+
+      setRkamItems(response.data);
+      setPaginationData({
+        total: response.total,
+        from: response.from,
+        to: response.to,
+        last_page: response.last_page
+      });
+    } catch (err) {
+      console.error('Failed to fetch RKAM:', err);
+      setToast({ type: 'error', message: 'Gagal memuat data RKAM' });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, perPage, selectedCategoryId, searchTerm, timeframe, dateRange, sortConfig]);
+
   useEffect(() => {
     fetchRKAMData();
   }, [fetchRKAMData]);
 
-  // Handle form submission (create or update)
+  const handleSort = (key: string) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+    setCurrentPage(1);
+  };
+
+  const SortIcon = ({ column }: { column: string }) => {
+    if (sortConfig.key !== column) return <ArrowUpDown size={14} className="ml-1 text-gray-300" />;
+    return sortConfig.direction === 'asc' ? 
+      <ChevronUp size={14} className="ml-1 text-blue-600" /> : 
+      <ChevronDown size={14} className="ml-1 text-blue-600" />;
+  };
+
+  useEffect(() => {
+    fetchOptions();
+  }, [fetchOptions]);
+
+  // CRUD Handlers
+  const handleOpenForm = (item?: RKAM) => {
+    if (item) {
+      setEditingId(item.id);
+      setFormData({
+        category_id: item.category_id,
+        item_name: item.item_name,
+        volume: String(item.volume),
+        satuan: item.satuan,
+        unit_price: String(item.unit_price),
+        dana_bos: String(item.dana_bos),
+        dana_komite: String(item.dana_komite),
+        tahun_anggaran: item.tahun_anggaran,
+        deskripsi: item.deskripsi || '',
+      });
+    } else {
+      setEditingId(null);
+      setFormData({
+        category_id: '',
+        item_name: '',
+        volume: '',
+        satuan: '',
+        unit_price: '',
+        dana_bos: '',
+        dana_komite: '',
+        tahun_anggaran: new Date().getFullYear(),
+        deskripsi: '',
+      });
+    }
+    setShowFormModal(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
+      const payload = {
+        ...formData,
+        volume: Number(formData.volume),
+        unit_price: Number(formData.unit_price),
+        dana_bos: Number(formData.dana_bos || 0),
+        dana_komite: Number(formData.dana_komite || 0),
+      };
+
       if (editingId) {
-        // Update existing RKAM
-        await apiService.updateRKAM(editingId, { ...formData, pagu: Number(formData.pagu || 0) });
+        await apiService.updateRKAM(editingId, payload);
         setToast({ type: 'success', message: 'RKAM berhasil diperbarui' });
       } else {
-        // Create new RKAM
-        await apiService.createRKAM({ ...formData, pagu: Number(formData.pagu || 0) });
+        await apiService.createRKAM(payload);
         setToast({ type: 'success', message: 'RKAM berhasil ditambahkan' });
       }
-      
-      // Refresh data and close modal
-      await fetchRKAMData();
-      handleCloseModal();
-    } catch (err) {
-      console.error('Failed to save RKAM:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Gagal menyimpan data RKAM. Silakan coba lagi.';
-      setToast({ type: 'error', message: errorMessage });
+      setShowFormModal(false);
+      fetchRKAMData();
+    } catch (err: any) {
+      setToast({ type: 'error', message: err.message || 'Gagal menyimpan RKAM' });
     }
   };
 
-  // Handle edit button click
-  const handleEdit = (item: RKAMItem) => {
-    setEditingId(item.id);
-    setFormData({
-      kategori: item.kategori,
-      item_name: item.item_name,
-      pagu: String(item.pagu),
-      tahun_anggaran: item.tahun_anggaran,
-      deskripsi: item.deskripsi || '',
-    });
-    setShowModal(true);
-  };
-
-  // Handle delete button click (open confirm)
-  const handleDeleteRequest = (id: string) => {
-    setConfirmModal({ isOpen: true, id });
-  };
-
-  const handleDeleteConfirm = async () => {
-    const id = confirmModal.id;
-    setConfirmModal({ isOpen: false, id: null });
-    if (!id) return;
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
     try {
-      await apiService.deleteRKAM(id);
+      await apiService.deleteRKAM(confirmDelete);
       setToast({ type: 'success', message: 'RKAM berhasil dihapus' });
-      await fetchRKAMData();
-    } catch (err) {
-      console.error('Failed to delete RKAM:', err);
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      if (errorMessage.includes('proposals')) {
-        setToast({ type: 'error', message: 'Tidak dapat menghapus RKAM. Masih ada proposal yang terkait dengan RKAM ini.' });
+      fetchRKAMData();
+    } catch (err: any) {
+      setToast({ type: 'error', message: err.message || 'Gagal menghapus RKAM' });
+    }
+    setConfirmDelete(null);
+  };
+
+  const handlePrint = async () => {
+    try {
+      setIsPreparingPrint(true);
+      setToast({ type: 'info', message: 'Menyiapkan dokumen cetak...' });
+      
+      const response = await apiService.getAllRKAM({
+        category_id: selectedCategoryId,
+        search: searchTerm,
+        tahun_anggaran: timeframe === 'year' ? new Date().getFullYear() : undefined,
+        start_date: dateRange.start,
+        end_date: dateRange.end,
+        preset: timeframe !== 'custom' ? timeframe : undefined,
+        sort_by: sortConfig.key,
+        order: sortConfig.direction,
+        no_paginate: true
+      });
+
+      if (Array.isArray(response)) {
+        setFullDataForPrint(response);
+        // Wait for state to update and template to render
+        setTimeout(() => {
+          window.print();
+          setIsPreparingPrint(false);
+        }, 800);
       } else {
-        setToast({ type: 'error', message: 'Gagal menghapus data RKAM. Silakan coba lagi.' });
+        throw new Error('Gagal mengambil data lengkap untuk pencetakan.');
       }
+    } catch (err: any) {
+      console.error('Print failed:', err);
+      setToast({ type: 'error', message: err.message || 'Gagal menyiapkan cetakan.' });
+      setIsPreparingPrint(false);
     }
   };
 
-  // Reset form
-  const resetForm = () => {
-    setFormData({
-      kategori: '',
-      item_name: '',
-      pagu: '',
-      tahun_anggaran: 2025,
-      deskripsi: '',
-    });
-    setEditingId(null);
-  };
-
-  // Handle modal close
-  const handleCloseModal = () => {
-    setShowModal(false);
-    resetForm();
-  };
-
-  const formatRupiah = (number: number) => {
+  const formatIDR = (num: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(number);
+    }).format(num);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Normal':
-        return 'bg-green-100 text-green-800';
-      case 'Warning':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Critical':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
+  // Helper for progress bar
   const getProgressColor = (percentage: number) => {
-    if (percentage >= 90) return 'bg-red-500';
-    if (percentage >= 75) return 'bg-yellow-500';
+    if (percentage > 90) return 'bg-red-500';
+    if (percentage > 75) return 'bg-orange-500';
     return 'bg-green-500';
   };
 
-  // Filter by search term and kategori
-  const filteredItems = rkamItems.filter(item => {
-    const matchesSearch = item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.kategori.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesKategori = selectedKategori === 'all' || item.kategori === selectedKategori;
-    return matchesSearch && matchesKategori;
-  });
-
-  // Get unique categories
-  const categories = ['all', ...Array.from(new Set(rkamItems.map(item => item.kategori)))];
-
-  // Calculate totals
-  const totalPagu = rkamItems.reduce((sum, item) => sum + item.pagu, 0);
-  const totalTerpakai = rkamItems.reduce((sum, item) => sum + item.terpakai, 0);
-  const totalSisa = totalPagu - totalTerpakai;
-  const overallPercentage = totalPagu > 0 ? (totalTerpakai / totalPagu) * 100 : 0;
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">RKAM Management</h1>
-          <p className="text-gray-600 mt-1">Kelola Rencana Kegiatan dan Anggaran Madrasah</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Manajemen Anggaran (RKAM)</h1>
+          <p className="text-gray-500 mt-0.5">Pantau dan kelola distribusi anggaran madrasah secara akurat.</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus size={20} />
-          Tambah RKAM
-        </button>
-      </div>
-
-      {/* Info Banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
-          <div>
-            <h3 className="font-semibold text-blue-900 mb-1">Tentang RKAM</h3>
-            <p className="text-sm text-blue-800">
-              RKAM (Rencana Kegiatan dan Anggaran Madrasah) adalah master budget tahunan yang menjadi acuan untuk semua proposal pengajuan. 
-              Setiap proposal harus mengacu ke salah satu kategori RKAM dan tidak boleh melebihi sisa anggaran yang tersedia.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Pagu</p>
-              <p className="text-2xl font-bold text-gray-900">{formatRupiah(totalPagu)}</p>
-            </div>
-            <div className="bg-blue-500 p-3 rounded-lg">
-              <DollarSign className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Terpakai</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{formatRupiah(totalTerpakai)}</p>
-            </div>
-            <div className="bg-green-100 p-3 rounded-lg">
-              <TrendingUp className="text-green-600" size={24} />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Sisa Anggaran</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{formatRupiah(totalSisa)}</p>
-            </div>
-            <div className="bg-purple-100 p-3 rounded-lg">
-              <Activity className="text-purple-600" size={24} />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Progress</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{overallPercentage.toFixed(1)}%</p>
-            </div>
-            <div className={`p-3 rounded-lg ${getProgressColor(overallPercentage).replace('bg-', 'bg-opacity-20 bg-')}`}>
-              <Activity className={getProgressColor(overallPercentage).replace('bg-', 'text-')} size={24} />
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setIsCategoryModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
+          >
+            <Settings size={18} />
+            Kelola Kategori
+          </button>
+          <button 
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
+          >
+            <Printer size={18} />
+            Cetak
+          </button>
+          <button 
+            onClick={() => handleOpenForm()}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium shadow-sm"
+          >
+            <Plus size={18} />
+            Tambah RKAM
+          </button>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Cari nama item atau kategori..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+      {/* Filter & Search Bar */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 print:hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Cari item..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            />
           </div>
-          <div className="md:w-64">
+
+          {/* Category Filter */}
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <select
-              value={selectedKategori}
-              onChange={(e) => setSelectedKategori(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={selectedCategoryId}
+              onChange={(e) => setSelectedCategoryId(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg appearance-none bg-white outline-none focus:ring-2 focus:ring-blue-500"
             >
+              <option value="all">Semua Kategori</option>
               {categories.map(cat => (
-                <option key={cat} value={cat}>
-                  {cat === 'all' ? 'Semua Kategori' : cat}
-                </option>
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
           </div>
+
+          {/* Timeframe Preset */}
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <select
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value as any)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg appearance-none bg-white outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Seluruh Waktu</option>
+              <option value="year">Tahun Ini</option>
+              <option value="month">Bulan Ini</option>
+              <option value="week">Pekan Ini</option>
+              <option value="custom">Rentang Kustom</option>
+            </select>
+          </div>
+
+          {/* Custom Date Range */}
+          {timeframe === 'custom' && (
+            <div className="flex items-center gap-2">
+              <input 
+                type="date" 
+                value={dateRange.start}
+                onChange={e => setDateRange({...dateRange, start: e.target.value})}
+                className="w-full px-2 py-2 border border-gray-200 rounded-lg text-sm" 
+              />
+              <span className="text-gray-400">-</span>
+              <input 
+                type="date" 
+                value={dateRange.end}
+                onChange={e => setDateRange({...dateRange, end: e.target.value})}
+                className="w-full px-2 py-2 border border-gray-200 rounded-lg text-sm" 
+              />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* RKAM Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      {/* Main Table Content */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden print:hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Kategori
+                <th className="px-6 py-4 font-semibold text-gray-700 w-32 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('kategori')}>
+                  <div className="flex items-center">Kategori <SortIcon column="kategori" /></div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nama Item
+                <th className="px-6 py-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('item_name')}>
+                  <div className="flex items-center">Uraian Anggaran <SortIcon column="item_name" /></div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tahun
+                <th className="px-6 py-4 font-semibold text-gray-700 text-right cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('pagu')}>
+                  <div className="flex items-center justify-end">Pagu (Total) <SortIcon column="pagu" /></div>
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Pagu
+                <th className="px-6 py-4 font-semibold text-gray-700 text-right cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('realization')}>
+                  <div className="flex items-center justify-end">Terpakai <SortIcon column="realization" /></div>
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Terpakai
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sisa
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Progress
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Aksi
-                </th>
+                <th className="px-6 py-4 font-semibold text-gray-700 text-right">Sisa</th>
+                <th className="px-6 py-4 font-semibold text-gray-700 w-1/6">Penyerapan</th>
+                <th className="px-6 py-4 font-semibold text-gray-700 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-100">
               {isLoading ? (
+                Array(5).fill(0).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    {Array(7).fill(0).map((_, j) => (
+                      <td key={j} className="px-6 py-4"><div className="h-4 bg-gray-100 rounded"></div></td>
+                    ))}
+                  </tr>
+                ))
+              ) : rkamItems.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                      <p className="text-gray-500">Memuat data RKAM...</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : error ? (
-                <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center">
-                      <AlertCircle size={48} className="text-red-400 mb-3" />
-                      <p className="font-medium text-red-500">{error}</p>
-                      <button
-                        onClick={fetchRKAMData}
-                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Coba Lagi
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredItems.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
-                    <div className="flex flex-col items-center">
-                      <AlertCircle size={48} className="text-gray-300 mb-3" />
-                      <p className="font-medium">Tidak ada data RKAM</p>
-                      <p className="text-sm mt-1">Silakan tambahkan RKAM baru atau ubah filter pencarian</p>
-                    </div>
-                  </td>
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500 italic">Data tidak ditemukan.</td>
                 </tr>
               ) : (
-                filteredItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                        {item.kategori}
+                rkamItems.map(item => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors group">
+                    <td className="px-6 py-4">
+                      <span 
+                        className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border"
+                        style={{ 
+                          borderColor: item.category?.color || '#e5e7eb',
+                          color: item.category?.color || '#6b7280',
+                          backgroundColor: `${item.category?.color || '#6b7280'}10`
+                        }}
+                      >
+                        {item.category?.name || item.kategori}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{item.item_name}</div>
+                      <div className="font-semibold text-gray-900">{item.item_name}</div>
+                      <div className="text-[10px] text-gray-400 mt-0.5 uppercase">{item.volume} {item.satuan} @ {formatIDR(item.unit_price)}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {item.tahun_anggaran}
+                    <td className="px-6 py-4 text-right font-bold text-gray-900">
+                      {formatIDR(item.pagu)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900">
-                      {formatRupiah(item.pagu)}
+                    <td className="px-6 py-4 text-right text-orange-600 font-medium">
+                      {formatIDR(item.terpakai_filtered ?? item.terpakai)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-green-600">
-                      {formatRupiah(item.terpakai)}
+                    <td className="px-6 py-4 text-right text-green-600 font-medium">
+                      {formatIDR(item.sisa_filtered ?? item.sisa)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right font-medium text-purple-600">
-                      {formatRupiah(item.sisa)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${getProgressColor(item.persentase)}`}
-                            style={{ width: `${Math.min(item.persentase, 100)}%` }}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                          <div 
+                            className={`h-1.5 rounded-full ${getProgressColor(item.persentase_filtered ?? item.persentase)}`}
+                            style={{ width: `${Math.min(item.persentase_filtered ?? item.persentase, 100)}%` }}
                           />
                         </div>
-                        <span className="text-sm font-medium text-gray-600 w-12 text-right">
-                          {item.persentase.toFixed(0)}%
-                        </span>
+                        <span className="text-[10px] font-bold text-gray-500">{(item.persentase_filtered ?? item.persentase).toFixed(1)}%</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(item.status)}`}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Edit"
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => handleOpenForm(item)}
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
                         >
                           <Edit2 size={16} />
                         </button>
-                        <button
-                          onClick={() => handleDeleteRequest(item.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Hapus"
+                        <button 
+                          onClick={() => setConfirmDelete(item.id)}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -448,142 +457,226 @@ const RKAMManagement: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-gray-500 font-medium">
+              Menampilkan {paginationData.from}-{paginationData.to} dari {paginationData.total}
+            </span>
+            <select 
+              value={perPage}
+              onChange={e => { setPerPage(Number(e.target.value)); setCurrentPage(1); }}
+              className="text-xs border border-gray-300 rounded px-2 py-1 bg-white outline-none"
+            >
+              <option value={10}>10 Baris</option>
+              <option value={25}>25 Baris</option>
+              <option value={50}>50 Baris</option>
+              <option value={100}>100 Baris</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-1">
+            <button 
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(p => p - 1)}
+              className="p-1.5 border border-gray-300 rounded hover:bg-white disabled:opacity-30 disabled:hover:bg-transparent"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <div className="flex items-center gap-1 mx-2">
+              {Array.from({ length: Math.min(paginationData.last_page, 5) }).map((_, i) => {
+                const pageNum = i + 1; // Simplified for now, could be improved with sliding window
+                return (
+                  <button 
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-8 h-8 rounded text-xs font-bold transition-all ${currentPage === pageNum ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-white'}`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+              {paginationData.last_page > 5 && <span className="text-gray-400 px-1">...</span>}
+            </div>
+            <button 
+              disabled={currentPage === paginationData.last_page}
+              onClick={() => setCurrentPage(p => p + 1)}
+              className="p-1.5 border border-gray-300 rounded hover:bg-white disabled:opacity-30 disabled:hover:bg-transparent"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Add/Edit Modal */}
-      {showModal && createPortal(
-        <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={handleCloseModal} />
-          <div className="fixed z-50 bg-white rounded-lg shadow-xl w-full max-w-md p-6 overflow-auto left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ maxHeight: '90vh' }}>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingId ? 'Edit RKAM' : 'Tambah RKAM Baru'}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Kategori
-                </label>
-                <select
-                  value={formData.kategori}
-                  onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Pilih Kategori</option>
-                  <option value="Kurikulum">Kurikulum</option>
-                  <option value="Kantor">Kantor</option>
-                  <option value="Sarana">Sarana</option>
-                  <option value="Prasarana">Prasarana</option>
-                  <option value="Humas">Humas</option>
-                  <option value="Kemahasiswaan">Kemahasiswaan</option>
-                  <option value="Komite">Komite</option>
-                </select>
+      {/* RKAM Print View (Hidden unless printing) */}
+      <RKAMPrintTemplate 
+        data={fullDataForPrint.length > 0 ? fullDataForPrint : rkamItems} 
+        tahun={new Date().getFullYear()} 
+      />
+
+      {/* Loading Overlay for Print */}
+      {isPreparingPrint && createPortal(
+        <div className="fixed inset-0 z-[100] bg-black bg-opacity-70 flex flex-col items-center justify-center text-white">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+          <h2 className="text-xl font-bold">Menyiapkan Dokumen RKAM...</h2>
+          <p className="opacity-70 mt-2">Seluruh data sedang dimuat untuk hasil cetal maksimal.</p>
+        </div>, document.body
+      )}
+
+      {/* Category Management Modal */}
+      <CategoryManagementModal 
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onCategoriesChanged={fetchOptions}
+      />
+
+      {/* RKAM Add/Edit Modal */}
+      {showFormModal && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-bold text-gray-900">{editingId ? 'Edit Anggaran RKAM' : 'Tambah Anggaran Baru'}</h2>
+              <button onClick={() => setShowFormModal(false)} className="p-2 hover:bg-gray-100 rounded-full"><XIcon size={24} className="text-gray-400" /></button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Item / Uraian</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.item_name}
+                    onChange={e => setFormData({ ...formData, item_name: e.target.value })}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
+                    placeholder="Contoh: Belanja Alat Tulis Kantor"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Kategori</label>
+                  <select
+                    required
+                    value={formData.category_id}
+                    onChange={e => setFormData({ ...formData, category_id: e.target.value })}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    <option value="">Pilih Kategori</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Volume</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      required
+                      value={formData.volume}
+                      onChange={e => setFormData({ ...formData, volume: e.target.value })}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"
+                      placeholder="e.g. 1"
+                    />
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        required
+                        list="unitsDropdown"
+                        value={formData.satuan}
+                        onChange={e => setFormData({ ...formData, satuan: e.target.value })}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"
+                        placeholder="Satuan"
+                      />
+                      <datalist id="unitsDropdown">
+                        <option value="Tahun" />
+                        <option value="Bulan" />
+                        <option value="Paket" />
+                        <option value="Orang" />
+                        <option value="Lusin" />
+                        <option value="Item" />
+                      </datalist>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Harga Satuan (Rp)</label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.unit_price}
+                    onChange={e => setFormData({ ...formData, unit_price: e.target.value })}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"
+                    placeholder="e.g. 100000"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Total Pagu (Auto)</label>
+                  <div className="px-4 py-2 bg-blue-50 border border-blue-100 rounded-lg font-bold text-blue-700">
+                    {formatIDR(computedPagu)}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Dana BOS (Rp)</label>
+                  <input
+                    type="number"
+                    value={formData.dana_bos}
+                    onChange={e => setFormData({ ...formData, dana_bos: e.target.value })}
+                    className="w-full px-4 py-2 bg-green-50 border border-green-100 rounded-lg outline-none"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Dana Komite (Rp)</label>
+                  <input
+                    type="number"
+                    value={formData.dana_komite}
+                    onChange={e => setFormData({ ...formData, dana_komite: e.target.value })}
+                    className="w-full px-4 py-2 bg-purple-50 border border-purple-100 rounded-lg outline-none"
+                    placeholder="0"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nama Item
-                </label>
-                <input
-                  type="text"
-                  value={formData.item_name}
-                  onChange={(e) => setFormData({ ...formData, item_name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Contoh: Renovasi Gedung Utama"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Pagu Anggaran (Rp)
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={formData.pagu}
-                  onChange={(e) => setFormData({ ...formData, pagu: e.target.value.replace(/[^0-9]/g, '') })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="50000000"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {formData.pagu ? formatRupiah(Number(formData.pagu)) : ''}
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tahun Anggaran
-                </label>
-                <input
-                  type="number"
-                  value={formData.tahun_anggaran}
-                  onChange={(e) => setFormData({ ...formData, tahun_anggaran: parseInt(e.target.value) || 2025 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  min="2020"
-                  max="2100"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Deskripsi (Opsional)
-                </label>
-                <textarea
-                  value={formData.deskripsi}
-                  onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Deskripsi detail tentang anggaran ini..."
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-4 pt-4">
                 <button
                   type="button"
-                  onClick={handleCloseModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  onClick={() => setShowFormModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-bold transition-all"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold shadow-lg shadow-blue-200 transition-all"
                 >
-                  {editingId ? 'Update' : 'Simpan'}
+                  {editingId ? 'Simpan Perubahan' : 'Posting Anggaran'}
                 </button>
               </div>
             </form>
           </div>
         </div>, document.body)
       }
-      {/* Confirm Modal for delete */}
-      {createPortal(
-        <ConfirmModal
-          isOpen={confirmModal.isOpen}
-          title="Hapus RKAM"
-          message="Apakah Anda yakin ingin menghapus item RKAM ini?"
-          type="danger"
-          confirmText="Ya, Hapus"
-          cancelText="Batal"
-          onConfirm={handleDeleteConfirm}
-          onCancel={() => setConfirmModal({ isOpen: false, id: null })}
-        />, document.body
-      )}
 
-      {/* Toast */}
-      {toast && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onClose={() => setToast(null)}
-        />
-      )}
+      <ConfirmModal 
+        isOpen={!!confirmDelete}
+        title="Hapus RKAM"
+        message="Data yang dihapus tidak dapat dikembalikan. Lanjutkan?"
+        type="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(null)}
+      />
+
+      {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
     </div>
   );
 };
+
 
 export default RKAMManagement;

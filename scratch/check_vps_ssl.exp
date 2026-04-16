@@ -1,0 +1,31 @@
+#!/usr/bin/expect -f
+set timeout 30
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$pass\r"
+expect "$ "
+
+# Check Nginx server names
+send "grep -r 'server_name' /etc/nginx/sites-enabled\r"
+expect "$ "
+
+# Check SSL certificates (if possible)
+send "sudo certbot certificates\r"
+expect {
+    "password for sirangkul:" {
+        send "$pass\r"
+        expect "$ "
+    }
+    "$ " {}
+}
+
+# Check expiration of common certs
+send "ls -l /etc/letsencrypt/live\r"
+expect "$ "
+
+send "exit\r"
+expect eof

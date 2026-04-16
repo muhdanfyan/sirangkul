@@ -1,0 +1,26 @@
+#!/usr/bin/expect -f
+
+set timeout 300
+set user "kassaone"
+set host "103.191.92.247"
+set password "Piblajar2020"
+set db_user "root"
+set db_pass "1234567890"
+set db_name "sirangkul"
+
+spawn ssh -o StrictHostKeyChecking=accept-new $user@$host
+expect "password:"
+send "$password\r"
+
+expect -re "(\\\$|#) $"
+send "mysqldump -u $db_user -p$db_pass $db_name > /tmp/sirangkul_migration.sql\r"
+
+expect -re "(\\\$|#) $"
+send "exit\r"
+expect eof
+
+# Download the file locally
+spawn scp -o StrictHostKeyChecking=accept-new $user@$host:/tmp/sirangkul_migration.sql /Users/pondokit/Herd/sirangkul/sirangkul_migration.sql
+expect "password:"
+send "$password\r"
+expect eof

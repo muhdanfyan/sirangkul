@@ -1,0 +1,10 @@
+#!/usr/bin/expect -f
+set timeout 600
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+
+spawn scp -o StrictHostKeyChecking=no sirangkul_update.tar.gz $user@$host:/home/sirangkul/tmp/
+expect "password:"
+send "$pass\r"
+expect eof

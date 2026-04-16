@@ -1,0 +1,10 @@
+#!/usr/bin/expect -f
+set timeout 30
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+
+spawn ssh -o StrictHostKeyChecking=no $user@$host "cd /home/sirangkul/apps/sirangkul/api-sirangkul && php artisan tinker --execute=\"echo app('router')->getRoutes()->match(app('request')->create('/api/public/rkam/options', 'GET'))->action['controller'];\""
+expect "password:"
+send "$pass\r"
+expect eof

@@ -55,3 +55,13 @@ Pengujian E2E harus mensimulasikan login dan aksi dari kelima peran fungsional u
 - **Penolakan (Rejection Flow)**: Verifikator/Kepala menolak proposal. Status kembali ke Draf/Revisi, dan pengusul wajib bisa mengeditnya ulang.
 - **Akses Ilegal**: Pengusul *A* tidak boleh mengedit atau menghapus draf proposal milik Pengusul *B*.
 - **CORS Failure**: Login gagal memberikan Bearer token dengan 419 di lingkungan production.
+
+## 5. Skema Pengujian Fitur Upload (Semua Komponen)
+Semua komponen yang memiliki fitur upload (Proposal, Pencairan/Payment, dan Pelaporan/Reporting) wajib diuji dengan skenario berikut:
+- **Upload File Valid (Positive Test)**: Mengunggah file PDF/JPG/PNG dengan format dan ukuran sesuai ketentuan.
+  - *Proposal*: Dokumen lampiran/RAB PDF (via Pengusul).
+  - *Payment/Pencairan*: Bukti transfer atau kuitansi gambar JPG/PNG (via Bendahara).
+  - *Reporting/Pelaporan*: Dokumen laporan PDF dan foto dokumentasi JPG (via Pengusul/Penerima Dana).
+- **Mandatory File Check**: Mencoba submit form tanpa menyertakan file pada field yang diwajibkan (harus ditolak dengan 422).
+- **MIME Type Validation**: Mengunggah file dengan ekstensi yang tidak diizinkan, misalnya `.exe`, `.sh`, `.php`, atau `.js` (harus ditolak dengan 422).
+- **Maximum File Size Validation**: Mengunggah file melebihi batas maksimal ukuran aplikasi (misal > 2MB/5MB), untuk memastikan ditolak dengan `422 Unprocessable Entity` secara gracefully.

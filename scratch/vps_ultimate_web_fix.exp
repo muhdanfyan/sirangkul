@@ -1,0 +1,25 @@
+#!/usr/bin/expect -f
+set timeout 60
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+
+# 1. Upload final web.php
+spawn scp -o StrictHostKeyChecking=no scratch/web.php.final_v2 $user@$host:/home/sirangkul/tmp/web_final.php
+expect "password:"
+send "$pass\r"
+expect eof
+
+# 2. Swap and Clear Cache
+spawn ssh -t -o StrictHostKeyChecking=no $user@$host "cp /home/sirangkul/tmp/web_final.php /home/sirangkul/apps/sirangkul/api-sirangkul/routes/web.php && cd /home/sirangkul/apps/sirangkul/api-sirangkul && php artisan route:clear"
+expect {
+    "password:" {
+        send "$pass\r"
+        exp_continue
+    }
+    "password for" {
+        send "$pass\r"
+        exp_continue
+    }
+    eof { }
+}

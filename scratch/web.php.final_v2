@@ -1,0 +1,16 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RkamController;
+
+Route::get('/', function () {
+    return response()->json([
+        'message' => 'SiRangkul API Server',
+        'version' => '1.1.0',
+        'status' => 'running'
+    ]);
+});
+
+// Public RKAM Routes (Corrected: No /api prefix because Laravel already handles it)
+Route::get('/public/rkam', [RkamController::class, 'publicIndex']);
+Route::get('/public/rkam/options', [RkamController::class, 'getOptions']);

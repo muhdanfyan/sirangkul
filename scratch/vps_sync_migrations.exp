@@ -1,0 +1,11 @@
+#!/usr/bin/expect -f
+set timeout 120
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+
+# Sync all migrations
+spawn scp -o StrictHostKeyChecking=no -r /Users/pondokit/Herd/sirangkul/api-sirangkul/database/migrations $user@$host:/home/sirangkul/apps/sirangkul/api-sirangkul/database/
+expect "password:"
+send "$pass\r"
+expect eof

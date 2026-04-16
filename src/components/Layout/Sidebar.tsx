@@ -38,7 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: Users, label: 'Manajemen User', path: '/users', roles: ['Administrator'] },
+    { icon: Users, label: 'User', path: '/users', roles: ['Administrator'] },
     { icon: PiggyBank, label: 'RKAM', path: '/rkam', roles: ['Administrator', 'Bendahara', 'Kepala Madrasah'] },
     { icon: CheckCircle, label: 'Persetujuan', path: '/approvals', roles: ['Verifikator', 'Kepala Madrasah', 'Komite Madrasah'] },
     { icon: CreditCard, label: 'Pembayaran', path: '/payments', roles: ['Bendahara', 'Administrator'] },
@@ -71,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 w-60 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
         lg:translate-x-0 lg:static lg:inset-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, X, User, Shield, ClipboardCheck, GraduationCap, Wallet, Users, Home, BookOpen } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, X, Home, BookOpen } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -11,7 +11,6 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,20 +26,6 @@ const LoginPage: React.FC = () => {
     setIsLoading(false);
   };
 
-  const demoAccounts = [
-    { email: 'admin@sirangkul.com', role: 'Administrator', icon: Shield, gradient: 'from-rose-500 to-pink-600' },
-    { email: 'ahmad@madrasah.com', role: 'Pengusul', icon: User, gradient: 'from-emerald-500 to-teal-600' },
-    { email: 'siti@madrasah.com', role: 'Verifikator', icon: ClipboardCheck, gradient: 'from-cyan-500 to-teal-600' },
-    { email: 'kepala@madrasah.com', role: 'Kepala Madrasah', icon: GraduationCap, gradient: 'from-amber-500 to-orange-600' },
-    { email: 'bendahara@madrasah.com', role: 'Bendahara', icon: Wallet, gradient: 'from-blue-500 to-cyan-600' },
-    { email: 'komite@madrasah.com', role: 'Komite Madrasah', icon: Users, gradient: 'from-violet-500 to-purple-600' },
-  ];
-
-  const selectDemoAccount = (account: typeof demoAccounts[0]) => {
-    setEmail(account.email);
-    setPassword('password');
-    setShowDemoAccounts(false);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-cyan-50 flex items-center justify-center p-4">
@@ -79,7 +64,7 @@ const LoginPage: React.FC = () => {
 
           <div className="relative z-10 flex items-center gap-4">
             <div className="bg-white rounded-xl p-3 shadow-lg">
-              <img src="https://man2kotamakassar.sch.id/images/logo.png" alt="MAN 2" className="h-12 w-12 object-contain" />
+              <img src="/logo-man2.png" alt="MAN 2" className="h-12 w-12 object-contain" />
             </div>
             <div className="text-white">
               <p className="font-semibold text-lg">MAN 2 Kota Makassar</p>
@@ -180,60 +165,6 @@ const LoginPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Demo Toggle */}
-      <button
-        onClick={() => setShowDemoAccounts(true)}
-        className="fixed right-0 top-1/2 -translate-y-1/2 bg-gradient-to-b from-cyan-500 to-teal-600 text-white px-2.5 py-6 rounded-l-xl shadow-lg z-50 hover:px-3 transition-all"
-      >
-        <span className="text-xs font-bold tracking-wider" style={{ writingMode: 'vertical-rl' }}>DEMO</span>
-      </button>
-
-      {/* Demo Panel */}
-      {showDemoAccounts && (
-        <>
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setShowDemoAccounts(false)} />
-          <div className="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl z-50 animate-slideUp">
-            <div className="flex justify-center pt-3 pb-2">
-              <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
-            </div>
-            <div className="px-6 pb-4 flex justify-between items-center">
-              <div>
-                <h3 className="text-xl font-bold text-gray-800">Demo Accounts</h3>
-                <p className="text-gray-400 text-sm">Password: <code className="bg-cyan-50 text-cyan-600 px-2 py-0.5 rounded">password</code></p>
-              </div>
-              <button onClick={() => setShowDemoAccounts(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                <X className="h-5 w-5 text-gray-400" />
-              </button>
-            </div>
-            <div className="px-4 pb-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {demoAccounts.map((acc, i) => {
-                const Icon = acc.icon;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => selectDemoAccount(acc)}
-                    className="p-4 bg-gray-50 hover:bg-white border border-gray-100 hover:border-cyan-200 rounded-2xl text-left group hover:shadow-lg transition-all"
-                  >
-                    <div className={`w-12 h-12 bg-gradient-to-br ${acc.gradient} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
-                      <Icon className="h-6 w-6 text-white" />
-                    </div>
-                    <p className="font-semibold text-gray-700 group-hover:text-cyan-600">{acc.role}</p>
-                    <p className="text-xs text-gray-400 truncate">{acc.email}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </>
-      )}
-
-      <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-        .animate-slideUp { animation: slideUp 0.3s ease-out; }
-      `}</style>
     </div>
   );
 };

@@ -1,0 +1,29 @@
+#!/usr/bin/expect -f
+set timeout 60
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+
+# 1. Read web.php and api.php
+spawn ssh -o StrictHostKeyChecking=no $user@$host "cat /home/sirangkul/apps/sirangkul/api-sirangkul/routes/web.php"
+expect "password:"
+send "$pass\r"
+expect eof
+
+# 2. Modify web.php (Add routes with /api prefix)
+spawn ssh -o StrictHostKeyChecking=no $user@$host "sed -i '1i use App\\Http\\Controllers\\RkamController;' /home/sirangkul/apps/sirangkul/api-sirangkul/routes/web.php && echo \"\n// Public RKAM Routes (Moved from api.php to avoid Laravel 11 auto-prefixing issue)\nRoute::get('/api/public/rkam', \[RkamController::class, 'publicIndex'\]);\nRoute::get('/api/public/rkam/options', \[RkamController::class, 'getOptions'\]);\" >> /home/sirangkul/apps/sirangkul/api-sirangkul/routes/web.php"
+expect "password:"
+send "$pass\r"
+expect eof
+
+# 3. Clean up api.php (Remove the misplaced public routes)
+spawn ssh -o StrictHostKeyChecking=no $user@$host "sed -i '/public\/rkam/d' /home/sirangkul/apps/sirangkul/api-sirangkul/routes/api.php"
+expect "password:"
+send "$pass\r"
+expect eof
+
+# 4. Clear Route Cache
+spawn ssh -o StrictHostKeyChecking=no $user@$host "cd /home/sirangkul/apps/sirangkul/api-sirangkul && php artisan route:clear"
+expect "password:"
+send "$pass\r"
+expect eof
