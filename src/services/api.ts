@@ -1066,7 +1066,6 @@ class ApiService {
 
     const blob = await response.blob();
     return { url: URL.createObjectURL(blob), mimeType: blob.type };
->>>>>>> 1c01d530a4ea1f3de4e1f5fc60c0edb8676847c7
   }
 
 }
