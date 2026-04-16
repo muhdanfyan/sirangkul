@@ -286,6 +286,7 @@ class ApiService {
 
     const config: RequestInit = {
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
         ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
@@ -303,6 +304,7 @@ class ApiService {
         // Check if response is JSON before parsing
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
+          try {
             const errorData = await response.json();
             const error = new Error(errorData.message || `HTTP error! status: ${response.status}`) as any;
             error.response = { data: errorData }; // Mock axios structure for easier transition

@@ -1,0 +1,11 @@
+#!/usr/bin/expect -f
+set timeout 300
+set password "Sfgxjs4H38DQb7K"
+spawn scp -o StrictHostKeyChecking=no -r dist sirangkul@89.233.105.92:/home/sirangkul/apps/sirangkul/
+expect {
+    "password:" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}

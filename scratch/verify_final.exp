@@ -1,0 +1,35 @@
+#!/usr/bin/expect -f
+
+set timeout 30
+set user "sirangkul"
+set host "89.233.105.92"
+set password "Sfgxjs4H38DQb7K"
+set workdir "/home/sirangkul/apps/sirangkul"
+
+spawn ssh -o StrictHostKeyChecking=accept-new $user@$host
+expect "password:"
+send "$password\r"
+
+expect -re "(\\$|#) $"
+send "cd $workdir/api-sirangkul && php artisan optimize:clear\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- ROUTE LIST RKAM --'\r"
+expect -re "(\\$|#) $"
+send "php artisan route:list --path=rkam 2>&1\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- TEST RKAM OPTIONS AUTH --'\r"
+expect -re "(\\$|#) $"
+send {curl -sk -w '\nHTTP:%{http_code}\n' 'https://sirangkul.man2kotamakassar.sch.id/api/rkam/options' -H 'Accept: application/json' -H 'Authorization: Bearer 23|XCN99wKMT6AZ8XgnOTqiDuZZmRAYhFNesXOwCmd2c5be0191' | head -c 300}
+send "\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- TEST RKAM INDEX --'\r"
+expect -re "(\\$|#) $"
+send {curl -sk -w '\nHTTP:%{http_code}\n' 'https://sirangkul.man2kotamakassar.sch.id/api/rkam' -H 'Accept: application/json' -H 'Authorization: Bearer 23|XCN99wKMT6AZ8XgnOTqiDuZZmRAYhFNesXOwCmd2c5be0191' | head -c 200}
+send "\r"
+
+expect -re "(\\$|#) $"
+send "exit\r"
+expect eof

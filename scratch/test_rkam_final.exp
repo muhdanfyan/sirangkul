@@ -1,0 +1,32 @@
+#!/usr/bin/expect -f
+
+set timeout 30
+set user "sirangkul"
+set host "89.233.105.92"
+set password "Sfgxjs4H38DQb7K"
+
+spawn ssh -o StrictHostKeyChecking=accept-new $user@$host
+expect "password:"
+send "$password\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- TEST RKAM OPTIONS WITH AUTH --'\r"
+expect -re "(\\$|#) $"
+send {curl -sk -w '\nHTTP_CODE:%{http_code}\n' 'https://sirangkul.man2kotamakassar.sch.id/api/rkam/options' -H 'Accept: application/json' -H 'Authorization: Bearer 23|XCN99wKMT6AZ8XgnOTqiDuZZmRAYhFNesXOwCmd2c5be0191'}
+send "\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- TEST PUBLIC RKAM OPTIONS --'\r"
+expect -re "(\\$|#) $"
+send {curl -sk -w '\nHTTP_CODE:%{http_code}\n' 'https://sirangkul.man2kotamakassar.sch.id/api/public/rkam/options' -H 'Accept: application/json' | head -c 300}
+send "\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- NEW ERRORS CHECK --'\r"
+expect -re "(\\$|#) $"
+send {grep 'production.ERROR' /home/sirangkul/apps/sirangkul/api-sirangkul/storage/logs/laravel.log | tail -3}
+send "\r"
+
+expect -re "(\\$|#) $"
+send "exit\r"
+expect eof

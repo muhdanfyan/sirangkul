@@ -1,0 +1,35 @@
+#!/usr/bin/expect -f
+
+set timeout 30
+set user "sirangkul"
+set host "89.233.105.92"
+set password "Sfgxjs4H38DQb7K"
+set workdir "/home/sirangkul/apps/sirangkul"
+
+spawn ssh -o StrictHostKeyChecking=accept-new $user@$host
+expect "password:"
+send "$password\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- RESOURCE STATUS --'\r"
+expect -re "(\\$|#) $"
+send "uptime && df -h / && free -m\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- WEB SERVER STATUS --'\r"
+expect -re "(\\$|#) $"
+send "systemctl status apache2 --no-pager || systemctl status nginx --no-pager\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- APPLICATION LOGS (API) --'\r"
+expect -re "(\\$|#) $"
+send "tail -n 20 $workdir/api-sirangkul/storage/logs/laravel.log\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- RECENT COMMITS --'\r"
+expect -re "(\\$|#) $"
+send "cd $workdir && git log -n 5 --oneline\r"
+
+expect -re "(\\$|#) $"
+send "exit\r"
+expect eof

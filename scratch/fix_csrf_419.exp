@@ -1,0 +1,26 @@
+#!/usr/bin/expect -f
+
+set timeout 30
+set user "sirangkul"
+set host "89.233.105.92"
+set password "Sfgxjs4H38DQb7K"
+set workdir "/home/sirangkul/apps/sirangkul"
+
+spawn ssh -o StrictHostKeyChecking=accept-new $user@$host
+expect "password:"
+send "$password\r"
+
+expect -re "(\\$|#) $"
+send "echo '-- UPDATING APP.PHP FOR CSRF --'\r"
+expect -re "(\\$|#) $"
+send "cat << 'EOF' > /tmp/app_fix.php\n<?php\n\nuse Illuminate\\Foundation\\Application;\nuse Illuminate\\Foundation\\Configuration\\Exceptions;\nuse Illuminate\\Foundation\\Configuration\\Middleware;\nuse Illuminate\\Auth\\AuthenticationException;\nuse Illuminate\\Http\\Request;\nuse Illuminate\\Support\\Facades\\Route;\nuse Symfony\\Component\\Routing\\Exception\\RouteNotFoundException;\n\nreturn Application::configure(basePath: dirname(__DIR__))\n    ->withRouting(\n        web: __DIR__.'/../routes/web.php',\n        commands: __DIR__.'/../routes/console.php',\n        health: '/up',\n    )\n    ->withMiddleware(function (Middleware \\\$middleware): void {\n        \\\$middleware->validateCsrfTokens(except: [\n            'api/*', 'api',\n            'auth/*', 'auth',\n            'public/*', 'public',\n            'proposals/*', 'proposals',\n            'payments/*', 'payments',\n            'users/*', 'users',\n            'rkam/*', 'rkam',\n            'categories/*', 'categories',\n        ]);\n    })\n    ->withExceptions(function (Exceptions \\\$exceptions): void {\n        \\\$exceptions->render(function (AuthenticationException \\\$e, Request \\\$request) {\n            return response()->json(['message' => 'Unauthenticated.'], 401);\n        });\n        \n        \\\$exceptions->render(function (RouteNotFoundException \\\$e, Request \\\$request) {\n            if (\\\$request->is('api/*') || \\\$request->expectsJson()) {\n                return response()->json(['message' => 'Unauthenticated.'], 401);\n            }\n        });\n    })->create();\nEOF\n\r"
+
+expect -re "(\\$|#) $"
+send "cp /tmp/app_fix.php $workdir/api-sirangkul/bootstrap/app.php\r"
+
+expect -re "(\\$|#) $"
+send "cd $workdir/api-sirangkul && php artisan optimize:clear\r"
+
+expect -re "(\\$|#) $"
+send "exit\r"
+expect eof

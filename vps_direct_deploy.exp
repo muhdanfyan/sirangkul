@@ -1,0 +1,51 @@
+#!/usr/bin/expect -f
+
+set timeout 900
+set host "89.233.105.92"
+set user "sirangkul"
+set pass "Sfgxjs4H38DQb7K"
+set workdir "/home/sirangkul/apps/sirangkul"
+
+# 1. Upload
+puts "\n--- Uploading dist.zip ---"
+spawn scp -o StrictHostKeyChecking=no dist.zip $user@$host:/home/sirangkul/apps/dist.zip
+expect "password:"
+send "$pass\r"
+expect eof
+
+# 2. Deploy
+puts "\n--- Deploying Changes on VPS ---"
+spawn ssh -o StrictHostKeyChecking=no $user@$host
+expect "password:"
+send "$pass\r"
+expect "$ "
+
+send "cd $workdir\r"
+expect "$ "
+
+# Git Pull for backend/source changes
+puts "\n--- Git Pull ---"
+send "git pull origin master\r"
+expect "$ "
+
+# Replace dist folder
+puts "\n--- Replacing Frontend ---"
+send "rm -rf dist_backup && mv dist dist_backup\r"
+expect "$ "
+send "unzip /home/sirangkul/apps/dist.zip -d $workdir/\r"
+expect "$ "
+send "rm /home/sirangkul/apps/dist.zip\r"
+expect "$ "
+
+# Run Backend updates
+puts "\n--- Backend Updates ---"
+send "cd api-sirangkul\r"
+expect "$ "
+send "php artisan migrate --force\r"
+expect "$ "
+send "php artisan config:clear && php artisan cache:clear\r"
+expect "$ "
+
+puts "\n--- Deployment Completed Successfully ---"
+send "exit\r"
+expect eof

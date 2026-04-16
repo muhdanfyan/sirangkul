@@ -1,0 +1,18 @@
+#!/usr/bin/expect -f
+
+set timeout 30
+set user "sirangkul"
+set host "89.233.105.92"
+set password "Sfgxjs4H38DQb7K"
+set workdir "/home/sirangkul/apps/sirangkul"
+
+spawn ssh -o StrictHostKeyChecking=accept-new $user@$host
+expect "password:"
+send "$password\r"
+
+expect -re "(\\$|#) $"
+send "cd $workdir/api-sirangkul && grep 'DB_PASSWORD' .env\r"
+
+expect -re "(\\$|#) $"
+send "exit\r"
+expect eof
