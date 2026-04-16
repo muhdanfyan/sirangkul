@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, DollarSign, Save, Send, Search } from 'lucide-react';
+import { Upload, FileText, DollarSign, Save, Send, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiService, RKAM } from '../services/api';
 import Toast, { ToastType } from '../components/Toast';
+
+const MAX_FILES = 5;
+const MIN_FILES = 1;
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx'];
 
 const ProposalSubmission: React.FC = () => {
   const navigate = useNavigate();
@@ -26,6 +31,8 @@ const ProposalSubmission: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [fileErrors, setFileErrors] = useState<string[]>([]);
+  const [uploadStatus, setUploadStatus] = useState<string>('');
   
   // Toast state
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
@@ -99,9 +106,36 @@ const ProposalSubmission: React.FC = () => {
   }, []);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFiles(Array.from(e.target.files));
+    if (!e.target.files) return;
+    const selected = Array.from(e.target.files);
+    const newErrors: string[] = [];
+
+    const combined = [...files, ...selected];
+
+    if (combined.length > MAX_FILES) {
+      newErrors.push(`Maksimal ${MAX_FILES} dokumen. Anda memilih ${combined.length}.`);
     }
+
+    selected.forEach((file) => {
+      const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+      if (!ALLOWED_EXTENSIONS.includes(ext)) {
+        newErrors.push(`"${file.name}" — tipe file tidak didukung. Gunakan PDF, DOC, DOCX, XLS, atau XLSX.`);
+      } else if (file.size > MAX_FILE_SIZE_BYTES) {
+        newErrors.push(`"${file.name}" — ukuran file (${(file.size / 1024 / 1024).toFixed(2)} MB) melebihi batas 5 MB.`);
+      }
+    });
+
+    setFileErrors(newErrors);
+    if (newErrors.length === 0) {
+      setFiles(combined.slice(0, MAX_FILES));
+    }
+    // reset input so same files can be re-selected after removal
+    e.target.value = '';
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFileErrors([]);
   };
 
   const handleSubmit = async (e: React.FormEvent, asDraft: boolean = false) => {
@@ -139,8 +173,15 @@ const ProposalSubmission: React.FC = () => {
       }
     }
 
+    // File validation
+    if (files.length < MIN_FILES) {
+      setToast({ message: `Minimal ${MIN_FILES} dokumen pendukung wajib dilampirkan.`, type: 'error' });
+      return;
+    }
+
     setLoading(true);
     setErrors({});
+    setUploadStatus('');
 
     try {
       const proposalData = {
@@ -153,10 +194,16 @@ const ProposalSubmission: React.FC = () => {
         end_date: formData.endDate
       };
 
+      setUploadStatus('Membuat proposal...');
       const createdProposal = await apiService.createProposal(proposalData);
+      // Upload attachments
+      if (files.length > 0) {
+        setUploadStatus(`Mengompresi & mengunggah ${files.length} dokumen...`);
+        await apiService.uploadProposalAttachments(createdProposal.id, files);
+      }
       
       let successMessage = asDraft 
-        ? 'Proposal berhasil disimpan sebagai draft' 
+        ? 'Proposal berhasil disimpan sebagai draft beserta dokumen pendukung.' 
         : 'Proposal berhasil dibuat';
 
       // Automatically submit if not saving as draft
@@ -214,6 +261,7 @@ const ProposalSubmission: React.FC = () => {
       }
     } finally {
       setLoading(false);
+      setUploadStatus('');
     }
   };
 
@@ -500,38 +548,63 @@ const ProposalSubmission: React.FC = () => {
 
             {/* Document Upload */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Dokumen Pendukung</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">Dokumen Pendukung</h3>
+              <p className="text-xs text-gray-500 mb-4">
+                Wajib: {MIN_FILES}–{MAX_FILES} file &bull; Maks. 5 MB per file &bull; Format: PDF, DOC, DOCX, XLS, XLSX &bull;
+                File akan dikompresi otomatis sebelum diunggah
+              </p>
               
               <div className="space-y-4">
+                {/* File error messages */}
+                {fileErrors.length > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
+                      {fileErrors.map((err, i) => <li key={i}>{err}</li>)}
+                    </ul>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Upload Dokumen (RAB, TOR, dll.)
+                    <span className="text-red-500 ml-1">*</span>
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <div className="text-sm text-gray-600">
-                      <label className="cursor-pointer">
+                  <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 text-center transition-colors hover:border-blue-500 hover:bg-blue-50">
+                    <label className={`block cursor-pointer ${files.length >= MAX_FILES ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <div className="text-sm text-gray-600">
                         <span className="text-blue-600 hover:text-blue-500">Klik untuk upload</span>
                         <span> atau drag and drop file di sini</span>
-                        <input
-                          type="file"
-                          multiple
-                          onChange={handleFileUpload}
-                          className="hidden"
-                          accept=".pdf,.doc,.docx,.xls,.xlsx"
-                        />
-                      </label>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">PDF, DOC, XLS up to 10MB</p>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        PDF, DOC, DOCX, XLS, XLSX &bull; Maks. 5 MB per file &bull; {files.length}/{MAX_FILES} file dipilih
+                      </p>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx"
+                        disabled={files.length >= MAX_FILES}
+                      />
+                    </label>
                   </div>
                   
                   {files.length > 0 && (
                     <div className="mt-4 space-y-2">
                       {files.map((file, index) => (
-                        <div key={index} className="flex items-center p-2 bg-gray-50 rounded">
-                          <FileText className="h-4 w-4 text-blue-500 mr-2" />
-                          <span className="text-sm text-gray-700 flex-1">{file.name}</span>
-                          <span className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                        <div key={index} className="flex items-center p-2 bg-gray-50 rounded border border-gray-200">
+                          <FileText className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
+                          <span className="text-sm text-gray-700 flex-1 truncate">{file.name}</span>
+                          <span className="text-xs text-gray-500 mr-3">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFile(index)}
+                            className="text-red-400 hover:text-red-600 flex-shrink-0"
+                            title="Hapus file"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -542,6 +615,15 @@ const ProposalSubmission: React.FC = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 justify-end">
+              {uploadStatus && (
+                <div className="flex items-center text-sm text-blue-600 mr-auto">
+                  <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  {uploadStatus}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={(e) => handleSubmit(e, true)}

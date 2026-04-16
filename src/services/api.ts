@@ -81,6 +81,7 @@ export interface Proposal {
     full_name?: string;
     role?: string;
   };
+  attachments?: ProposalAttachment[];  // Uploaded supporting documents
   payment?: Payment;  // NEW: Payment relationship
   current_workflow?: {
     stage: string;
@@ -264,6 +265,16 @@ export interface ApiError {
   message: string;
 }
 
+export interface ProposalAttachment {
+  id: string;
+  proposal_id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  mime_type: string;
+  created_at: string;
+}
+
 class ApiService {
   private baseURL: string;
 
@@ -322,6 +333,12 @@ class ApiService {
       }
 
       console.log(`✅ API Response: ${endpoint} - OK`);
+      const successContentType = response.headers.get('content-type');
+      if (!successContentType || !successContentType.includes('application/json')) {
+        const rawText = await response.text();
+        console.error('Expected JSON response but got:', rawText.substring(0, 200));
+        throw new Error('Server mengembalikan respons tidak valid. Pastikan backend Laravel sudah berjalan dan konfigurasi API benar.');
+      }
       return await response.json();
     } catch (error) {
       clearTimeout(timeoutId);
@@ -864,6 +881,79 @@ class ApiService {
     return response.data;
   }
 
+  // Compress a File using the browser's native CompressionStream API (gzip)
+  async compressFile(file: File): Promise<Blob> {
+    const stream = file.stream().pipeThrough(new CompressionStream('gzip'));
+    const arrayBuffer = await new Response(stream).arrayBuffer();
+    return new Blob([arrayBuffer], { type: 'application/gzip' });
+  }
+
+  // Upload 1–5 attachments for a proposal (compresses each file with gzip before sending)
+  async uploadProposalAttachments(proposalId: string, files: File[]): Promise<ProposalAttachment[]> {
+    const url = `${this.baseURL}/proposals/${proposalId}/attachments`;
+    const token = localStorage.getItem('sirangkul_token');
+
+    const formData = new FormData();
+
+    for (const file of files) {
+      const compressed = await this.compressFile(file);
+      formData.append('files[]', compressed, file.name + '.gz');
+      formData.append('original_names[]', file.name);
+      formData.append('mime_types[]', file.type || 'application/octet-stream');
+      formData.append('file_sizes[]', String(file.size));
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const uploadContentType = response.headers.get('content-type');
+      if (uploadContentType && uploadContentType.includes('application/json')) {
+        const errorData = await response.json().catch(() => ({ message: `HTTP error ${response.status}` }));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      throw new Error(`Upload gagal (${response.status}): Server mengembalikan respons tidak valid.`);
+    }
+
+    const uploadResult = await response.json().catch(() => {
+      throw new Error('Upload selesai tetapi server mengembalikan respons tidak valid.');
+    });
+    return uploadResult.data as ProposalAttachment[];
+  }
+
+  // Download an attachment by its ID
+  async downloadAttachment(attachmentId: string, fileName: string): Promise<void> {
+    const url = `${this.baseURL}/attachments/${attachmentId}/download`;
+    const token = localStorage.getItem('sirangkul_token');
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: `HTTP error ${response.status}` }));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = objectUrl;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(objectUrl);
+  }
+
   // NEW: Download reporting export
   async downloadReportExport(format: string = 'csv', filters?: any): Promise<Blob> {
     const url = new URL(`${this.baseURL}/reporting/export`);
@@ -930,6 +1020,53 @@ class ApiService {
 
     const result = await response.json();
     return result.data; // Laravel wraps in { success, data: { categories, units } }
+  }
+
+  // Fetch an attachment as a Blob URL for in-browser preview
+  async fetchAttachmentBlobUrl(attachmentId: string): Promise<string> {
+    const url = `${this.baseURL}/attachments/${attachmentId}/download`;
+    const token = localStorage.getItem('sirangkul_token');
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: `HTTP error ${response.status}` }));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  }
+
+  // Fetch payment proof as a Blob URL for in-browser preview.
+  // Returns { url, mimeType } — mimeType comes from the decompressed blob.
+  async fetchPaymentProofBlobUrl(paymentId: string): Promise<{ url: string; mimeType: string }> {
+    const fetchUrl = `${this.baseURL}/payments/${paymentId}/download-proof`;
+    const token = localStorage.getItem('sirangkul_token');
+
+    const response = await fetch(fetchUrl, {
+      method: 'GET',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (!response.ok) {
+      const ct = response.headers.get('content-type') || '';
+      const errorData = ct.includes('application/json')
+        ? await response.json().catch(() => ({}))
+        : {};
+      throw new Error((errorData as ApiError).message || `HTTP error! status: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    return { url: URL.createObjectURL(blob), mimeType: blob.type };
+>>>>>>> 1c01d530a4ea1f3de4e1f5fc60c0edb8676847c7
   }
 
 }

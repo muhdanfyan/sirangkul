@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { apiService, Proposal } from '../../services/api';
-import { ArrowLeft, Edit, Trash2, User, Calendar, FileText, CheckCircle, Send, XCircle } from 'lucide-react';
+import { apiService, Proposal, ProposalAttachment } from '../../services/api';
+import { ArrowLeft, Edit, Trash2, User, Calendar, FileText, CheckCircle, Send, XCircle, Download, Eye, Paperclip } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import ConfirmModal from '../../components/ConfirmModal';
 import Toast from '../../components/Toast';
@@ -26,6 +26,12 @@ const ProposalDetail: React.FC = () => {
   const [fetchAttempts, setFetchAttempts] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
   const MAX_FETCH_ATTEMPTS = 3;
+
+  // Attachment preview state
+  const [previewAttachment, setPreviewAttachment] = useState<ProposalAttachment | null>(null);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     // Only fetch once when component mounts or ID changes
@@ -331,6 +337,50 @@ const ProposalDetail: React.FC = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(num);
+  };
+
+  const getFileIcon = (mimeType: string) => {
+    if (mimeType === 'application/pdf') return '📄';
+    if (mimeType.includes('word')) return '📝';
+    if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return '📊';
+    return '📎';
+  };
+
+  const handlePreview = async (attachment: ProposalAttachment) => {
+    // Only PDF can be previewed inline; others trigger download
+    if (attachment.mime_type !== 'application/pdf') {
+      handleDownload(attachment);
+      return;
+    }
+    setPreviewAttachment(attachment);
+    setPreviewLoading(true);
+    setPreviewBlobUrl(null);
+    try {
+      const blobUrl = await apiService.fetchAttachmentBlobUrl(attachment.id);
+      setPreviewBlobUrl(blobUrl);
+    } catch (err) {
+      setToast({ type: 'error', message: err instanceof Error ? err.message : 'Gagal memuat preview' });
+      setPreviewAttachment(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleClosePreview = () => {
+    if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl);
+    setPreviewBlobUrl(null);
+    setPreviewAttachment(null);
+  };
+
+  const handleDownload = async (attachment: ProposalAttachment) => {
+    setDownloadingId(attachment.id);
+    try {
+      await apiService.downloadAttachment(attachment.id, attachment.file_name);
+    } catch (err) {
+      setToast({ type: 'error', message: err instanceof Error ? err.message : 'Gagal mengunduh file' });
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   const formatDate = (dateString: string | null | undefined) => {
@@ -678,6 +728,47 @@ const ProposalDetail: React.FC = () => {
           </div>
         </div>
 
+        {/* Dokumen Pendukung */}
+        {proposal.attachments && proposal.attachments.length > 0 && (
+          <div className="p-6 border-t border-gray-200">
+            <div className="flex items-center gap-2 mb-4">
+              <Paperclip className="text-gray-400" size={20} />
+              <h3 className="font-semibold text-gray-900">Dokumen Pendukung</h3>
+              <span className="ml-auto text-xs text-gray-500">{proposal.attachments.length} file</span>
+            </div>
+            <div className="space-y-2">
+              {proposal.attachments.map((attachment) => (
+                <div key={attachment.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <span className="text-xl">{getFileIcon(attachment.mime_type)}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{attachment.file_name}</p>
+                    <p className="text-xs text-gray-500">{(attachment.file_size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handlePreview(attachment)}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Pratinjau"
+                    >
+                      <Eye size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDownload(attachment)}
+                      disabled={downloadingId === attachment.id}
+                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                      title="Unduh"
+                    >
+                      {downloadingId === attachment.id
+                        ? <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                        : <Download size={16} />}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Committee Requirement & Rejection Reason */}
         {(proposal.requires_committee_approval || proposal.rejection_reason || proposal.improvement_suggestions) && (
           <div className="p-6 border-t border-gray-200 space-y-4">
@@ -755,6 +846,56 @@ const ProposalDetail: React.FC = () => {
                    user?.role === 'Komite Madrasah' ? 'komite_madrasah' : 
                    'bendahara') as 'verifikator' | 'kepala_madrasah' | 'komite_madrasah' | 'bendahara'}
       />
+
+      {/* Attachment Preview Modal */}
+      {previewAttachment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-200">
+              <Paperclip size={18} className="text-gray-400 shrink-0" />
+              <p className="flex-1 text-sm font-medium text-gray-900 truncate">{previewAttachment.file_name}</p>
+              <button
+                onClick={() => handleDownload(previewAttachment)}
+                disabled={downloadingId === previewAttachment.id}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Unduh"
+              >
+                <Download size={18} />
+              </button>
+              <button
+                onClick={handleClosePreview}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Tutup"
+              >
+                <XCircle size={18} />
+              </button>
+            </div>
+            {/* Body */}
+            <div className="flex-1 overflow-hidden bg-gray-100 flex items-center justify-center min-h-64">
+              {previewLoading ? (
+                <div className="flex flex-col items-center gap-3 text-gray-500">
+                  <span className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm">Memuat pratinjau…</span>
+                </div>
+              ) : previewBlobUrl ? (
+                <iframe
+                  src={previewBlobUrl}
+                  className="w-full h-full"
+                  style={{ minHeight: '60vh' }}
+                  title={previewAttachment.file_name}
+                />
+              ) : (
+                <div className="text-center text-gray-500 p-8">
+                  <FileText size={48} className="mx-auto mb-3 text-gray-300" />
+                  <p className="text-sm">Pratinjau tidak tersedia untuk tipe file ini.</p>
+                  <p className="text-xs mt-1">Silakan unduh file untuk membukanya.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Back Link removed - header has back button */}
     </div>
