@@ -201,6 +201,8 @@ export interface DashboardSummary {
   totalBudget: number;
   usedBudget: number;
   remainingBudget: number;
+  totalDanaBos: number;
+  totalDanaKomite: number;
 }
 
 export interface Laporan {
