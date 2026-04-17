@@ -215,6 +215,8 @@ const RAKMViewer: React.FC = () => {
                     <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px] cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('item_name')}>
                        <div className="flex items-center">Uraian Kegitan <SortIcon column="item_name" /></div>
                     </th>
+                    <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px] text-right">BOS</th>
+                    <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px] text-right">Komite</th>
                     <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px] text-right cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('pagu')}>
                        <div className="flex items-center justify-end">Pagu <SortIcon column="pagu" /></div>
                     </th>
@@ -228,44 +230,70 @@ const RAKMViewer: React.FC = () => {
                   {isLoading ? (
                     Array(5).fill(0).map((_, i) => (
                       <tr key={i} className="animate-pulse">
-                        {Array(5).fill(0).map((_, j) => (
+                        {Array(7).fill(0).map((_, j) => (
                           <td key={j} className="px-6 py-4"><div className="h-4 bg-gray-50 rounded"></div></td>
                         ))}
                       </tr>
                     ))
                   ) : rkamData.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-gray-400 italic">Data tidak ditemukan.</td>
+                      <td colSpan={7} className="px-6 py-12 text-center text-gray-400 italic">Data tidak ditemukan.</td>
                     </tr>
                   ) : (
-                    rkamData.map(item => (
-                      <tr key={item.id} className="hover:bg-blue-50/30 transition-colors group">
-                        <td className="px-6 py-4">
-                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 border border-gray-200">
-                              {item.category?.name || 'Umum'}
-                           </span>
+                    <>
+                      {rkamData.map(item => (
+                        <tr key={item.id} className="hover:bg-blue-50/30 transition-colors group">
+                          <td className="px-6 py-4">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 border border-gray-200">
+                                {item.category?.name || 'Umum'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="font-bold text-gray-900 group-hover:text-blue-700 transition-colors">{item.item_name}</div>
+                          </td>
+                          <td className="px-6 py-4 text-right font-medium text-green-700 bg-green-50/20">
+                             {formatCurrency(item.dana_bos || 0)}
+                          </td>
+                          <td className="px-6 py-4 text-right font-medium text-purple-700 bg-purple-50/20">
+                             {formatCurrency(item.dana_komite || 0)}
+                          </td>
+                          <td className="px-6 py-4 text-right font-black text-gray-900">
+                             {formatCurrency(item.pagu)}
+                          </td>
+                          <td className="px-6 py-4 text-right font-medium text-blue-600 bg-blue-50/30">
+                             {formatCurrency(item.terpakai_filtered || 0)}
+                          </td>
+                          <td className="px-6 py-4">
+                             <div className="flex items-center justify-center">
+                                <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                   <div 
+                                     className={`h-full rounded-full ${item.persentase_filtered > 90 ? 'bg-red-500' : 'bg-green-500'}`} 
+                                     style={{ width: `${Math.min(item.persentase_filtered, 100)}%` }}
+                                   ></div>
+                                </div>
+                             </div>
+                          </td>
+                        </tr>
+                      ))}
+                      
+                      {/* Dynamic Total Row */}
+                      <tr className="bg-gray-50 border-t-2 border-gray-200 font-black text-gray-900">
+                        <td colSpan={2} className="px-6 py-4 text-right uppercase tracking-widest text-[10px] text-gray-400">Total Halaman Ini</td>
+                        <td className="px-6 py-4 text-right text-green-700">
+                          {formatCurrency(rkamData.reduce((acc, item) => acc + Number(item.dana_bos || 0), 0))}
                         </td>
-                        <td className="px-6 py-4">
-                           <div className="font-bold text-gray-900 group-hover:text-blue-700 transition-colors">{item.item_name}</div>
+                        <td className="px-6 py-4 text-right text-purple-700">
+                          {formatCurrency(rkamData.reduce((acc, item) => acc + Number(item.dana_komite || 0), 0))}
                         </td>
-                        <td className="px-6 py-4 text-right font-black text-gray-900">
-                           {formatCurrency(item.pagu)}
+                        <td className="px-6 py-4 text-right">
+                          {formatCurrency(rkamData.reduce((acc, item) => acc + Number(item.pagu || 0), 0))}
                         </td>
-                        <td className="px-6 py-4 text-right font-medium text-blue-600 bg-blue-50/30">
-                           {formatCurrency(item.terpakai_filtered || 0)}
+                        <td className="px-6 py-4 text-right text-blue-700">
+                          {formatCurrency(rkamData.reduce((acc, item) => acc + Number(item.terpakai_filtered || 0), 0))}
                         </td>
-                        <td className="px-6 py-4">
-                           <div className="flex items-center justify-center">
-                              <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                 <div 
-                                   className={`h-full rounded-full ${item.persentase_filtered > 90 ? 'bg-red-500' : 'bg-green-500'}`} 
-                                   style={{ width: `${Math.min(item.persentase_filtered, 100)}%` }}
-                                 ></div>
-                              </div>
-                           </div>
-                        </td>
+                        <td></td>
                       </tr>
-                    ))
+                    </>
                   )}
                 </tbody>
               </table>
