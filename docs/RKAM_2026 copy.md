@@ -9,6 +9,7 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **1** | **KURIKULUM :** | **1** | **Tahun** | **Rp 676.400.000** | **Rp 676.400.000** | **Rp 114.300.000** | **Rp 562.100.000** |
 | 1 | Psikotest kls X | 426 | Siswa | Rp 150.000 | Rp 63.900.000 | | Rp 63.900.000 |
 | 2 | Persiapan Layanan Percepatan (Tes CBT) | 3 | Kegiatan | Rp 3.000.000 | Rp 9.000.000 | | Rp 9.000.000 |
 | 3 | Kegiatan Penilaian (ASAS) dan Ujian/Asesmen Madrasah | 1 | tahun | Rp 180.000.000 | Rp 180.000.000 | Rp 100.000.000 | Rp 80.000.000 |
@@ -26,23 +27,32 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 15 | Pengolahan nilai akhir kelas XII (Eligible dan Ijazah) | 1 | kegiatan | Rp 5.000.000 | Rp 5.000.000 | | Rp 5.000.000 |
 | 16 | Program Penguatan Bahasa (M2IELST) Kelas X | 1080 | JP | Rp 25.000 | Rp 27.000.000 | | Rp 27.000.000 |
 | 17 | E-Learning/LMS | 1 | Paket | Rp 110.000.000 | Rp 110.000.000 | | Rp 110.000.000 |
+| | **SUB TOTAL (KURIKULUM)** | | | **Rp 501.925.000** | **Rp 676.400.000** | **Rp 114.300.000** | **Rp 562.100.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **2** | **KANTOR :** | **1** | **Tahun** | **Rp 1.562.550.000** | **Rp 1.562.550.000** | **Rp 461.800.000** | **Rp 1.100.750.000** |
+| **I** | **Perlengkapan** | | | | | | |
 | 1 | Cinderamata/ Plakat | 12 | buah | Rp 350.000 | Rp 4.200.000 | Rp 2.000.000 | Rp 2.200.000 |
 | 2 | Pembelian Laptop Operator Utama | 3 | Unit | Rp 20.000.000 | Rp 60.000.000 | Rp 60.000.000 | - |
 | 3 | Pembelian Printer (BK) | 1 | Unit | Rp 3.800.000 | Rp 3.800.000 | Rp 3.800.000 | - |
 | 4 | Seragam PDH Security dan cleaning service | 13 | Unit | Rp 250.000 | Rp 3.250.000 | | Rp 3.250.000 |
 | 5 | Kit Alat Pelindung Diri cleaning service | 1 | Tahun | Rp 2.000.000 | Rp 2.000.000 | | Rp 2.000.000 |
+| **II** | **Konsumsi** | | | | | | |
 | 1 | Konsumsi Tamu/ Monev | 1 | Tahun | Rp 80.000.000 | Rp 80.000.000 | Rp 30.000.000 | Rp 50.000.000 |
 | 2 | Konsumsi Kegiatan Madrasah | 12 | Bulan | Rp 12.000.000 | Rp 144.000.000 | | Rp 144.000.000 |
+| **III** | **Pemeliharaan** | | | | | | |
+| **a.** | **Kendaraan Operasional Madrasah** | | | | | | |
 | 1 | Biaya Pajak Kendaraan Operasional (Komite) | 1 | Tahun | Rp 5.500.000 | Rp 5.500.000 | | Rp 5.500.000 |
 | 2 | Biaya Pemeliharaan suku cadang Kendaraan | 1 | Tahun | Rp 7.000.000 | Rp 7.000.000 | | Rp 7.000.000 |
 | 3 | Biaya Bahan Bakar Kendaraan Operasional | 36 | Kegiatan | Rp 250.000 | Rp 9.000.000 | | Rp 9.000.000 |
+| **b.** | **Perlengkapan Kantor/Madrasah** | | | | | | |
 | 4 | Biaya Loundry (Gorden, taplak meja) | 12 | Bulan | Rp 350.000 | Rp 4.200.000 | | Rp 4.200.000 |
+| **IV** | **Bahan** | | | | | | |
 | 1 | Bahan Kebersihan | 1 | Tahun | Rp 58.000.000 | Rp 58.000.000 | Rp 38.000.000 | Rp 20.000.000 |
+| **V** | **Pembiayaan Rutin Madrasah** | | | | | | |
 | 1 | Biaya Listrik | 12 | Bulan | Rp 30.000.000 | Rp 360.000.000 | Rp 280.000.000 | Rp 80.000.000 |
 | 2 | Internet Madrasah | 12 | Bulan | Rp 8.000.000 | Rp 96.000.000 | Rp 48.000.000 | Rp 48.000.000 |
 | 3 | Zoom | 1 | Tahun | Rp 2.000.000 | Rp 2.000.000 | | Rp 2.000.000 |
@@ -56,20 +66,24 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 11 | Pengadaan Plastik Sampah | 12 | Bln | Rp 500.000 | Rp 6.000.000 | | Rp 6.000.000 |
 | 12 | Pohon | 1 | Tahun | Rp 6.000.000 | Rp 6.000.000 | | Rp 6.000.000 |
 | 13 | Apresiasi Kinerja Cleaning, security & penjaga malam | 8 | 12 | Rp 400.000 | Rp 38.400.000 | | Rp 38.400.000 |
+| **VI** | **Implementasi ASTA PROTAS** | | | | | | |
 | 1 | Biaya Pendampingan | 1 | Tahun | Rp 20.000.000 | Rp 20.000.000 | | Rp 20.000.000 |
 | 2 | Konsumsi | 1 | Tahun | Rp 20.000.000 | Rp 20.000.000 | | Rp 20.000.000 |
 | 3 | Pengelolaan sampah organik dan non organik | 1 | Tahun | Rp 10.000.000 | Rp 10.000.000 | | Rp 10.000.000 |
 | 4 | Pembelian dan Pemeliharaan Tanaman Area Madrasah, Green House dan Hidroponik Madrasah | 1 | Tahun | Rp 50.000.000 | Rp 50.000.000 | | Rp 50.000.000 |
+| | **SUB TOTAL (KANTOR)** | | | **Rp 361.225.000** | **Rp 1.562.550.000** | **Rp 461.800.000** | **Rp 1.100.750.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **3** | **SARANA & PRASARANA :** | **1** | **Tahun** | **Rp 130.332.500** | **Rp 130.332.500** | **Rp 15.000.000** | **Rp 149.832.500** |
 | 1 | Maintenance Listrik : saklar stop kontak dan stand | 25 | Ruangan | Rp 250.000 | Rp 6.250.000 | Rp 5.000.000 | Rp 1.250.000 |
 | 2 | Penggantian/pengaturan panel kontrol listrik yang terbakar | 4 | panel | Rp 750.000 | Rp 3.000.000 | | Rp 3.000.000 |
 | 3 | Penggantian/pengaturan jalur kabel AC gedung B dan C | 24 | unit | Rp 150.000 | Rp 3.600.000 | | Rp 3.600.000 |
 | 4 | Perbaikan dan penggantian bahlon kelas (38 kls X 4 bahlon) | 152 | titik | Rp 60.000 | Rp 9.120.000 | Rp 7.000.000 | Rp 2.120.000 |
 | 5 | Maintenance (CUCI) AC 138 X 4 KALI | 540 | unit | Rp 75.000 | Rp 40.500.000 | | Rp 40.500.000 |
+| 6 | Perbaikan AC rusak 25 % dari total | 35 | unit | Rp 450.000 | Rp 15.750.000 | | Rp 15.750.000 |
 | 7 | Penggantian Fiber penghalang tampias dari Gedung Tua dan Ruang Guru | 15 | 75000 | Rp 120.000 | Rp 1.800.000 | | Rp 1.800.000 |
 | 8 | Perbaikan toilet siswa buntu area gedung B | 2 | bh | Rp 3.000.000 | Rp 6.000.000 | | Rp 6.000.000 |
 | 9 | Pengadaan kuncian pintu Kelas X | 13 | kelas | Rp 200.000 | Rp 2.600.000 | | Rp 2.600.000 |
@@ -85,11 +99,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 19 | Ganti kunci pintu master 12 kelas lantai 1 gedung | 4 | ps | Rp 450.000 | Rp 1.800.000 | | Rp 1.800.000 |
 | 20 | Pengadaan alat foto copy kantor | 1 | unit | Rp 34.500.000 | Rp 34.500.000 | | Rp 34.500.000 |
 | 21 | Apresiasi Kinerja bantuan tim kerja sarana | 2 | 12 | Rp 400.000 | Rp 9.600.000 | | Rp 9.600.000 |
+| | **SUB TOTAL (SARANA & PRASARANA)** | | | **Rp 16.877.500** | **Rp 130.332.500** | **Rp 15.000.000** | **Rp 159.432.500** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **4** | **KESISWAAN :** | **1** | **Tahun** | **Rp 668.395.000** | **Rp 668.395.000** | **Rp 24.800.000** | **Rp 580.945.000** |
 | 1 | Matsama | 1 | Kegiatan | Rp 35.000.000 | Rp 35.000.000 | Rp 7.300.000 | Rp 27.700.000 |
 | 2 | Buku Panduan Matsama | 500 | Buah | Rp 35.000 | Rp 17.500.000 | Rp 12.500.000 | Rp 5.000.000 |
 | 3 | Raker Bersama | 1 | Kegiatan | Rp 20.000.000 | Rp 20.000.000 | Rp 5.000.000 | Rp 15.000.000 |
@@ -113,11 +129,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 21 | Piket Tenaga Kependidikan PNS | 1 | Tahun | Rp 11.550.000 | Rp 11.550.000 | | Rp 11.550.000 |
 | 22 | Pendampingan Pengembangan Madrasah | 1 | Tahun | Rp 14.000.000 | Rp 14.000.000 | | Rp 14.000.000 |
 | 23 | Pembinaan peningkatan soft skill murid | 1 | Tahun | Rp 15.500.000 | Rp 15.500.000 | | Rp 56.700.000 |
+| | **SUB TOTAL (KESISWAAN)** | | | **Rp 668.395.000** | **Rp 668.395.000** | **Rp 24.800.000** | **Rp 643.595.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **5** | **HUMAS :** | **1** | **Tahun** | **Rp 110.000.000** | **Rp 110.000.000** | **Rp -** | **Rp 110.000.000** |
 | 1 | Maintenance dan Pemeliharaan website Madrasah | 1 | Kegiatan | Rp 4.000.000 | Rp 4.000.000 | | Rp 4.000.000 |
 | 2 | Publikasi Zona Integritas | 1 | Kegiatan | Rp 5.000.000 | Rp 5.000.000 | | Rp 5.000.000 |
 | 3 | Iklan dan Property PPDB/SNMB 2026-2027 | 1 | Kegiatan | Rp 7.500.000 | Rp 7.500.000 | | Rp 7.500.000 |
@@ -130,22 +148,26 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 10 | MAP Madrasah | 500 | Volume | Rp 15.000 | Rp 7.500.000 | | Rp 7.500.000 |
 | 11 | Madrash Award | 1 | Kegiatan | Rp 15.000.000 | Rp 15.000.000 | | Rp 15.000.000 |
 | 12 | Maintenance Sirangkul | 1 | Tahun | Rp 10.000.000 | Rp 10.000.000 | | Rp 10.000.000 |
+| | **SUB TOTAL (HUMAS)** | | | **Rp 64.515.000** | **Rp 110.000.000** | **Rp -** | **Rp 110.000.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **6** | **PEMBINAAN OLIMPIADE DAN LOMBA :** | **1** | **Tahun** | **Rp 525.000.000** | **Rp 525.000.000** | **Rp 60.000.000** | **Rp 465.000.000** |
 | 1 | OSN | 1 | Paket | Rp 100.000.000 | Rp 100.000.000 | Rp 20.000.000 | Rp 80.000.000 |
 | 2 | OMI Sains | 6 | Mapel | Rp 35.000.000 | Rp 210.000.000 | | Rp 210.000.000 |
 | 3 | OMI Riset dan OPSI | 1 | Tahun | Rp 75.000.000 | Rp 75.000.000 | | Rp 75.000.000 |
 | 4 | FLS3N | 1 | Tahun | Rp 30.000.000 | Rp 30.000.000 | | Rp 30.000.000 |
 | 5 | O2SN | 1 | Tahun | Rp 10.000.000 | Rp 10.000.000 | | Rp 10.000.000 |
 | 6 | Lomba-Lomba Lainnya | 1 | tahun | Rp 100.000.000 | Rp 100.000.000 | Rp 40.000.000 | Rp 60.000.000 |
+| | **SUB TOTAL (OLIMPIADE)** | | | **Rp 350.000.000** | **Rp 525.000.000** | **Rp 60.000.000** | **Rp 465.000.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **7** | **OSIM :** | **1** | **Tahun** | **Rp 88.200.000** | **Rp 88.200.000** | **Rp 4.000.000** | **Rp 84.200.000** |
 | 1 | Imsac M2M Competition (IMSAC) | 1 | kali | Rp 3.000.000 | Rp 3.000.000 | | Rp 3.000.000 |
 | 2 | Seminar Moderasi Beragama | 1 | kali | Rp 3.000.000 | Rp 3.000.000 | | Rp 3.000.000 |
 | 3 | National Hero's Day/ Han Pahlawan Nasional | 1 | kali | Rp 2.000.000 | Rp 2.000.000 | | Rp 2.000.000 |
@@ -162,11 +184,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 14 | Pentas Seni Matsama | 1 | kali | Rp 1.500.000 | Rp 1.500.000 | | Rp 1.500.000 |
 | 15 | Level Up Your English (LUYE VOL. IV) | 1 | kali | Rp 1.500.000 | Rp 1.500.000 | | Rp 1.500.000 |
 | 16 | Pengadaan Alat-alat OSIM | 1 | tahun | Rp 2.000.000 | Rp 2.000.000 | | Rp 2.000.000 |
+| | **SUB TOTAL (OSIM)** | | | **Rp 88.200.000** | **Rp 88.200.000** | **Rp 4.000.000** | **Rp 84.200.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **8** | **MAJELIS PERWAKILAN KELAS :** | **1** | **Tahun** | **Rp 20.000.000** | **Rp 20.000.000** | **Rp 4.000.000** | **Rp 16.000.000** |
 | 1 | Latihan Manajemen Parlemen Siswa (LMPS) | 1 | Kegiatan | Rp 4.000.000 | Rp 4.000.000 | Rp 4.000.000 | - |
 | 2 | Membentuk Sikap Kepemimpinan / Upgrading | 1 | Kegiatan | Rp 1.000.000 | Rp 1.000.000 | | Rp 1.000.000 |
 | 3 | Pemilihan Ketua dan Wakil Ketua OSIM MAN 2 Kota Makassar | 1 | Kegiatan | Rp 3.000.000 | Rp 3.000.000 | | Rp 3.000.000 |
@@ -175,11 +199,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 6 | Rencana Anggaran Pendapatan dan Belanja Madrasah | 1 | Kegiatan | Rp 1.500.000 | Rp 1.500.000 | | Rp 1.500.000 |
 | 7 | Rapat Penetapan Pengurus Baru Seluruh Organisasi MAN 2 Kota Makassar | 1 | Kegiatan | Rp 3.500.000 | Rp 3.500.000 | | Rp 3.500.000 |
 | 8 | Rapat Kerja Seluruh Organisasi MAN 2 Kota Makassar | 1 | Kegiatan | Rp 3.500.000 | Rp 3.500.000 | | Rp 3.500.000 |
+| | **SUB TOTAL (MPK)** | | | **Rp 18.500.000** | **Rp 20.000.000** | **Rp 4.000.000** | **Rp 16.000.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **9** | **PASKIBRAKA :** | **1** | **Tahun** | **Rp 27.835.000** | **Rp 27.835.000** | **Rp 4.000.000** | **Rp 23.835.000** |
 | 1 | Pengibaran HUT 17 2026 | 1 | Set | Rp 2.000.000 | Rp 2.000.000 | | Rp 2.000.000 |
 | 2 | DIKLATSAR 2025 | 1 | Kegiatan | Rp 10.000.000 | Rp 10.000.000 | Rp 4.000.000 | Rp 6.000.000 |
 | 3 | MA'LAMBANG 2025 | 1 | Kegiatan | Rp 500.000 | Rp 500.000 | | Rp 500.000 |
@@ -192,11 +218,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 10 | Dana Awal Lontara VOL.III | 1 | Kegiatan | Rp 4.500.000 | Rp 4.500.000 | | Rp 4.500.000 |
 | 11 | SOSTUB 2026 | 1 | Kegiatan | Rp 700.000 | Rp 700.000 | | Rp 700.000 |
 | 12 | Air Dos Pengibaran | 1 | Kegiatan | Rp 315.000 | Rp 315.000 | | Rp 315.000 |
+| | **SUB TOTAL (PASKIBRAKA)** | | | **Rp 27.835.000** | **Rp 27.835.000** | **Rp 4.000.000** | **Rp 23.835.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **10** | **KEAGAMAAN/IKRAMUL :** | **1** | **Tahun** | **Rp 75.100.000** | **Rp 75.100.000** | **Rp 4.000.000** | **Rp 71.100.000** |
 | 1 | Malam Bina Ilmu Iman dan Taqwa (MABIIT) | 1 | kegiatan | Rp 4.000.000 | Rp 4.000.000 | Rp 4.000.000 | - |
 | 2 | Kajian Internal (KITA) | 3 | kegiatan | Rp 500.000 | Rp 1.500.000 | | Rp 1.500.000 |
 | 3 | Musyawarah Anggota (MUSYAG) | 1 | kegiatan | Rp 1.100.000 | Rp 1.100.000 | | Rp 1.100.000 |
@@ -210,11 +238,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 11 | Isra Mi'raj | 1 | kegiatan | Rp 17.000.000 | Rp 17.000.000 | | Rp 17.000.000 |
 | 12 | Muharram | 1 | kegiatan | Rp 4.000.000 | Rp 4.000.000 | | Rp 4.000.000 |
 | 13 | Amaliyah Ramadhan | 1 | kegiatan | Rp 15.000.000 | Rp 15.000.000 | | Rp 15.000.000 |
+| | **SUB TOTAL (KEAGAMAAN)** | | | **Rp 73.100.000** | **Rp 75.100.000** | **Rp 4.000.000** | **Rp 71.100.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **11** | **KARYA ILMIAH REMAJA :** | **1** | **Tahun** | **Rp 43.500.000** | **Rp 43.500.000** | **Rp 4.000.000** | **Rp 39.500.000** |
 | 1 | Seminar KTI | 1 | Kegiatan | Rp 2.500.000 | Rp 2.500.000 | | Rp 2.500.000 |
 | 2 | Penerbitan Antologi Cerpen | 1 | Kegiatan | Rp 2.000.000 | Rp 2.000.000 | | Rp 2.000.000 |
 | 3 | Bedah Buku | 1 | Kegiatan | Rp 3.000.000 | Rp 3.000.000 | | Rp 3.000.000 |
@@ -225,11 +255,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 8 | Laporan Pertanggung Jawaban | 1 | Kegiatan | Rp 2.500.000 | Rp 2.500.000 | | Rp 2.500.000 |
 | 9 | Diklatsar | 1 | Kegiatan | Rp 4.000.000 | Rp 4.000.000 | Rp 4.000.000 | - |
 | 10 | Pembuatan Mading Offline | 1 | Kegiatan | Rp 1.500.000 | Rp 1.500.000 | | Rp 1.500.000 |
+| | **SUB TOTAL (KIR)** | | | **Rp 43.500.000** | **Rp 43.500.000** | **Rp 4.000.000** | **Rp 39.500.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **12** | **PMR :** | **1** | **Tahun** | **Rp 20.060.000** | **Rp 20.060.000** | **Rp 4.000.000** | **Rp 16.060.000** |
 | 1 | DIKLATSAR (Indoor/Outdoor) | 2 | Kegiatan | Rp 5.000.000 | Rp 10.000.000 | Rp 4.000.000 | Rp 6.000.000 |
 | 2 | UPGRADING | 1 | Kegiatan | Rp 1.500.000 | Rp 1.500.000 | | Rp 1.500.000 |
 | 3 | Bakti Sosial (BAKSOS) | 1 | Kegiatan | Rp 1.000.000 | Rp 1.000.000 | | Rp 1.000.000 |
@@ -241,11 +273,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 9 | Bambu Panjang 225cm | 6 | Sarana | Rp 35.000 | Rp 210.000 | | Rp 210.000 |
 | 10 | Bambu Panjang 60cm | 6 | Sarana | Rp 25.000 | Rp 150.000 | | Rp 150.000 |
 | 11 | Tandu Lipat | 2 | Sarana | Rp 700.000 | Rp 1.400.000 | | Rp 1.400.000 |
+| | **SUB TOTAL (PMR)** | | | **Rp 14.060.000** | **Rp 20.060.000** | **Rp 4.000.000** | **Rp 16.060.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **13** | **PIK-R :** | **1** | **Tahun** | **Rp 22.969.000** | **Rp 22.969.000** | **Rp 4.000.000** | **Rp 18.969.000** |
 | 1 | Pendidikan dan Pelatihan (DIKLAT) | 1 | Kegiatan | Rp 4.000.000 | Rp 4.000.000 | Rp 4.000.000 | - |
 | 2 | Seminar | 1 | Kegiatan | Rp 2.000.000 | Rp 2.000.000 | | Rp 2.000.000 |
 | 3 | Uprgrading, Outbound, Bina Akrab | 1 | Kegiatan | Rp 8.000.000 | Rp 8.000.000 | | Rp 8.000.000 |
@@ -255,11 +289,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 7 | Car Free Day | 1 | Kegiatan | Rp 110.000 | Rp 110.000 | | Rp 110.000 |
 | 8 | Sekolah Siaga Kependudukan | 1 | Kegiatan | Rp 4.000.000 | Rp 4.000.000 | | Rp 4.000.000 |
 | 9 | Cerita Mading Dan Edu Talks | 1 | Kegiatan | Rp 500.000 | Rp 500.000 | | Rp 500.000 |
+| | **SUB TOTAL (PIK-R)** | | | **Rp 22.969.000** | **Rp 22.969.000** | **Rp 4.000.000** | **Rp 18.969.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **14** | **PRAMUKA :** | **1** | **Tahun** | **Rp 28.360.000** | **Rp 28.360.000** | **Rp 4.000.000** | **Rp 24.360.000** |
 | 1 | Kemah Kebangsaan | 1 | Kegiatan | Rp 1.000.000 | Rp 1.000.000 | | Rp 1.000.000 |
 | 2 | Proses Penerimaan Aggota Baru (PPAB) | 1 | Kegiatan | Rp 10.360.000 | Rp 10.360.000 | Rp 4.000.000 | Rp 6.360.000 |
 | 3 | Pramuka Relawan Aktif Tangguh Alam Muda | 1 | Kegiatan | Rp 3.000.000 | Rp 3.000.000 | | Rp 3.000.000 |
@@ -270,11 +306,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 8 | Pembenahan Sanggar | 1 | Kegiatan | Rp 1.000.000 | Rp 1.000.000 | | Rp 1.000.000 |
 | 9 | Pembuatan Kartu Tanda Anggota | 1 | Kegiatan | Rp 600.000 | Rp 600.000 | | Rp 600.000 |
 | 10 | Honor Pelatih | 6 | Bulan | Rp 500.000 | Rp 3.000.000 | | Rp 3.000.000 |
+| | **SUB TOTAL (PRAMUKA)** | | | **Rp 20.660.000** | **Rp 28.360.000** | **Rp 4.000.000** | **Rp 24.360.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **15** | **FOTOGRAFI DAN JURNALISTIK :** | **1** | **Tahun** | **Rp 62.100.000** | **Rp 62.100.000** | **Rp 4.000.000** | **Rp 58.100.000** |
 | 1 | Seminar Fomusain (Fotografi, Multimedia, Desain) | 1 | Kegiatan | Rp 5.000.000 | Rp 5.000.000 | | Rp 5.000.000 |
 | 2 | Seminar Fomusain (Fotografi, Multimedia, Desain) | 2 | Kegiatan | Rp 5.000.000 | Rp 5.000.000 | | Rp 5.000.000 |
 | 3 | Upgrading | 1 | Kegiatan | Rp 5.000.000 | Rp 5.000.000 | | Rp 5.000.000 |
@@ -289,19 +327,23 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 12 | Foju Fest | 1 | Kegiatan | Rp 8.000.000 | Rp 8.000.000 | | Rp 8.000.000 |
 | 13 | Final Recap (Gelar Karya dan LPJ) | 1 | Kegiatan | Rp 3.000.000 | Rp 3.000.000 | | Rp 3.000.000 |
 | 14 | Talkbite dan Kuis Edukasi | 12 | Bulan | Rp 400.000 | Rp 4.800.000 | | Rp 4.800.000 |
+| | **SUB TOTAL (FOTOGRAFI)** | | | **Rp 45.550.000** | **Rp 62.100.000** | **Rp 4.000.000** | **Rp 58.100.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **16** | **SENI :** | **1** | **Tahun** | **Rp 14.000.000** | **Rp 14.000.000** | **Rp -** | **Rp 14.000.000** |
 | 1 | Mixer MG16XU | 1 | buah | Rp 8.000.000 | Rp 8.000.000 | | Rp 8.000.000 |
 | 2 | Cermin Ukuran 7x2 meter | 1 | buah | Rp 5.000.000 | Rp 5.000.000 | | Rp 5.000.000 |
 | 3 | Kabel KREZT TCAS 001 KZT 50 m | 1 | Roll | Rp 1.000.000 | Rp 1.000.000 | | Rp 1.000.000 |
+| | **SUB TOTAL (SENI)** | | | **Rp 14.000.000** | **Rp 14.000.000** | **Rp -** | **Rp 14.000.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **17** | **BK :** | **1** | **Tahun** | **Rp 15.100.000** | **Rp 15.100.000** | **Rp -** | **Rp 15.100.000** |
 | 1 | Peminatan Kelas X (Asesmen, Konsultasi, dan penyusunan kelas X) | 1 | Kegiatan | Rp 4.000.000 | Rp 4.000.000 | | Rp 4.000.000 |
 | 2 | Peminatan Kelas XI (Asesmen, Konsultasi, Penetapan Mapel Pilihan) | 1 | Kegiatan | Rp 4.000.000 | Rp 4.000.000 | | Rp 4.000.000 |
 | 3 | Peminatan Kelas XII (Asesmen, Konsultasi, dan Rekomendasi Pendidikan Lanjutan) | 1 | Kegiatan | Rp 4.000.000 | Rp 4.000.000 | | Rp 4.000.000 |
@@ -309,11 +351,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 5 | Software/Aplikasi BK (BK Konselor) | 1 | Sarana | Rp 500.000 | Rp 500.000 | | Rp 500.000 |
 | 6 | Pembuatan Banner Anti Bulying | 1 | Sarana | Rp 500.000 | Rp 500.000 | | Rp 500.000 |
 | 7 | Langganan Aplikasi dan pembuatan konten edukasi | 1 | Sarana | Rp 500.000 | Rp 500.000 | | Rp 500.000 |
+| | **SUB TOTAL (BK)** | | | **Rp 13.700.000** | **Rp 15.100.000** | **Rp -** | **Rp 15.100.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **18** | **OLAHRAGA :** | **1** | **Tahun** | **Rp 10.075.000** | **Rp 10.075.000** | **Rp 8.000.000** | **Rp 10.075.000** |
 | 1 | Bola Basket | 4 | Buah | Rp 500.000 | Rp 2.000.000 | | Rp 2.000.000 |
 | 2 | Boal Volley | 4 | Buah | Rp 500.000 | Rp 2.000.000 | | Rp 2.000.000 |
 | 3 | Net Bola Volley | 2 | Buah | Rp 700.000 | Rp 1.400.000 | | Rp 1.400.000 |
@@ -323,11 +367,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 7 | Peluit | 5 | Buah | Rp 250.000 | Rp 1.250.000 | | Rp 1.250.000 |
 | 8 | Stop watch | 2 | Buah | Rp 500.000 | Rp 1.000.000 | | Rp 1.000.000 |
 | 9 | Kabel lampu Indoor | 50 | Meter | Rp 12.500 | Rp 625.000 | | Rp 625.000 |
+| | **SUB TOTAL (OLAHRAGA)** | | | **Rp 3.362.500** | **Rp 10.075.000** | **Rp 8.000.000** | **Rp 2.075.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **19** | **LAB. FISIKA :** | **1** | **Tahun** | **Rp 20.810.000** | **Rp 20.810.000** | **Rp 1.500.000** | **Rp 19.310.000** |
 | 1 | Lemari Alat | 1 | buah | Rp 3.000.000 | Rp 3.000.000 | | Rp 3.000.000 |
 | 2 | Kit Mekanika | 1 | buah | Rp 5.610.000 | Rp 5.610.000 | | Rp 5.610.000 |
 | 3 | Mass Cart + Track (lintasan gerak) | 1 | set | Rp 2.000.000 | Rp 2.000.000 | | Rp 2.000.000 |
@@ -335,11 +381,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 5 | Karpet lantai (10 x 12 m) | 120 | meter | Rp 30.000 | Rp 3.600.000 | | Rp 3.600.000 |
 | 6 | Kaca meja ( 1 x 2 m ) | 6 | set | Rp 250.000 | Rp 1.500.000 | Rp 1.500.000 | - |
 | 7 | Printer | 1 | set | Rp 3.000.000 | Rp 3.000.000 | | Rp 3.000.000 |
+| | **SUB TOTAL (LAB. FISIKA)** | | | **Rp 14.590.000** | **Rp 20.810.000** | **Rp 1.500.000** | **Rp 19.310.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **20** | **LAB. BIOLOGI :** | **1** | **Tahun** | **Rp 9.848.000** | **Rp 9.848.000** | **Rp 6.000.000** | **Rp 9.848.000** |
 | 1 | Preparat Mitosis | 6 | Keping | Rp 60.000 | Rp 360.000 | | Rp 360.000 |
 | 2 | Preparat meiosis | 6 | Keping | Rp 60.000 | Rp 360.000 | | Rp 360.000 |
 | 3 | Preparat anatomi Tumbuhan | 1 | Set | Rp 846.000 | Rp 846.000 | | Rp 846.000 |
@@ -365,11 +413,13 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 23 | H2O2 Pekat | 2 | Liter | Rp 100.000 | Rp 200.000 | | Rp 200.000 |
 | 24 | Serum Anti AB 10 ml | 2 | Set | Rp 350.000 | Rp 700.000 | | Rp 700.000 |
 | 25 | Kapas | 1 | Ball | Rp 50.000 | Rp 50.000 | | Rp 50.000 |
+| | **SUB TOTAL (LAB. BIOLOGI)** | | | **Rp 4.177.500** | **Rp 9.848.000** | **Rp 6.000.000** | **Rp 3.848.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **21** | **LAB. KIMIA :** | **1** | **Tahun** | **Rp 9.270.000** | **Rp 9.270.000** | **Rp 6.000.000** | **Rp 3.270.000** |
 | 1 | Termometer alkohol | 12 | buah | Rp 25.000 | Rp 300.000 | | Rp 300.000 |
 | 2 | spatula kaca | 12 | buah | Rp 5.000 | Rp 60.000 | | Rp 60.000 |
 | 3 | pipet tetes panjang | 20 | buah | Rp 3.500 | Rp 70.000 | | Rp 70.000 |
@@ -396,11 +446,14 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 24 | Es Crystal | 28 | kantong | Rp 20.000 | Rp 560.000 | | Rp 560.000 |
 | 25 | cairan pencuci piring | 1 | liter | Rp 30.000 | Rp 30.000 | | Rp 30.000 |
 | 26 | NaOH | 500 | gram | Rp 50.000 | Rp 50.000 | | Rp 50.000 |
+| | **SUB TOTAL (LAB. KIMIA)** | | | **Rp 3.066.000** | **Rp 9.270.000** | **Rp 6.000.000** | **Rp 3.270.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **22** | **PRAKARYA :** | **1** | **Tahun** | **Rp 16.714.920** | **Rp 16.714.920** | **Rp 6.000.000** | **Rp 16.714.920** |
+| **I** | **BUDIDAYA TANAMAN (HYDROPONIK)** | | | | | | |
 | 1 | Bibit Tanaman | 1 | Paket | Rp 100.000 | Rp 100.000 | | Rp 100.000 |
 | 2 | Rokwool (Media semai) | 5 | Buah | Rp 80.000 | Rp 400.000 | | Rp 400.000 |
 | 3 | Mesin Celup | 1 | Unit | Rp 700.000 | Rp 700.000 | | Rp 700.000 |
@@ -410,6 +463,7 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 7 | Dop pipi paralon | 2 | Buah | Rp 25.000 | Rp 50.000 | | Rp 50.000 |
 | 8 | Lem Pipa | 1 | Kaleng | Rp 15.000 | Rp 15.000 | | Rp 15.000 |
 | 9 | Prktek Memasak | 12 | Kelas | Rp 250.000 | Rp 3.000.000 | | Rp 3.000.000 |
+| **II** | **BUDIDAYA IKAN TERPAL (BIOFLOK)** | | | | | | |
 | 1 | Kolam terpal | 6 | Buah | Rp 135.000 | Rp 810.000 | | Rp 810.000 |
 | 2 | Kanel C | 20 | Batang | Rp 85.500 | Rp 1.710.000 | | Rp 1.710.000 |
 | 3 | Pipa Paralon 1/2 " | 3 | Batang | Rp 51.000 | Rp 153.000 | | Rp 153.000 |
@@ -422,18 +476,22 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 10 | Pakan Ikan | 6 | Zak | Rp 450.000 | Rp 2.700.000 | | Rp 2.700.000 |
 | 11 | Bibit Ikan | 3000 | Ekor | Rp 500 | Rp 1.500.000 | | Rp 1.500.000 |
 | 12 | Baut Baja Ringan | 1 | Dos | Rp 82.000 | Rp 82.000 | | Rp 82.000 |
+| | **SUB TOTAL (PRAKARYA)** | | | **Rp 4.719.960** | **Rp 16.714.920** | **Rp 6.000.000** | **Rp 10.714.920** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **23** | **UKS :** | **1** | **Tahun** | **Rp 9.700.000** | **Rp 9.700.000** | **Rp 5.000.000** | **Rp 4.700.000** |
 | 1 | Bed Hospital | 2 | Unit | Rp 2.350.000 | Rp 4.700.000 | | Rp 4.700.000 |
 | 2 | Obat | 1 | tahun | Rp 5.000.000 | Rp 5.000.000 | Rp 5.000.000 | - |
+| | **SUB TOTAL (UKS)** | | | **Rp 7.350.000** | **Rp 9.700.000** | **Rp 5.000.000** | **Rp 4.700.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **24** | **PENGEMBANGAN BAHASA :** | **1** | **Tahun** | **Rp 34.460.000** | **Rp 34.460.000** | **Rp 6.000.000** | **Rp 28.460.000** |
 | 1 | English Camp dirangkaikan dengan Workshop Persiapan Students Mobility (Pembicara Native Speaker) | 1 | Kegiatan | Rp 7.400.000 | Rp 7.400.000 | Rp 2.000.000 | Rp 5.400.000 |
 | 2 | Pelatihan Speaking Guru dan Tendik | 64 | Pertemuan | Rp 150.000 | Rp 9.600.000 | | Rp 9.600.000 |
 | 3 | Eng Teachers' Workshop (MGMP) & Teachers' English Training | 2 | Kegiatan | Rp 3.400.000 | Rp 6.800.000 | Rp 3.600.000 | Rp 3.200.000 |
@@ -441,52 +499,65 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 5 | English Eco-Edu Tech Program (Pembelajaran berbasis PjBL) | 200 | QR-Botanica | Rp 3.500 | Rp 700.000 | | Rp 700.000 |
 | 6 | Program Talkshow/ Podcast Inggris, Arab, Jepang & Jerman | 12 | Kegiatan | Rp 80.000 | Rp 960.000 | | Rp 960.000 |
 | 7 | Festival Jepang | 1 | Kegiatan | Rp 8.000.000 | Rp 8.000.000 | Rp 400.000 | Rp 7.600.000 |
+| | **SUB TOTAL (PENGEMBANGAN BAHASA)** | | | **Rp 34.460.000** | **Rp 34.460.000** | **Rp 12.000.000** | **Rp 22.460.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **25** | **ROBOTIC :** | **1** | **Tahun** | **Rp 38.000.000** | **Rp 38.000.000** | **Rp 24.000.000** | **Rp 31.000.000** |
 | 1 | Pengadaan alat & bahan praktek robotic | 1 | tahun | Rp 7.000.000 | Rp 7.000.000 | | Rp 7.000.000 |
 | 2 | International Robotic Competition | 1 | kali | Rp 25.000.000 | Rp 25.000.000 | | Rp 25.000.000 |
 | 3 | Honor Instruktur (pelatih) | 10 | pertemuan | Rp 500.000 | Rp 5.000.000 | | Rp 5.000.000 |
 | 4 | Lemari / box penyimpanan alat - alat robotic | 1 | buah | Rp 1.000.000 | Rp 1.000.000 | | Rp 1.000.000 |
+| | **SUB TOTAL (ROBOTIC)** | | | **Rp -** | **Rp 38.000.000** | **Rp 24.000.000** | **Rp 14.000.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **26** | **LAB KOMPUTER :** | **1** | **Tahun** | **Rp 175.000.000** | **Rp 175.000.000** | **Rp 6.000.000** | **Rp 175.000.000** |
 | 1 | Pengembangan Sistem Informasi Madrasah (SIM) | 1 | Kegiatan | Rp 15.000.000 | Rp 15.000.000 | | Rp 15.000.000 |
 | 2 | Pembangunan infrastruktur Jaringan Madrasah | 12 | Volume | Rp 12.500.000 | Rp 150.000.000 | | Rp 150.000.000 |
 | 3 | Platform UBAGI | 1 | Kegiatan | Rp 10.000.000 | Rp 10.000.000 | | Rp 10.000.000 |
+| | **SUB TOTAL (LAB KOMPUTER)** | | | **Rp 37.500.000** | **Rp 175.000.000** | **Rp 6.000.000** | **Rp 169.000.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **27** | **AULA PSBB & WISMA :** | **1** | **Tahun** | **Rp 30.500.000** | **Rp 30.500.000** | **Rp -** | **Rp 30.500.000** |
+| **AULA PSBB** | | | | | | | |
 | 1 | Pengadaan kursi Aula PSBB | 30 | unit | Rp 350.000 | Rp 10.500.000 | | Rp 10.500.000 |
 | 2 | Sound System | 1 | Unit | Rp 20.000.000 | Rp 20.000.000 | | Rp 20.000.000 |
+| | **SUB TOTAL (AULA PSBB & WISMA)** | | | **Rp 20.350.000** | **Rp 30.500.000** | **Rp -** | **Rp 30.500.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **28** | **PROGRAM SKS DAN RISET SAINS SERTA HUMANIORA :** | **1** | **Tahun** | **Rp 42.000.000** | **Rp 42.000.000** | **Rp -** | **Rp 42.000.000** |
 | 1 | Pendampingan dan Semester 3 dan 5 untuk guru yg mengajar Kls SKS | 2 | Kegiatan | Rp 6.000.000 | Rp 12.000.000 | | Rp 12.000.000 |
 | 2 | Study Lingkungan di PPLP Puntondo Takalar | 1 | Kegiatan | Rp 10.000.000 | Rp 10.000.000 | | Rp 10.000.000 |
 | 3 | Biaya Riset per kelompok 20 Kelompok | 10 | Kegiatan | Rp 2.000.000 | Rp 20.000.000 | | Rp 20.000.000 |
+| | **SUB TOTAL (PROGRAM SKS & RISET)** | | | **Rp 18.000.000** | **Rp 42.000.000** | **Rp -** | **Rp 42.000.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **29** | **MAN - PUN PROGRAM UNGGULAN NASIONAL :** | **1** | **Tahun** | **Rp 124.000.000** | **Rp 124.000.000** | **Rp -** | **Rp 124.000.000** |
 | 1 | Kurikulum | 1 | Kegiatan | Rp 10.000.000 | Rp 10.000.000 | | Rp 10.000.000 |
 | 2 | Pembinaan akademik dan karakter | 6 | Bulan | Rp 9.000.000 | Rp 54.000.000 | | Rp 54.000.000 |
 | 3 | Jasa dan operasional (tenaga housekeeping) | 6 | Bulan | Rp 10.000.000 | Rp 60.000.000 | | Rp 60.000.000 |
 | 4 | Biaya Makan | 6 | Bulan | Rp 45.000.000 | Rp 270.000.000 | | Rp 270.000.000 |
+| | **SUB TOTAL (MAN-PUN)** | | | **Rp 74.000.000** | **Rp 124.000.000** | **Rp -** | **Rp 124.000.000** |
 
 ---
 
 | NO. | URAIAN KEGIATAN | VOLUME | SATUAN | SATUAN (Rp) | JUMLAH (Rp) | BOS 2026 (Rp) | KOMITE (Rp) |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **30** | **KEGIATAN KOMITE :** | **1** | **Tahun** | **Rp 215.900.000** | **Rp 215.900.000** | **Rp -** | **Rp 215.900.000** |
 | 1 | Transport Wakil Sekertaris dan Wakil Bendahara | 2 | 12 | Rp 2.000.000 | Rp 48.000.000 | | Rp 48.000.000 |
 | 2 | Sosialisasi Prog.Madrasah/Wawancara | 1 | kegiatan | Rp 50.000.000 | Rp 50.000.000 | | Rp 50.000.000 |
 | 3 | Konsumsi Rapat Komite | 12 | kali | Rp 1.000.000 | Rp 12.000.000 | | Rp 12.000.000 |
@@ -494,9 +565,11 @@ Jl. Sultan Alauddin No. 105 Tlp. 0411-875500, Faximili 0411-875500 Makassar, 902
 | 6 | Transport Rapat Pengurus Komite | 12 | 28 | Rp 150.000 | Rp 50.400.000 | | Rp 50.400.000 |
 | 7 | Rapat kerja tahunan pengurus | 1 | kali | Rp 10.000.000 | Rp 10.000.000 | | Rp 10.000.000 |
 | 8 | Pengadaan Paket Lebaran | 170 | orang | Rp 250.000 | Rp 42.500.000 | | Rp 42.500.000 |
+| | **SUB TOTAL (KOMITE)** | | | **Rp 66.400.000** | **Rp 215.900.000** | **Rp -** | **Rp 215.900.000** |
 
 ---
 
+| **TOTAL** | | | **Rp 4.826.179.420** | **Rp 2.148.000.000** | **Rp 2.678.179.420** |
 |:---|:---:|:---:|:---:|:---:|:---:|
 
 ---
