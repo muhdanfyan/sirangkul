@@ -63,6 +63,7 @@ const RKAMManagement: React.FC = () => {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
   const [fullDataForPrint, setFullDataForPrint] = useState<RKAM[]>([]);
+  const [summary, setSummary] = useState<{ totalBudget: number; totalDanaBos: number; totalDanaKomite: number } | null>(null);
 
   // Auto-calculated pagu in form
   const computedPagu = useMemo(() => {
