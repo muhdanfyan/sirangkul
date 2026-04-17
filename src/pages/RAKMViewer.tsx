@@ -12,6 +12,7 @@ const RAKMViewer: React.FC = () => {
   // Data States
   const [rkamData, setRkamData] = useState<RKAM[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [summary, setSummary] = useState<{ totalBudget: number; totalDanaBos: number; totalDanaKomite: number } | null>(null);
   
   // UI States
   const [isLoading, setIsLoading] = useState(true);
