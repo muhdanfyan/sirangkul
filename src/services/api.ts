@@ -991,6 +991,18 @@ class ApiService {
     });
   }
 
+  async getMonthlyTrends(): Promise<any[]> {
+    return this.request<any[]>('/reporting/monthly-trends', {
+      method: 'GET',
+    });
+  }
+
+  async getCategoryBreakdown(): Promise<any[]> {
+    return this.request<any[]>('/reporting/category-breakdown', {
+      method: 'GET',
+    });
+  }
+
   // PUBLIC VIEWER METHODS
   async getPublicRKAM(params: any): Promise<PaginatedResponse<RKAM>> {
     const url = new URL(`${this.baseURL}/public/rkam`);
