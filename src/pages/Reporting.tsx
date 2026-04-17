@@ -22,7 +22,9 @@ const Reporting: React.FC = () => {
     pendingProposals: 0,
     totalBudget: 0,
     usedBudget: 0,
-    remainingBudget: 0
+    remainingBudget: 0,
+    totalDanaBos: 0,
+    totalDanaKomite: 0
   });
 
   const [monthlyTrends, setMonthlyTrends] = useState<any[]>([]);
@@ -144,9 +146,9 @@ const Reporting: React.FC = () => {
       </div>
 
       {/* Summary Matrix with Liquid Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        {/* Proposal Count */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-4 gap-6 mb-8">
+        {/* Total Submission */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group flex flex-col min-h-[160px]">
           <div className="relative z-10 flex flex-col h-full justify-between">
             <div className="flex items-center justify-between">
               <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform"><Database size={24} /></div>
@@ -190,11 +192,18 @@ const Reporting: React.FC = () => {
           <div className="flex-grow flex flex-col justify-end">
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-1">Pagu Anggaran</h4>
             <div className="flex flex-wrap items-baseline gap-1">
-              <p className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 tracking-tight break-all leading-none">
+              <p className="text-xl sm:text-lg xl:text-2xl 2xl:text-3xl font-black text-gray-900 tracking-tight break-words leading-none">
                 {formatCurrency(summary.totalBudget)}
               </p>
             </div>
-            <div className="mt-3 text-[10px] text-gray-400 font-medium truncate">Total Pagu Terdaftar</div>
+            <div className="mt-3 flex items-center justify-between text-[10px] gap-2">
+               <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 text-green-700 rounded-md border border-green-100 font-bold whitespace-nowrap">
+                 BOS: {formatCurrency(summary.totalDanaBos)}
+               </div>
+               <div className="flex items-center gap-1.5 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-md border border-purple-100 font-bold whitespace-nowrap">
+                 KMT: {formatCurrency(summary.totalDanaKomite)}
+               </div>
+            </div>
           </div>
         </div>
 
@@ -207,7 +216,7 @@ const Reporting: React.FC = () => {
           <div className="flex-grow flex flex-col justify-end">
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-1">Estimasi Sisa</h4>
             <div className="flex flex-wrap items-baseline gap-1">
-              <p className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 tracking-tight break-all leading-none">
+              <p className="text-xl sm:text-lg xl:text-2xl 2xl:text-3xl font-black text-gray-900 tracking-tight break-words leading-none">
                 {formatCurrency(summary.remainingBudget)}
               </p>
             </div>
