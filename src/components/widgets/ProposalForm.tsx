@@ -54,10 +54,13 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
   const fetchRkams = async () => {
     try {
       setLoadingRkams(true);
-      const data = await apiService.getAllRKAM();
+      const response = await apiService.getAllRKAM({ no_paginate: true });
+      // Extract array from the result
+      const data = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+      
       // Only show RKAM items that have budget remaining
       const availableRkams = data.filter(rkam => {
-        const sisa = typeof rkam.sisa === 'string' ? parseFloat(rkam.sisa) : rkam.sisa;
+        const sisa = typeof rkam.sisa_filtered === 'number' ? rkam.sisa_filtered : (typeof rkam.sisa === 'string' ? parseFloat(rkam.sisa) : (rkam.sisa || 0));
         return sisa > 0;
       });
       setRkams(availableRkams);
