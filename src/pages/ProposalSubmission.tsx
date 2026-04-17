@@ -55,13 +55,13 @@ const ProposalSubmission: React.FC = () => {
 
   const fetchRkams = async () => {
     try {
-      const response = await apiService.getAllRKAM();
-      // Robust array check for both direct array and wrapped response
-      const data = Array.isArray(response) ? response : (response.data || []);
+      const response = await apiService.getAllRKAM({ no_paginate: true });
+      // Extract array from the result
+      const data = Array.isArray(response.data) ? response.data : (response.data?.data || []);
       
       // Only show RKAM items that have budget remaining
       const availableRkams = data.filter((rkam: RKAM) => {
-        const sisa = typeof rkam.sisa === 'string' ? parseFloat(rkam.sisa) : rkam.sisa;
+        const sisa = typeof rkam.sisa === 'string' ? parseFloat(rkam.sisa) : (rkam.sisa || 0);
         return sisa > 0;
       });
       setRkams(availableRkams);

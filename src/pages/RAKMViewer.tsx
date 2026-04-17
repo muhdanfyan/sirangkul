@@ -17,7 +17,6 @@ const RAKMViewer: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
-  const [summary, setSummary] = useState<{ totalBudget: number; totalDanaBos: number; totalDanaKomite: number } | null>(null);
   
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,14 +56,16 @@ const RAKMViewer: React.FC = () => {
           order: sortConfig.direction
         });
   
-        setRkamData(response.data.data);
+        setRkamData(Array.isArray(response.data) ? response.data : (response.data?.data || []));
         setSummary(response.summary || null);
-        setPaginationData({
-          total: response.data.total,
-          from: response.data.from,
-          to: response.data.to,
-          last_page: response.data.last_page
-        });
+        if (!Array.isArray(response.data)) {
+          setPaginationData({
+            total: response.data.total,
+            from: response.data.from,
+            to: response.data.to,
+            last_page: response.data.last_page
+          });
+        }
     } catch (err) {
       console.error('Failed to fetch public RKAM data:', err);
     } finally {
@@ -135,46 +136,28 @@ const RAKMViewer: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         {/* Statistics or Hero Section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-           <div className="md:col-span-2 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-xl shadow-blue-100 relative overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-xl shadow-blue-100 relative overflow-hidden">
               <div className="relative z-10">
-                <Landmark className="h-8 w-8 text-blue-200 mb-3" />
-                <h2 className="text-xl font-bold">Transparansi Anggaran 2026</h2>
-                <div className="mt-4">
-                   <p className="text-[10px] text-blue-200 font-bold uppercase tracking-widest mb-1">Total Pagu SiRangkul</p>
-                   <p className="text-3xl font-black">{formatCurrency(summary?.totalBudget || 0)}</p>
-                </div>
+                <Landmark className="h-10 w-10 text-blue-200 mb-4" />
+                <h2 className="text-2xl font-bold">Transparansi Anggaran 2026</h2>
+                <p className="text-blue-100 mt-2 text-sm max-w-sm">SiRangkul berkomitmen menyederhanakan pelaporan dan transparansi anggaran madrasah untuk seluruh stakeholder.</p>
               </div>
               <div className="absolute -right-8 -bottom-8 bg-white opacity-5 w-48 h-48 rounded-full"></div>
            </div>
            
            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
-              <div>
-                 <h3 className="text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-2">Alokasi Dana BOS</h3>
-                 <p className="text-xl font-bold text-gray-900 tracking-tight">{formatCurrency(summary?.totalDanaBos || 0)}</p>
+              <div className="flex items-center justify-between">
+                 <h3 className="text-gray-400 font-bold text-xs uppercase tracking-widest">Update Terakhir</h3>
+                 <Calendar className="text-gray-300 h-5 w-5" />
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-50">
-                 <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-blue-500 transition-all duration-1000" 
-                      style={{ width: `${summary?.totalBudget ? (summary.totalDanaBos / summary.totalBudget) * 100 : 0}%` }}
-                    ></div>
-                 </div>
+              <div className="mt-4">
+                <p className="text-3xl font-black text-gray-900 tracking-tight">{paginationData.total}</p>
+                <p className="text-sm text-gray-400 font-medium">Item anggaran yang terpublikasi</p>
               </div>
-           </div>
-
-           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
-              <div>
-                 <h3 className="text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-2">Alokasi Dana Komite</h3>
-                 <p className="text-xl font-bold text-gray-900 tracking-tight">{formatCurrency(summary?.totalDanaKomite || 0)}</p>
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-50">
-                 <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-teal-500 transition-all duration-1000" 
-                      style={{ width: `${summary?.totalBudget ? (summary.totalDanaKomite / summary.totalBudget) * 100 : 0}%` }}
-                    ></div>
-                 </div>
+              <div className="mt-4 pt-4 border-t border-gray-50 flex items-center gap-2">
+                 <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                 <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Live Database Sync Active</span>
               </div>
            </div>
         </div>
@@ -231,8 +214,6 @@ const RAKMViewer: React.FC = () => {
                     <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px] text-right cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('realization')}>
                        <div className="flex items-center justify-end">Realisasi <SortIcon column="realization" /></div>
                     </th>
-                    <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px] text-right">BOS</th>
-                    <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px] text-right">Komite</th>
                     <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px] text-center">Status</th>
                   </tr>
                 </thead>
@@ -265,12 +246,6 @@ const RAKMViewer: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-right font-medium text-blue-600 bg-blue-50/30">
                            {formatCurrency(item.terpakai_filtered || 0)}
-                        </td>
-                        <td className="px-6 py-4 text-right text-xs font-semibold text-gray-600">
-                           {formatCurrency(item.dana_bos || 0)}
-                        </td>
-                        <td className="px-6 py-4 text-right text-xs font-semibold text-gray-600">
-                           {formatCurrency(item.dana_komite || 0)}
                         </td>
                         <td className="px-6 py-4">
                            <div className="flex items-center justify-center">

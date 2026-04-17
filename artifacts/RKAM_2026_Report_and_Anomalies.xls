@@ -1,0 +1,2988 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+        .header { background-color: #f3f4f6; font-weight: bold; text-align: center; }
+        .category-row { background-color: #e5e7eb; font-weight: bold; }
+        .total-row { background-color: #d1d5db; font-weight: bold; }
+        .anomaly { color: #dc2626; font-weight: bold; }
+        .currency { mso-number-format: "\#\,\#\#0"; text-align: right; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #000; padding: 5px; }
+    </style>
+</head>
+<body>
+    <h2>RKAM 2026 - Ringkasan Eksekutif</h2>
+    <table>
+        <tr><td colspan="2" class="header">STATUS ANGGARAN GLOBAL</td></tr>
+        <tr><td>Total Pagu di Database (Prod)</td><td class="currency">5140279420</td></tr>
+        <tr><td>Target Anggaran User</td><td class="currency">4800000000</td></tr>
+        <tr class="anomaly"><td>Selisih (Anomali Total)</td><td class="currency">340279420</td></tr>
+    </table>
+    <br>
+    
+    <h2>1. Ringkasan Per Kategori</h2>
+    <table>
+        <tr class="header">
+            <th>Kategori</th>
+            <th>Total Pagu</th>
+            <th>Dana BOS</th>
+            <th>Dana Komite</th>
+        </tr>
+                <tr>
+            <td>AULA PSBB & WISMA</td>
+            <td class="currency">30500000</td>
+            <td class="currency">0</td>
+            <td class="currency">30500000</td>
+        </tr>
+                <tr>
+            <td>BK</td>
+            <td class="currency">15100000</td>
+            <td class="currency">0</td>
+            <td class="currency">15100000</td>
+        </tr>
+                <tr>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td class="currency">62100000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">58100000</td>
+        </tr>
+                <tr>
+            <td>HUMAS</td>
+            <td class="currency">110000000</td>
+            <td class="currency">0</td>
+            <td class="currency">110000000</td>
+        </tr>
+                <tr>
+            <td>KANTOR</td>
+            <td class="currency">1562550000</td>
+            <td class="currency">461800000</td>
+            <td class="currency">1100750000</td>
+        </tr>
+                <tr>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td class="currency">43500000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">39500000</td>
+        </tr>
+                <tr>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td class="currency">75100000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">71100000</td>
+        </tr>
+                <tr>
+            <td>KEGIATAN KOMITE</td>
+            <td class="currency">215900000</td>
+            <td class="currency">0</td>
+            <td class="currency">215900000</td>
+        </tr>
+                <tr>
+            <td>KESISWAAN</td>
+            <td class="currency">668395000</td>
+            <td class="currency">88300000</td>
+            <td class="currency">580945000</td>
+        </tr>
+                <tr>
+            <td>KURIKULUM</td>
+            <td class="currency">676400000</td>
+            <td class="currency">114300000</td>
+            <td class="currency">562100000</td>
+        </tr>
+                <tr>
+            <td>LAB KOMPUTER</td>
+            <td class="currency">175000000</td>
+            <td class="currency">0</td>
+            <td class="currency">175000000</td>
+        </tr>
+                <tr>
+            <td>LAB. BIOLOGI</td>
+            <td class="currency">9848000</td>
+            <td class="currency">0</td>
+            <td class="currency">9848000</td>
+        </tr>
+                <tr>
+            <td>LAB. FISIKA</td>
+            <td class="currency">20810000</td>
+            <td class="currency">1500000</td>
+            <td class="currency">19310000</td>
+        </tr>
+                <tr>
+            <td>LAB. KIMIA</td>
+            <td class="currency">9270000</td>
+            <td class="currency">0</td>
+            <td class="currency">9270000</td>
+        </tr>
+                <tr>
+            <td>MAJELIS PERWAKILAN KELAS</td>
+            <td class="currency">20000000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">16000000</td>
+        </tr>
+                <tr>
+            <td>MAN - PUN PROGRAM UNGGULAN NASIONAL</td>
+            <td class="currency">394000000</td>
+            <td class="currency">0</td>
+            <td class="currency">394000000</td>
+        </tr>
+                <tr>
+            <td>OLAHRAGA</td>
+            <td class="currency">10075000</td>
+            <td class="currency">0</td>
+            <td class="currency">10075000</td>
+        </tr>
+                <tr>
+            <td>OSIM</td>
+            <td class="currency">88200000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">84200000</td>
+        </tr>
+                <tr>
+            <td>PASKIBRAKA</td>
+            <td class="currency">27835000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">23835000</td>
+        </tr>
+                <tr>
+            <td>PEMBINAAN OLIMPIADE DAN LOMBA</td>
+            <td class="currency">525000000</td>
+            <td class="currency">60000000</td>
+            <td class="currency">465000000</td>
+        </tr>
+                <tr>
+            <td>PENGEMBANGAN BAHASA</td>
+            <td class="currency">34460000</td>
+            <td class="currency">6000000</td>
+            <td class="currency">28460000</td>
+        </tr>
+                <tr>
+            <td>PIK-R</td>
+            <td class="currency">22969000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">18969000</td>
+        </tr>
+                <tr>
+            <td>PMR</td>
+            <td class="currency">20060000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">16060000</td>
+        </tr>
+                <tr>
+            <td>PRAKARYA</td>
+            <td class="currency">16714920</td>
+            <td class="currency">0</td>
+            <td class="currency">16714920</td>
+        </tr>
+                <tr>
+            <td>PRAMUKA</td>
+            <td class="currency">28360000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">24360000</td>
+        </tr>
+                <tr>
+            <td>PROGRAM SKS DAN RISET SAINS SERTA HUMANIORA</td>
+            <td class="currency">42000000</td>
+            <td class="currency">0</td>
+            <td class="currency">42000000</td>
+        </tr>
+                <tr>
+            <td>ROBOTIC</td>
+            <td class="currency">38000000</td>
+            <td class="currency">0</td>
+            <td class="currency">38000000</td>
+        </tr>
+                <tr>
+            <td>SARANA & PRASARANA</td>
+            <td class="currency">174432500</td>
+            <td class="currency">15000000</td>
+            <td class="currency">159432500</td>
+        </tr>
+                <tr>
+            <td>SENI</td>
+            <td class="currency">14000000</td>
+            <td class="currency">0</td>
+            <td class="currency">14000000</td>
+        </tr>
+                <tr>
+            <td>UKS</td>
+            <td class="currency">9700000</td>
+            <td class="currency">5000000</td>
+            <td class="currency">4700000</td>
+        </tr>
+                <tr class="total-row">
+            <td>TOTAL KESELURUHAN</td>
+            <td class="currency">5140279420</td>
+            <td class="currency">787900000</td>
+            <td class="currency">4353229420</td>
+        </tr>
+    </table>
+    <br>
+    
+    <h2>2. Temuan Anomali & Ketidaksesuaian</h2>
+    <p>Daftar item di bawah ini memiliki selisih antara nilai Pagu dengan rincian sumber dana (BOS + Komite).</p>
+    <table>
+        <tr class="header">
+            <th>Kategori</th>
+            <th>Nama Item</th>
+            <th>Pagu (A)</th>
+            <th>BOS + Komite (B)</th>
+            <th>Selisih (A-B)</th>
+        </tr>
+                <tr>
+            <td>KESISWAAN</td>
+            <td>Pembinaan peningkatan soft skill murid</td>
+            <td class="currency">15500000</td>
+            <td class="currency">56700000</td>
+            <td class="currency">-41200000</td>
+        </tr>
+                <tr>
+            <td>KESISWAAN</td>
+            <td>Komunikasi Perwalian Siswa</td>
+            <td class="currency">125400000</td>
+            <td class="currency">85050000</td>
+            <td class="currency">40350000</td>
+        </tr>
+            </table>
+    <br>
+    
+    <h2>3. Detail Seluruh Item RKAM 2026</h2>
+    <table>
+        <tr class="header">
+            <th>#</th>
+            <th>Kategori</th>
+            <th>Nama Item</th>
+            <th>Pagu</th>
+            <th>Dana BOS</th>
+            <th>Dana Komite</th>
+        </tr>
+                <tr>
+            <td>1</td>
+            <td>AULA PSBB & WISMA</td>
+            <td>Sound System</td>
+            <td class="currency">20000000</td>
+            <td class="currency">0</td>
+            <td class="currency">20000000</td>
+        </tr>
+                <tr>
+            <td>2</td>
+            <td>AULA PSBB & WISMA</td>
+            <td>Pengadaan kursi Aula PSBB</td>
+            <td class="currency">10500000</td>
+            <td class="currency">0</td>
+            <td class="currency">10500000</td>
+        </tr>
+                <tr>
+            <td>3</td>
+            <td>BK</td>
+            <td>Software/Aplikasi BK (BK Konselor)</td>
+            <td class="currency">500000</td>
+            <td class="currency">0</td>
+            <td class="currency">500000</td>
+        </tr>
+                <tr>
+            <td>4</td>
+            <td>BK</td>
+            <td>Peminatan Kelas XI (Asesmen, Konsultasi, Penetapan Mapel Pilihan)</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>5</td>
+            <td>BK</td>
+            <td>Peminatan Kelas XII (Asesmen, Konsultasi, dan Rekomendasi Pendidikan Lanjutan)</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>6</td>
+            <td>BK</td>
+            <td>Pembuatan Banner Anti Bulying</td>
+            <td class="currency">500000</td>
+            <td class="currency">0</td>
+            <td class="currency">500000</td>
+        </tr>
+                <tr>
+            <td>7</td>
+            <td>BK</td>
+            <td>Langganan Aplikasi dan pembuatan konten edukasi</td>
+            <td class="currency">500000</td>
+            <td class="currency">0</td>
+            <td class="currency">500000</td>
+        </tr>
+                <tr>
+            <td>8</td>
+            <td>BK</td>
+            <td>Peminatan Kelas X (Asesmen, Konsultasi, dan penyusunan kelas X)</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>9</td>
+            <td>BK</td>
+            <td>Kunjungan Rumah (Home Visit)</td>
+            <td class="currency">1600000</td>
+            <td class="currency">0</td>
+            <td class="currency">1600000</td>
+        </tr>
+                <tr>
+            <td>10</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Seminar Fomusain (Fotografi, Multimedia, Desain)</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>11</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Podcast Madrasah</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>12</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Set Alat dan Bahan Multimedia</td>
+            <td class="currency">2500000</td>
+            <td class="currency">0</td>
+            <td class="currency">2500000</td>
+        </tr>
+                <tr>
+            <td>13</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Majalah M2M</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>14</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Transport Pelatih Eksternal</td>
+            <td class="currency">4800000</td>
+            <td class="currency">0</td>
+            <td class="currency">4800000</td>
+        </tr>
+                <tr>
+            <td>15</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Upgrading</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>16</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Inventaris Studio</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>17</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Properti Photo Booth</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>18</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Studi Lapangan</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>19</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Final Recap (Gelar Karya dan LPJ)</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>20</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Foju Fest</td>
+            <td class="currency">8000000</td>
+            <td class="currency">0</td>
+            <td class="currency">8000000</td>
+        </tr>
+                <tr>
+            <td>21</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Seminar Fomusain (Fotografi, Multimedia, Desain)</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>22</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Diklatsar (Indoor dan Outdoor)</td>
+            <td class="currency">7000000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>23</td>
+            <td>FOTOGRAFI DAN JURNALISTIK</td>
+            <td>Talkbite dan Kuis Edukasi</td>
+            <td class="currency">4800000</td>
+            <td class="currency">0</td>
+            <td class="currency">4800000</td>
+        </tr>
+                <tr>
+            <td>24</td>
+            <td>HUMAS</td>
+            <td>Iklan dan Property PPDB/SNMB 2026-2027</td>
+            <td class="currency">7500000</td>
+            <td class="currency">0</td>
+            <td class="currency">7500000</td>
+        </tr>
+                <tr>
+            <td>25</td>
+            <td>HUMAS</td>
+            <td>Maintenance dan Pemeliharaan website Madrasah</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>26</td>
+            <td>HUMAS</td>
+            <td>MAP Madrasah</td>
+            <td class="currency">7500000</td>
+            <td class="currency">0</td>
+            <td class="currency">7500000</td>
+        </tr>
+                <tr>
+            <td>27</td>
+            <td>HUMAS</td>
+            <td>Project Konten E-Learning</td>
+            <td class="currency">12000000</td>
+            <td class="currency">0</td>
+            <td class="currency">12000000</td>
+        </tr>
+                <tr>
+            <td>28</td>
+            <td>HUMAS</td>
+            <td>Maintenance dan Perawatan VideoWall</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>29</td>
+            <td>HUMAS</td>
+            <td>Pemilihan Wakamad</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>30</td>
+            <td>HUMAS</td>
+            <td>Pemeliharaan konten E-Library</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>31</td>
+            <td>HUMAS</td>
+            <td>Madrash Award</td>
+            <td class="currency">15000000</td>
+            <td class="currency">0</td>
+            <td class="currency">15000000</td>
+        </tr>
+                <tr>
+            <td>32</td>
+            <td>HUMAS</td>
+            <td>Publikasi Zona Integritas</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>33</td>
+            <td>HUMAS</td>
+            <td>Peringatan HAB</td>
+            <td class="currency">10000000</td>
+            <td class="currency">0</td>
+            <td class="currency">10000000</td>
+        </tr>
+                <tr>
+            <td>34</td>
+            <td>HUMAS</td>
+            <td>Perlengkapan Alat Konten dan Peliputan Madrasah</td>
+            <td class="currency">25000000</td>
+            <td class="currency">0</td>
+            <td class="currency">25000000</td>
+        </tr>
+                <tr>
+            <td>35</td>
+            <td>HUMAS</td>
+            <td>Maintenance Sirangkul</td>
+            <td class="currency">10000000</td>
+            <td class="currency">0</td>
+            <td class="currency">10000000</td>
+        </tr>
+                <tr>
+            <td>36</td>
+            <td>KANTOR</td>
+            <td>Biaya Bahan Bakar Kendaraan Operasional</td>
+            <td class="currency">9000000</td>
+            <td class="currency">0</td>
+            <td class="currency">9000000</td>
+        </tr>
+                <tr>
+            <td>37</td>
+            <td>KANTOR</td>
+            <td>Biaya Loundry (Gorden, taplak meja)</td>
+            <td class="currency">4200000</td>
+            <td class="currency">0</td>
+            <td class="currency">4200000</td>
+        </tr>
+                <tr>
+            <td>38</td>
+            <td>KANTOR</td>
+            <td>Kit Alat Pelindung Diri cleaning service</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>39</td>
+            <td>KANTOR</td>
+            <td>Pembelian dan Pemeliharaan Tanaman Area Madrasah, Green House dan Hidroponik Madrasah</td>
+            <td class="currency">50000000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000000</td>
+        </tr>
+                <tr>
+            <td>40</td>
+            <td>KANTOR</td>
+            <td>Pengelolaan sampah organik dan non organik</td>
+            <td class="currency">10000000</td>
+            <td class="currency">0</td>
+            <td class="currency">10000000</td>
+        </tr>
+                <tr>
+            <td>41</td>
+            <td>KANTOR</td>
+            <td>Insentif Penjaga Malam (1 orang x 12 bulan)</td>
+            <td class="currency">30000000</td>
+            <td class="currency">0</td>
+            <td class="currency">30000000</td>
+        </tr>
+                <tr>
+            <td>42</td>
+            <td>KANTOR</td>
+            <td>Pohon</td>
+            <td class="currency">6000000</td>
+            <td class="currency">0</td>
+            <td class="currency">6000000</td>
+        </tr>
+                <tr>
+            <td>43</td>
+            <td>KANTOR</td>
+            <td>Cinderamata/ Plakat</td>
+            <td class="currency">4200000</td>
+            <td class="currency">2000000</td>
+            <td class="currency">2200000</td>
+        </tr>
+                <tr>
+            <td>44</td>
+            <td>KANTOR</td>
+            <td>Konsumsi</td>
+            <td class="currency">20000000</td>
+            <td class="currency">0</td>
+            <td class="currency">20000000</td>
+        </tr>
+                <tr>
+            <td>45</td>
+            <td>KANTOR</td>
+            <td>THR PTT, Cleaning Service, dan Security</td>
+            <td class="currency">9000000</td>
+            <td class="currency">0</td>
+            <td class="currency">9000000</td>
+        </tr>
+                <tr>
+            <td>46</td>
+            <td>KANTOR</td>
+            <td>THR untuk GTT</td>
+            <td class="currency">9000000</td>
+            <td class="currency">0</td>
+            <td class="currency">9000000</td>
+        </tr>
+                <tr>
+            <td>47</td>
+            <td>KANTOR</td>
+            <td>Insentif Guru Non-ASN</td>
+            <td class="currency">350000000</td>
+            <td class="currency">0</td>
+            <td class="currency">350000000</td>
+        </tr>
+                <tr>
+            <td>48</td>
+            <td>KANTOR</td>
+            <td>Konsumsi Tamu/ Monev</td>
+            <td class="currency">80000000</td>
+            <td class="currency">30000000</td>
+            <td class="currency">50000000</td>
+        </tr>
+                <tr>
+            <td>49</td>
+            <td>KANTOR</td>
+            <td>Biaya Pemeliharaan suku cadang Kendaraan</td>
+            <td class="currency">7000000</td>
+            <td class="currency">0</td>
+            <td class="currency">7000000</td>
+        </tr>
+                <tr>
+            <td>50</td>
+            <td>KANTOR</td>
+            <td>Insentif cleaning Service (7 orang x 12 bulan)</td>
+            <td class="currency">151200000</td>
+            <td class="currency">0</td>
+            <td class="currency">151200000</td>
+        </tr>
+                <tr>
+            <td>51</td>
+            <td>KANTOR</td>
+            <td>Pengadaan Plastik Sampah</td>
+            <td class="currency">6000000</td>
+            <td class="currency">0</td>
+            <td class="currency">6000000</td>
+        </tr>
+                <tr>
+            <td>52</td>
+            <td>KANTOR</td>
+            <td>Internet Madrasah</td>
+            <td class="currency">96000000</td>
+            <td class="currency">48000000</td>
+            <td class="currency">48000000</td>
+        </tr>
+                <tr>
+            <td>53</td>
+            <td>KANTOR</td>
+            <td>Pembelian Printer (BK)</td>
+            <td class="currency">3800000</td>
+            <td class="currency">3800000</td>
+            <td class="currency">0</td>
+        </tr>
+                <tr>
+            <td>54</td>
+            <td>KANTOR</td>
+            <td>Piket Tenaga Kependidikan</td>
+            <td class="currency">18000000</td>
+            <td class="currency">0</td>
+            <td class="currency">18000000</td>
+        </tr>
+                <tr>
+            <td>55</td>
+            <td>KANTOR</td>
+            <td>Biaya Pendampingan</td>
+            <td class="currency">20000000</td>
+            <td class="currency">0</td>
+            <td class="currency">20000000</td>
+        </tr>
+                <tr>
+            <td>56</td>
+            <td>KANTOR</td>
+            <td>Bahan Kebersihan</td>
+            <td class="currency">58000000</td>
+            <td class="currency">38000000</td>
+            <td class="currency">20000000</td>
+        </tr>
+                <tr>
+            <td>57</td>
+            <td>KANTOR</td>
+            <td>Biaya Listrik</td>
+            <td class="currency">360000000</td>
+            <td class="currency">280000000</td>
+            <td class="currency">80000000</td>
+        </tr>
+                <tr>
+            <td>58</td>
+            <td>KANTOR</td>
+            <td>Apresiasi Kinerja Cleaning, security & penjaga malam</td>
+            <td class="currency">38400000</td>
+            <td class="currency">0</td>
+            <td class="currency">38400000</td>
+        </tr>
+                <tr>
+            <td>59</td>
+            <td>KANTOR</td>
+            <td>Seragam PDH Security dan cleaning service</td>
+            <td class="currency">3250000</td>
+            <td class="currency">0</td>
+            <td class="currency">3250000</td>
+        </tr>
+                <tr>
+            <td>60</td>
+            <td>KANTOR</td>
+            <td>Biaya Pajak Kendaraan Operasional (Komite)</td>
+            <td class="currency">5500000</td>
+            <td class="currency">0</td>
+            <td class="currency">5500000</td>
+        </tr>
+                <tr>
+            <td>61</td>
+            <td>KANTOR</td>
+            <td>Konsumsi Kegiatan Madrasah</td>
+            <td class="currency">144000000</td>
+            <td class="currency">0</td>
+            <td class="currency">144000000</td>
+        </tr>
+                <tr>
+            <td>62</td>
+            <td>KANTOR</td>
+            <td>Zoom</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>63</td>
+            <td>KANTOR</td>
+            <td>Jasa pengangkutan sampah</td>
+            <td class="currency">6000000</td>
+            <td class="currency">0</td>
+            <td class="currency">6000000</td>
+        </tr>
+                <tr>
+            <td>64</td>
+            <td>KANTOR</td>
+            <td>Pembelian Laptop Operator Utama</td>
+            <td class="currency">60000000</td>
+            <td class="currency">60000000</td>
+            <td class="currency">0</td>
+        </tr>
+                <tr>
+            <td>65</td>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td>Laporan Pertanggung Jawaban</td>
+            <td class="currency">2500000</td>
+            <td class="currency">0</td>
+            <td class="currency">2500000</td>
+        </tr>
+                <tr>
+            <td>66</td>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td>Pembuatan Mading Offline</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>67</td>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td>Penerbitan Antologi Cerpen</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>68</td>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td>Bakti Sosial</td>
+            <td class="currency">2500000</td>
+            <td class="currency">0</td>
+            <td class="currency">2500000</td>
+        </tr>
+                <tr>
+            <td>69</td>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td>Diklatsar</td>
+            <td class="currency">4000000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+        </tr>
+                <tr>
+            <td>70</td>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td>Workshop KTI</td>
+            <td class="currency">2500000</td>
+            <td class="currency">0</td>
+            <td class="currency">2500000</td>
+        </tr>
+                <tr>
+            <td>71</td>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td>Penerbitan Majalah As-Salam</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>72</td>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td>Seminar KTI</td>
+            <td class="currency">2500000</td>
+            <td class="currency">0</td>
+            <td class="currency">2500000</td>
+        </tr>
+                <tr>
+            <td>73</td>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td>Lomba KTI Se Sulsel</td>
+            <td class="currency">20000000</td>
+            <td class="currency">0</td>
+            <td class="currency">20000000</td>
+        </tr>
+                <tr>
+            <td>74</td>
+            <td>KARYA ILMIAH REMAJA</td>
+            <td>Bedah Buku</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>75</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Kartu Tanda Anggota (KTA)</td>
+            <td class="currency">500000</td>
+            <td class="currency">0</td>
+            <td class="currency">500000</td>
+        </tr>
+                <tr>
+            <td>76</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Maulid</td>
+            <td class="currency">20000000</td>
+            <td class="currency">0</td>
+            <td class="currency">20000000</td>
+        </tr>
+                <tr>
+            <td>77</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Malam Bina Ilmu Iman dan Taqwa (MABIIT)</td>
+            <td class="currency">4000000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+        </tr>
+                <tr>
+            <td>78</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Isra Mi'raj</td>
+            <td class="currency">17000000</td>
+            <td class="currency">0</td>
+            <td class="currency">17000000</td>
+        </tr>
+                <tr>
+            <td>79</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Musyawarah Anggota (MUSYAG)</td>
+            <td class="currency">1100000</td>
+            <td class="currency">0</td>
+            <td class="currency">1100000</td>
+        </tr>
+                <tr>
+            <td>80</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Pelatihan Dakwah (PELDAK)</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>81</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Kajian Internal (KITA)</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>82</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Pelatihan Nasyid dan Qasidah</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>83</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Upgrading</td>
+            <td class="currency">2500000</td>
+            <td class="currency">0</td>
+            <td class="currency">2500000</td>
+        </tr>
+                <tr>
+            <td>84</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Amaliyah Ramadhan</td>
+            <td class="currency">15000000</td>
+            <td class="currency">0</td>
+            <td class="currency">15000000</td>
+        </tr>
+                <tr>
+            <td>85</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Seminar</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>86</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Laporan Pertanggungjawaban (LPJ)</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>87</td>
+            <td>KEAGAMAAN/IKRAMUL</td>
+            <td>Muharram</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>88</td>
+            <td>KEGIATAN KOMITE</td>
+            <td>Rapat kerja tahunan pengurus</td>
+            <td class="currency">10000000</td>
+            <td class="currency">0</td>
+            <td class="currency">10000000</td>
+        </tr>
+                <tr>
+            <td>89</td>
+            <td>KEGIATAN KOMITE</td>
+            <td>Sosialisasi Prog.Madrasah/Wawancara</td>
+            <td class="currency">50000000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000000</td>
+        </tr>
+                <tr>
+            <td>90</td>
+            <td>KEGIATAN KOMITE</td>
+            <td>Pengadaan ATK dan Kebutuhan Rutin Sekretariat</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>91</td>
+            <td>KEGIATAN KOMITE</td>
+            <td>Konsumsi Rapat Komite</td>
+            <td class="currency">12000000</td>
+            <td class="currency">0</td>
+            <td class="currency">12000000</td>
+        </tr>
+                <tr>
+            <td>92</td>
+            <td>KEGIATAN KOMITE</td>
+            <td>Pengadaan Paket Lebaran</td>
+            <td class="currency">42500000</td>
+            <td class="currency">0</td>
+            <td class="currency">42500000</td>
+        </tr>
+                <tr>
+            <td>93</td>
+            <td>KEGIATAN KOMITE</td>
+            <td>Transport Wakil Sekertaris dan Wakil Bendahara</td>
+            <td class="currency">48000000</td>
+            <td class="currency">0</td>
+            <td class="currency">48000000</td>
+        </tr>
+                <tr>
+            <td>94</td>
+            <td>KEGIATAN KOMITE</td>
+            <td>Transport Rapat Pengurus Komite</td>
+            <td class="currency">50400000</td>
+            <td class="currency">0</td>
+            <td class="currency">50400000</td>
+        </tr>
+                <tr>
+            <td>95</td>
+            <td>KESISWAAN</td>
+            <td>Foto Raport Kelas X</td>
+            <td class="currency">10650000</td>
+            <td class="currency">0</td>
+            <td class="currency">10650000</td>
+        </tr>
+                <tr>
+            <td>96</td>
+            <td>KESISWAAN</td>
+            <td>Kartu Pelajar Siswa Kelas X</td>
+            <td class="currency">17040000</td>
+            <td class="currency">0</td>
+            <td class="currency">17040000</td>
+        </tr>
+                <tr>
+            <td>97</td>
+            <td>KESISWAAN</td>
+            <td>Aplikasi kesiswaan (SIPAKAR MADU)</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>98</td>
+            <td>KESISWAAN</td>
+            <td>Piket Tenaga Kependidikan PNS</td>
+            <td class="currency">11550000</td>
+            <td class="currency">0</td>
+            <td class="currency">11550000</td>
+        </tr>
+                <tr>
+            <td>99</td>
+            <td>KESISWAAN</td>
+            <td>Map Ijazah</td>
+            <td class="currency">20080000</td>
+            <td class="currency">0</td>
+            <td class="currency">20080000</td>
+        </tr>
+                <tr>
+            <td>100</td>
+            <td>KESISWAAN</td>
+            <td>Pembinaan Karakter Siswa Kelas X,XI dan XII</td>
+            <td class="currency">135000000</td>
+            <td class="currency">0</td>
+            <td class="currency">135000000</td>
+        </tr>
+                <tr>
+            <td>101</td>
+            <td>KESISWAAN</td>
+            <td>Buku Panduan Matsama</td>
+            <td class="currency">17500000</td>
+            <td class="currency">12500000</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>102</td>
+            <td>KESISWAAN</td>
+            <td>Pembinaan karakter keislaman siswa</td>
+            <td class="currency">25000000</td>
+            <td class="currency">0</td>
+            <td class="currency">25000000</td>
+        </tr>
+                <tr>
+            <td>103</td>
+            <td>KESISWAAN</td>
+            <td>Pembinaan peningkatan soft skill murid</td>
+            <td class="currency">15500000</td>
+            <td class="currency">0</td>
+            <td class="currency">56700000</td>
+        </tr>
+                <tr>
+            <td>104</td>
+            <td>KESISWAAN</td>
+            <td>Pendampingan Siswa Keluar Madrasah (Organisasi)/Undangan Kegiatan</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>105</td>
+            <td>KESISWAAN</td>
+            <td>Rapat Evaluasi Pembina intra & Ekstra</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>106</td>
+            <td>KESISWAAN</td>
+            <td>Pendampingan Sekolah Ramah Anak, anti bulying,HIV, 7 kebiasaan Anak indonesia hebat</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>107</td>
+            <td>KESISWAAN</td>
+            <td>Pembinaan Karakter Siswa Pengurus Organisasi</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>108</td>
+            <td>KESISWAAN</td>
+            <td>Raker Bersama</td>
+            <td class="currency">20000000</td>
+            <td class="currency">5000000</td>
+            <td class="currency">15000000</td>
+        </tr>
+                <tr>
+            <td>109</td>
+            <td>KESISWAAN</td>
+            <td>Komunikasi Perwalian Siswa</td>
+            <td class="currency">125400000</td>
+            <td class="currency">0</td>
+            <td class="currency">85050000</td>
+        </tr>
+                <tr>
+            <td>110</td>
+            <td>KESISWAAN</td>
+            <td>Penguatan nilai-nilai karakter nasionalisme</td>
+            <td class="currency">35100000</td>
+            <td class="currency">0</td>
+            <td class="currency">35100000</td>
+        </tr>
+                <tr>
+            <td>111</td>
+            <td>KESISWAAN</td>
+            <td>Akhirusanah (Penamatan)</td>
+            <td class="currency">50000000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000000</td>
+        </tr>
+                <tr>
+            <td>112</td>
+            <td>KESISWAAN</td>
+            <td>SNMP/PMBM</td>
+            <td class="currency">98500000</td>
+            <td class="currency">63500000</td>
+            <td class="currency">35000000</td>
+        </tr>
+                <tr>
+            <td>113</td>
+            <td>KESISWAAN</td>
+            <td>Pelantikan Pengurus Organisasi Intra dan Ekstra</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>114</td>
+            <td>KESISWAAN</td>
+            <td>Foto Ijazah Kelas XII</td>
+            <td class="currency">12075000</td>
+            <td class="currency">0</td>
+            <td class="currency">12075000</td>
+        </tr>
+                <tr>
+            <td>115</td>
+            <td>KESISWAAN</td>
+            <td>Pendampingan Pengembangan Madrasah</td>
+            <td class="currency">14000000</td>
+            <td class="currency">0</td>
+            <td class="currency">14000000</td>
+        </tr>
+                <tr>
+            <td>116</td>
+            <td>KESISWAAN</td>
+            <td>Matsama</td>
+            <td class="currency">35000000</td>
+            <td class="currency">7300000</td>
+            <td class="currency">27700000</td>
+        </tr>
+                <tr>
+            <td>117</td>
+            <td>KESISWAAN</td>
+            <td>Rapat Evaluasi Perwalian Kelas</td>
+            <td class="currency">6000000</td>
+            <td class="currency">0</td>
+            <td class="currency">6000000</td>
+        </tr>
+                <tr>
+            <td>118</td>
+            <td>KURIKULUM</td>
+            <td>Pengajar Kelas Karakter</td>
+            <td class="currency">30000000</td>
+            <td class="currency">0</td>
+            <td class="currency">30000000</td>
+        </tr>
+                <tr>
+            <td>119</td>
+            <td>KURIKULUM</td>
+            <td>Biaya sewa co-location server (4core RAM 6GB, SSD 120GB)</td>
+            <td class="currency">15000000</td>
+            <td class="currency">0</td>
+            <td class="currency">15000000</td>
+        </tr>
+                <tr>
+            <td>120</td>
+            <td>KURIKULUM</td>
+            <td>E-Learning/LMS</td>
+            <td class="currency">110000000</td>
+            <td class="currency">0</td>
+            <td class="currency">110000000</td>
+        </tr>
+                <tr>
+            <td>121</td>
+            <td>KURIKULUM</td>
+            <td>Pelaksanaan TKA/Ujian Nasional</td>
+            <td class="currency">10000000</td>
+            <td class="currency">0</td>
+            <td class="currency">10000000</td>
+        </tr>
+                <tr>
+            <td>122</td>
+            <td>KURIKULUM</td>
+            <td>Kegiatan Penilaian (ASAS) dan Ujian/Asesmen Madrasah</td>
+            <td class="currency">180000000</td>
+            <td class="currency">100000000</td>
+            <td class="currency">80000000</td>
+        </tr>
+                <tr>
+            <td>123</td>
+            <td>KURIKULUM</td>
+            <td>Program Penguatan Bahasa (M2IELST) Kelas X</td>
+            <td class="currency">27000000</td>
+            <td class="currency">0</td>
+            <td class="currency">27000000</td>
+        </tr>
+                <tr>
+            <td>124</td>
+            <td>KURIKULUM</td>
+            <td>Aplikasi Pendaftaran ulang dan database siswa</td>
+            <td class="currency">5000000</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+        </tr>
+                <tr>
+            <td>125</td>
+            <td>KURIKULUM</td>
+            <td>Digitalisasi Pembelajaran</td>
+            <td class="currency">30000000</td>
+            <td class="currency">0</td>
+            <td class="currency">30000000</td>
+        </tr>
+                <tr>
+            <td>126</td>
+            <td>KURIKULUM</td>
+            <td>Penyusunan Materi Implementasi Kurikulum Cinta dan Deep Learning oleh MGMP MAN 2 Kota Makassar</td>
+            <td class="currency">14000000</td>
+            <td class="currency">4300000</td>
+            <td class="currency">9700000</td>
+        </tr>
+                <tr>
+            <td>127</td>
+            <td>KURIKULUM</td>
+            <td>Bimbingan dan Try Out UTBK Kelas XII</td>
+            <td class="currency">15000000</td>
+            <td class="currency">0</td>
+            <td class="currency">15000000</td>
+        </tr>
+                <tr>
+            <td>128</td>
+            <td>KURIKULUM</td>
+            <td>Psikotest kls X</td>
+            <td class="currency">63900000</td>
+            <td class="currency">0</td>
+            <td class="currency">63900000</td>
+        </tr>
+                <tr>
+            <td>129</td>
+            <td>KURIKULUM</td>
+            <td>Workshop Guru dan Tenaga Kependidikan</td>
+            <td class="currency">10500000</td>
+            <td class="currency">5000000</td>
+            <td class="currency">5500000</td>
+        </tr>
+                <tr>
+            <td>130</td>
+            <td>KURIKULUM</td>
+            <td>Pelaksanaan Proyek Kokurikuler</td>
+            <td class="currency">20000000</td>
+            <td class="currency">0</td>
+            <td class="currency">20000000</td>
+        </tr>
+                <tr>
+            <td>131</td>
+            <td>KURIKULUM</td>
+            <td>Bimbingan TKA/Ujian Nasional</td>
+            <td class="currency">120000000</td>
+            <td class="currency">0</td>
+            <td class="currency">120000000</td>
+        </tr>
+                <tr>
+            <td>132</td>
+            <td>KURIKULUM</td>
+            <td>Kegiatan Tim Penjamin Mutu Madarasah</td>
+            <td class="currency">12000000</td>
+            <td class="currency">0</td>
+            <td class="currency">12000000</td>
+        </tr>
+                <tr>
+            <td>133</td>
+            <td>KURIKULUM</td>
+            <td>Persiapan Layanan Percepatan (Tes CBT)</td>
+            <td class="currency">9000000</td>
+            <td class="currency">0</td>
+            <td class="currency">9000000</td>
+        </tr>
+                <tr>
+            <td>134</td>
+            <td>KURIKULUM</td>
+            <td>Pengolahan nilai akhir kelas XII (Eligible dan Ijazah)</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>135</td>
+            <td>LAB KOMPUTER</td>
+            <td>Pembangunan infrastruktur Jaringan Madrasah</td>
+            <td class="currency">150000000</td>
+            <td class="currency">0</td>
+            <td class="currency">150000000</td>
+        </tr>
+                <tr>
+            <td>136</td>
+            <td>LAB KOMPUTER</td>
+            <td>Pengembangan Sistem Informasi Madrasah (SIM)</td>
+            <td class="currency">15000000</td>
+            <td class="currency">0</td>
+            <td class="currency">15000000</td>
+        </tr>
+                <tr>
+            <td>137</td>
+            <td>LAB KOMPUTER</td>
+            <td>Platform UBAGI</td>
+            <td class="currency">10000000</td>
+            <td class="currency">0</td>
+            <td class="currency">10000000</td>
+        </tr>
+                <tr>
+            <td>138</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Serum Anti AB 10 ml</td>
+            <td class="currency">700000</td>
+            <td class="currency">0</td>
+            <td class="currency">700000</td>
+        </tr>
+                <tr>
+            <td>139</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Formalin</td>
+            <td class="currency">150000</td>
+            <td class="currency">0</td>
+            <td class="currency">150000</td>
+        </tr>
+                <tr>
+            <td>140</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Preparat anatomi Tumbuhan</td>
+            <td class="currency">846000</td>
+            <td class="currency">0</td>
+            <td class="currency">846000</td>
+        </tr>
+                <tr>
+            <td>141</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Acriflavine HCI</td>
+            <td class="currency">120000</td>
+            <td class="currency">0</td>
+            <td class="currency">120000</td>
+        </tr>
+                <tr>
+            <td>142</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Fehling B</td>
+            <td class="currency">150000</td>
+            <td class="currency">0</td>
+            <td class="currency">150000</td>
+        </tr>
+                <tr>
+            <td>143</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Gelas Ukur (10 ml)</td>
+            <td class="currency">325000</td>
+            <td class="currency">0</td>
+            <td class="currency">325000</td>
+        </tr>
+                <tr>
+            <td>144</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Beaker Glass (500 ml)</td>
+            <td class="currency">534000</td>
+            <td class="currency">0</td>
+            <td class="currency">534000</td>
+        </tr>
+                <tr>
+            <td>145</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Objek Glass</td>
+            <td class="currency">170000</td>
+            <td class="currency">0</td>
+            <td class="currency">170000</td>
+        </tr>
+                <tr>
+            <td>146</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Tabung Reaksi</td>
+            <td class="currency">225000</td>
+            <td class="currency">0</td>
+            <td class="currency">225000</td>
+        </tr>
+                <tr>
+            <td>147</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Kapas</td>
+            <td class="currency">50000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000</td>
+        </tr>
+                <tr>
+            <td>148</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Spatula Kaca</td>
+            <td class="currency">230000</td>
+            <td class="currency">0</td>
+            <td class="currency">230000</td>
+        </tr>
+                <tr>
+            <td>149</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Lumpang + Alu Porselen</td>
+            <td class="currency">760000</td>
+            <td class="currency">0</td>
+            <td class="currency">760000</td>
+        </tr>
+                <tr>
+            <td>150</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Bunsen (100 ml)</td>
+            <td class="currency">680000</td>
+            <td class="currency">0</td>
+            <td class="currency">680000</td>
+        </tr>
+                <tr>
+            <td>151</td>
+            <td>LAB. BIOLOGI</td>
+            <td>H2O2 Pekat</td>
+            <td class="currency">200000</td>
+            <td class="currency">0</td>
+            <td class="currency">200000</td>
+        </tr>
+                <tr>
+            <td>152</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Fehling A</td>
+            <td class="currency">100000</td>
+            <td class="currency">0</td>
+            <td class="currency">100000</td>
+        </tr>
+                <tr>
+            <td>153</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Etanol 95%</td>
+            <td class="currency">100000</td>
+            <td class="currency">0</td>
+            <td class="currency">100000</td>
+        </tr>
+                <tr>
+            <td>154</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Preparat meiosis</td>
+            <td class="currency">360000</td>
+            <td class="currency">0</td>
+            <td class="currency">360000</td>
+        </tr>
+                <tr>
+            <td>155</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Cover Glass</td>
+            <td class="currency">140000</td>
+            <td class="currency">0</td>
+            <td class="currency">140000</td>
+        </tr>
+                <tr>
+            <td>156</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Etanol 95%</td>
+            <td class="currency">100000</td>
+            <td class="currency">0</td>
+            <td class="currency">100000</td>
+        </tr>
+                <tr>
+            <td>157</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Corong (75 mm)</td>
+            <td class="currency">850000</td>
+            <td class="currency">0</td>
+            <td class="currency">850000</td>
+        </tr>
+                <tr>
+            <td>158</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Thermometer - 10 - 110 C</td>
+            <td class="currency">400000</td>
+            <td class="currency">0</td>
+            <td class="currency">400000</td>
+        </tr>
+                <tr>
+            <td>159</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Preparat Mitosis</td>
+            <td class="currency">360000</td>
+            <td class="currency">0</td>
+            <td class="currency">360000</td>
+        </tr>
+                <tr>
+            <td>160</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Beaker Glass (500 ml)</td>
+            <td class="currency">780000</td>
+            <td class="currency">0</td>
+            <td class="currency">780000</td>
+        </tr>
+                <tr>
+            <td>161</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Preparat anatomi Hewan</td>
+            <td class="currency">1410000</td>
+            <td class="currency">0</td>
+            <td class="currency">1410000</td>
+        </tr>
+                <tr>
+            <td>162</td>
+            <td>LAB. BIOLOGI</td>
+            <td>Pipet Tetes Kaca (10 ml)</td>
+            <td class="currency">108000</td>
+            <td class="currency">0</td>
+            <td class="currency">108000</td>
+        </tr>
+                <tr>
+            <td>163</td>
+            <td>LAB. FISIKA</td>
+            <td>Pulley set + tali</td>
+            <td class="currency">2100000</td>
+            <td class="currency">0</td>
+            <td class="currency">2100000</td>
+        </tr>
+                <tr>
+            <td>164</td>
+            <td>LAB. FISIKA</td>
+            <td>Kit Mekanika</td>
+            <td class="currency">5610000</td>
+            <td class="currency">0</td>
+            <td class="currency">5610000</td>
+        </tr>
+                <tr>
+            <td>165</td>
+            <td>LAB. FISIKA</td>
+            <td>Lemari Alat</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>166</td>
+            <td>LAB. FISIKA</td>
+            <td>Printer</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>167</td>
+            <td>LAB. FISIKA</td>
+            <td>Mass Cart + Track (lintasan gerak)</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>168</td>
+            <td>LAB. FISIKA</td>
+            <td>Karpet lantai (10 x 12 m)</td>
+            <td class="currency">3600000</td>
+            <td class="currency">0</td>
+            <td class="currency">3600000</td>
+        </tr>
+                <tr>
+            <td>169</td>
+            <td>LAB. FISIKA</td>
+            <td>Kaca meja ( 1 x 2 m )</td>
+            <td class="currency">1500000</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+        </tr>
+                <tr>
+            <td>170</td>
+            <td>LAB. KIMIA</td>
+            <td>sarung tangan karet untuk laboratorium</td>
+            <td class="currency">60000</td>
+            <td class="currency">0</td>
+            <td class="currency">60000</td>
+        </tr>
+                <tr>
+            <td>171</td>
+            <td>LAB. KIMIA</td>
+            <td>Garam kasar</td>
+            <td class="currency">500000</td>
+            <td class="currency">0</td>
+            <td class="currency">500000</td>
+        </tr>
+                <tr>
+            <td>172</td>
+            <td>LAB. KIMIA</td>
+            <td>kertas indikator universal</td>
+            <td class="currency">1250000</td>
+            <td class="currency">0</td>
+            <td class="currency">1250000</td>
+        </tr>
+                <tr>
+            <td>173</td>
+            <td>LAB. KIMIA</td>
+            <td>gelas kimia 1000 mL</td>
+            <td class="currency">290000</td>
+            <td class="currency">0</td>
+            <td class="currency">290000</td>
+        </tr>
+                <tr>
+            <td>174</td>
+            <td>LAB. KIMIA</td>
+            <td>cairan pencuci piring</td>
+            <td class="currency">30000</td>
+            <td class="currency">0</td>
+            <td class="currency">30000</td>
+        </tr>
+                <tr>
+            <td>175</td>
+            <td>LAB. KIMIA</td>
+            <td>HCI pekat</td>
+            <td class="currency">50000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000</td>
+        </tr>
+                <tr>
+            <td>176</td>
+            <td>LAB. KIMIA</td>
+            <td>sarung tangan medis(Hanskul), isi 100 lembar</td>
+            <td class="currency">100000</td>
+            <td class="currency">0</td>
+            <td class="currency">100000</td>
+        </tr>
+                <tr>
+            <td>177</td>
+            <td>LAB. KIMIA</td>
+            <td>spatula Double Spatula (17cm - 18cm)</td>
+            <td class="currency">480000</td>
+            <td class="currency">0</td>
+            <td class="currency">480000</td>
+        </tr>
+                <tr>
+            <td>178</td>
+            <td>LAB. KIMIA</td>
+            <td>pipet tetes panjang</td>
+            <td class="currency">70000</td>
+            <td class="currency">0</td>
+            <td class="currency">70000</td>
+        </tr>
+                <tr>
+            <td>179</td>
+            <td>LAB. KIMIA</td>
+            <td>kertas saring 10 cm</td>
+            <td class="currency">200000</td>
+            <td class="currency">0</td>
+            <td class="currency">200000</td>
+        </tr>
+                <tr>
+            <td>180</td>
+            <td>LAB. KIMIA</td>
+            <td>kertas indikator laksmus biru</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>181</td>
+            <td>LAB. KIMIA</td>
+            <td>CH3COOH pekat</td>
+            <td class="currency">50000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000</td>
+        </tr>
+                <tr>
+            <td>182</td>
+            <td>LAB. KIMIA</td>
+            <td>aquadest</td>
+            <td class="currency">250000</td>
+            <td class="currency">0</td>
+            <td class="currency">250000</td>
+        </tr>
+                <tr>
+            <td>183</td>
+            <td>LAB. KIMIA</td>
+            <td>kabel</td>
+            <td class="currency">50000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000</td>
+        </tr>
+                <tr>
+            <td>184</td>
+            <td>LAB. KIMIA</td>
+            <td>Es Crystal</td>
+            <td class="currency">560000</td>
+            <td class="currency">0</td>
+            <td class="currency">560000</td>
+        </tr>
+                <tr>
+            <td>185</td>
+            <td>LAB. KIMIA</td>
+            <td>H2SO4 pekat</td>
+            <td class="currency">50000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000</td>
+        </tr>
+                <tr>
+            <td>186</td>
+            <td>LAB. KIMIA</td>
+            <td>spatula kaca</td>
+            <td class="currency">60000</td>
+            <td class="currency">0</td>
+            <td class="currency">60000</td>
+        </tr>
+                <tr>
+            <td>187</td>
+            <td>LAB. KIMIA</td>
+            <td>masker medis</td>
+            <td class="currency">50000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000</td>
+        </tr>
+                <tr>
+            <td>188</td>
+            <td>LAB. KIMIA</td>
+            <td>rak gelas kimia/rak alat/rak piring</td>
+            <td class="currency">400000</td>
+            <td class="currency">0</td>
+            <td class="currency">400000</td>
+        </tr>
+                <tr>
+            <td>189</td>
+            <td>LAB. KIMIA</td>
+            <td>Termometer alkohol</td>
+            <td class="currency">300000</td>
+            <td class="currency">0</td>
+            <td class="currency">300000</td>
+        </tr>
+                <tr>
+            <td>190</td>
+            <td>LAB. KIMIA</td>
+            <td>pipet tetes pendek</td>
+            <td class="currency">50000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000</td>
+        </tr>
+                <tr>
+            <td>191</td>
+            <td>LAB. KIMIA</td>
+            <td>lampu LED</td>
+            <td class="currency">90000</td>
+            <td class="currency">0</td>
+            <td class="currency">90000</td>
+        </tr>
+                <tr>
+            <td>192</td>
+            <td>LAB. KIMIA</td>
+            <td>NaOH</td>
+            <td class="currency">50000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000</td>
+        </tr>
+                <tr>
+            <td>193</td>
+            <td>LAB. KIMIA</td>
+            <td>kertas indikator laksmus merah</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>194</td>
+            <td>LAB. KIMIA</td>
+            <td>Rak tabung reaksi besi 50 lobang</td>
+            <td class="currency">830000</td>
+            <td class="currency">0</td>
+            <td class="currency">830000</td>
+        </tr>
+                <tr>
+            <td>195</td>
+            <td>LAB. KIMIA</td>
+            <td>pipet piler</td>
+            <td class="currency">450000</td>
+            <td class="currency">0</td>
+            <td class="currency">450000</td>
+        </tr>
+                <tr>
+            <td>196</td>
+            <td>MAJELIS PERWAKILAN KELAS</td>
+            <td>Pemilihan Ketua dan Wakil Ketua MPK MAN 2 Kota Makassar</td>
+            <td class="currency">500000</td>
+            <td class="currency">0</td>
+            <td class="currency">500000</td>
+        </tr>
+                <tr>
+            <td>197</td>
+            <td>MAJELIS PERWAKILAN KELAS</td>
+            <td>Rencana Anggaran Pendapatan dan Belanja Madrasah</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>198</td>
+            <td>MAJELIS PERWAKILAN KELAS</td>
+            <td>Membentuk Sikap Kepemimpinan / Upgrading</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>199</td>
+            <td>MAJELIS PERWAKILAN KELAS</td>
+            <td>Pemilihan Ketua dan Wakil Ketua OSIM MAN 2 Kota Makassar</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>200</td>
+            <td>MAJELIS PERWAKILAN KELAS</td>
+            <td>Latihan Manajemen Parlemen Siswa (LMPS)</td>
+            <td class="currency">4000000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+        </tr>
+                <tr>
+            <td>201</td>
+            <td>MAJELIS PERWAKILAN KELAS</td>
+            <td>Pelaksanaan Laporan Pertanggungjawaban (LPJ) OSIM MAN 2 Kota Makassar</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>202</td>
+            <td>MAJELIS PERWAKILAN KELAS</td>
+            <td>Rapat Penetapan Pengurus Baru Seluruh Organisasi MAN 2 Kota Makassar</td>
+            <td class="currency">3500000</td>
+            <td class="currency">0</td>
+            <td class="currency">3500000</td>
+        </tr>
+                <tr>
+            <td>203</td>
+            <td>MAJELIS PERWAKILAN KELAS</td>
+            <td>Rapat Kerja Seluruh Organisasi MAN 2 Kota Makassar</td>
+            <td class="currency">3500000</td>
+            <td class="currency">0</td>
+            <td class="currency">3500000</td>
+        </tr>
+                <tr>
+            <td>204</td>
+            <td>MAN - PUN PROGRAM UNGGULAN NASIONAL</td>
+            <td>Kurikulum</td>
+            <td class="currency">10000000</td>
+            <td class="currency">0</td>
+            <td class="currency">10000000</td>
+        </tr>
+                <tr>
+            <td>205</td>
+            <td>MAN - PUN PROGRAM UNGGULAN NASIONAL</td>
+            <td>Pembinaan akademik dan karakter</td>
+            <td class="currency">54000000</td>
+            <td class="currency">0</td>
+            <td class="currency">54000000</td>
+        </tr>
+                <tr>
+            <td>206</td>
+            <td>MAN - PUN PROGRAM UNGGULAN NASIONAL</td>
+            <td>Jasa dan operasional (tenaga housekeeping)</td>
+            <td class="currency">60000000</td>
+            <td class="currency">0</td>
+            <td class="currency">60000000</td>
+        </tr>
+                <tr>
+            <td>207</td>
+            <td>MAN - PUN PROGRAM UNGGULAN NASIONAL</td>
+            <td>Biaya Makan</td>
+            <td class="currency">270000000</td>
+            <td class="currency">0</td>
+            <td class="currency">270000000</td>
+        </tr>
+                <tr>
+            <td>208</td>
+            <td>OLAHRAGA</td>
+            <td>Kabel lampu Indoor</td>
+            <td class="currency">625000</td>
+            <td class="currency">0</td>
+            <td class="currency">625000</td>
+        </tr>
+                <tr>
+            <td>209</td>
+            <td>OLAHRAGA</td>
+            <td>Boal Volley</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>210</td>
+            <td>OLAHRAGA</td>
+            <td>Net Bulu Tangkis</td>
+            <td class="currency">600000</td>
+            <td class="currency">0</td>
+            <td class="currency">600000</td>
+        </tr>
+                <tr>
+            <td>211</td>
+            <td>OLAHRAGA</td>
+            <td>Stop watch</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>212</td>
+            <td>OLAHRAGA</td>
+            <td>Peluit</td>
+            <td class="currency">1250000</td>
+            <td class="currency">0</td>
+            <td class="currency">1250000</td>
+        </tr>
+                <tr>
+            <td>213</td>
+            <td>OLAHRAGA</td>
+            <td>Bola Basket</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>214</td>
+            <td>OLAHRAGA</td>
+            <td>Net Bola Volley</td>
+            <td class="currency">1400000</td>
+            <td class="currency">0</td>
+            <td class="currency">1400000</td>
+        </tr>
+                <tr>
+            <td>215</td>
+            <td>OLAHRAGA</td>
+            <td>Net Sepak Takrow</td>
+            <td class="currency">800000</td>
+            <td class="currency">0</td>
+            <td class="currency">800000</td>
+        </tr>
+                <tr>
+            <td>216</td>
+            <td>OLAHRAGA</td>
+            <td>Net Tennis Meja</td>
+            <td class="currency">400000</td>
+            <td class="currency">0</td>
+            <td class="currency">400000</td>
+        </tr>
+                <tr>
+            <td>217</td>
+            <td>OSIM</td>
+            <td>Pameran & Pentas Seni (MAPENSI)</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>218</td>
+            <td>OSIM</td>
+            <td>Seminar Moderasi Beragama</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>219</td>
+            <td>OSIM</td>
+            <td>Madrasah Science & Social Competition (MSCC)</td>
+            <td class="currency">1200000</td>
+            <td class="currency">0</td>
+            <td class="currency">1200000</td>
+        </tr>
+                <tr>
+            <td>220</td>
+            <td>OSIM</td>
+            <td>PORSENI</td>
+            <td class="currency">12000000</td>
+            <td class="currency">2000000</td>
+            <td class="currency">10000000</td>
+        </tr>
+                <tr>
+            <td>221</td>
+            <td>OSIM</td>
+            <td>Lomba Ekspresi Bahasa (LENTERA)</td>
+            <td class="currency">20000000</td>
+            <td class="currency">0</td>
+            <td class="currency">20000000</td>
+        </tr>
+                <tr>
+            <td>222</td>
+            <td>OSIM</td>
+            <td>Latihan Dasar Kepemimpinan (LDK)</td>
+            <td class="currency">5000000</td>
+            <td class="currency">2000000</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>223</td>
+            <td>OSIM</td>
+            <td>Seminar Hari Gizi</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>224</td>
+            <td>OSIM</td>
+            <td>(POSTAR)</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>225</td>
+            <td>OSIM</td>
+            <td>Level Up Your English (LUYE VOL. IV)</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>226</td>
+            <td>OSIM</td>
+            <td>UPGRADING</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>227</td>
+            <td>OSIM</td>
+            <td>National Hero's Day/ Han Pahlawan Nasional</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>228</td>
+            <td>OSIM</td>
+            <td>Pentas Seni Matsama</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>229</td>
+            <td>OSIM</td>
+            <td>Imsac M2M Competition (IMSAC)</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>230</td>
+            <td>OSIM</td>
+            <td>Pengadaan Alat-alat OSIM</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>231</td>
+            <td>OSIM</td>
+            <td>Market Day</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>232</td>
+            <td>OSIM</td>
+            <td>Invitasi Bola Basket (IBB)</td>
+            <td class="currency">25000000</td>
+            <td class="currency">0</td>
+            <td class="currency">25000000</td>
+        </tr>
+                <tr>
+            <td>233</td>
+            <td>PASKIBRAKA</td>
+            <td>Dana Awal Lontara VOL.III</td>
+            <td class="currency">4500000</td>
+            <td class="currency">0</td>
+            <td class="currency">4500000</td>
+        </tr>
+                <tr>
+            <td>234</td>
+            <td>PASKIBRAKA</td>
+            <td>DIKLATSAR 2025</td>
+            <td class="currency">10000000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">6000000</td>
+        </tr>
+                <tr>
+            <td>235</td>
+            <td>PASKIBRAKA</td>
+            <td>Air Dos Pengibaran</td>
+            <td class="currency">315000</td>
+            <td class="currency">0</td>
+            <td class="currency">315000</td>
+        </tr>
+                <tr>
+            <td>236</td>
+            <td>PASKIBRAKA</td>
+            <td>MUBES 26/27</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>237</td>
+            <td>PASKIBRAKA</td>
+            <td>SABANG 2026</td>
+            <td class="currency">750000</td>
+            <td class="currency">0</td>
+            <td class="currency">750000</td>
+        </tr>
+                <tr>
+            <td>238</td>
+            <td>PASKIBRAKA</td>
+            <td>Pengibaran HUT 17 2026</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>239</td>
+            <td>PASKIBRAKA</td>
+            <td>SOSTUB 2026</td>
+            <td class="currency">700000</td>
+            <td class="currency">0</td>
+            <td class="currency">700000</td>
+        </tr>
+                <tr>
+            <td>240</td>
+            <td>PASKIBRAKA</td>
+            <td>MA'LAMBANG 2025</td>
+            <td class="currency">500000</td>
+            <td class="currency">0</td>
+            <td class="currency">500000</td>
+        </tr>
+                <tr>
+            <td>241</td>
+            <td>PASKIBRAKA</td>
+            <td>Upgrading 2026</td>
+            <td class="currency">1320000</td>
+            <td class="currency">0</td>
+            <td class="currency">1320000</td>
+        </tr>
+                <tr>
+            <td>242</td>
+            <td>PASKIBRAKA</td>
+            <td>Bina Akrab 2026</td>
+            <td class="currency">2500000</td>
+            <td class="currency">0</td>
+            <td class="currency">2500000</td>
+        </tr>
+                <tr>
+            <td>243</td>
+            <td>PASKIBRAKA</td>
+            <td>LKJ 2026</td>
+            <td class="currency">2250000</td>
+            <td class="currency">0</td>
+            <td class="currency">2250000</td>
+        </tr>
+                <tr>
+            <td>244</td>
+            <td>PASKIBRAKA</td>
+            <td>Milad 2025</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>245</td>
+            <td>PEMBINAAN OLIMPIADE DAN LOMBA</td>
+            <td>OMI Sains</td>
+            <td class="currency">210000000</td>
+            <td class="currency">0</td>
+            <td class="currency">210000000</td>
+        </tr>
+                <tr>
+            <td>246</td>
+            <td>PEMBINAAN OLIMPIADE DAN LOMBA</td>
+            <td>O2SN</td>
+            <td class="currency">10000000</td>
+            <td class="currency">0</td>
+            <td class="currency">10000000</td>
+        </tr>
+                <tr>
+            <td>247</td>
+            <td>PEMBINAAN OLIMPIADE DAN LOMBA</td>
+            <td>OMI Riset dan OPSI</td>
+            <td class="currency">75000000</td>
+            <td class="currency">0</td>
+            <td class="currency">75000000</td>
+        </tr>
+                <tr>
+            <td>248</td>
+            <td>PEMBINAAN OLIMPIADE DAN LOMBA</td>
+            <td>Lomba-Lomba Lainnya</td>
+            <td class="currency">100000000</td>
+            <td class="currency">40000000</td>
+            <td class="currency">60000000</td>
+        </tr>
+                <tr>
+            <td>249</td>
+            <td>PEMBINAAN OLIMPIADE DAN LOMBA</td>
+            <td>OSN</td>
+            <td class="currency">100000000</td>
+            <td class="currency">20000000</td>
+            <td class="currency">80000000</td>
+        </tr>
+                <tr>
+            <td>250</td>
+            <td>PEMBINAAN OLIMPIADE DAN LOMBA</td>
+            <td>FLS3N</td>
+            <td class="currency">30000000</td>
+            <td class="currency">0</td>
+            <td class="currency">30000000</td>
+        </tr>
+                <tr>
+            <td>251</td>
+            <td>PENGEMBANGAN BAHASA</td>
+            <td>Pelatihan Speaking Guru dan Tendik</td>
+            <td class="currency">9600000</td>
+            <td class="currency">0</td>
+            <td class="currency">9600000</td>
+        </tr>
+                <tr>
+            <td>252</td>
+            <td>PENGEMBANGAN BAHASA</td>
+            <td>Festival Jepang</td>
+            <td class="currency">8000000</td>
+            <td class="currency">400000</td>
+            <td class="currency">7600000</td>
+        </tr>
+                <tr>
+            <td>253</td>
+            <td>PENGEMBANGAN BAHASA</td>
+            <td>Eng Teachers' Workshop (MGMP) & Teachers' English Training</td>
+            <td class="currency">6800000</td>
+            <td class="currency">3600000</td>
+            <td class="currency">3200000</td>
+        </tr>
+                <tr>
+            <td>254</td>
+            <td>PENGEMBANGAN BAHASA</td>
+            <td>English Camp dirangkaikan dengan Workshop Persiapan Students Mobility (Pembicara Native Speaker)</td>
+            <td class="currency">7400000</td>
+            <td class="currency">2000000</td>
+            <td class="currency">5400000</td>
+        </tr>
+                <tr>
+            <td>255</td>
+            <td>PENGEMBANGAN BAHASA</td>
+            <td>Program Talkshow/ Podcast Inggris, Arab, Jepang & Jerman</td>
+            <td class="currency">960000</td>
+            <td class="currency">0</td>
+            <td class="currency">960000</td>
+        </tr>
+                <tr>
+            <td>256</td>
+            <td>PENGEMBANGAN BAHASA</td>
+            <td>English Eco-Edu Tech Program (Pembelajaran berbasis PjBL)</td>
+            <td class="currency">700000</td>
+            <td class="currency">0</td>
+            <td class="currency">700000</td>
+        </tr>
+                <tr>
+            <td>257</td>
+            <td>PENGEMBANGAN BAHASA</td>
+            <td>Speaker + Stand Speaker + Mic UHF</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>258</td>
+            <td>PIK-R</td>
+            <td>Car Free Day</td>
+            <td class="currency">110000</td>
+            <td class="currency">0</td>
+            <td class="currency">110000</td>
+        </tr>
+                <tr>
+            <td>259</td>
+            <td>PIK-R</td>
+            <td>Uprgrading, Outbound, Bina Akrab</td>
+            <td class="currency">8000000</td>
+            <td class="currency">0</td>
+            <td class="currency">8000000</td>
+        </tr>
+                <tr>
+            <td>260</td>
+            <td>PIK-R</td>
+            <td>Cerita Mading Dan Edu Talks</td>
+            <td class="currency">500000</td>
+            <td class="currency">0</td>
+            <td class="currency">500000</td>
+        </tr>
+                <tr>
+            <td>261</td>
+            <td>PIK-R</td>
+            <td>Market Day</td>
+            <td class="currency">859000</td>
+            <td class="currency">0</td>
+            <td class="currency">859000</td>
+        </tr>
+                <tr>
+            <td>262</td>
+            <td>PIK-R</td>
+            <td>Sekolah Siaga Kependudukan</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>263</td>
+            <td>PIK-R</td>
+            <td>Seminar</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>264</td>
+            <td>PIK-R</td>
+            <td>Pendidikan dan Pelatihan (DIKLAT)</td>
+            <td class="currency">4000000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+        </tr>
+                <tr>
+            <td>265</td>
+            <td>PIK-R</td>
+            <td>Cerita Bersama Renaissance (CERENSA)</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>266</td>
+            <td>PIK-R</td>
+            <td>Pelatihan Konselor dan Pendidik Sebaya</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>267</td>
+            <td>PMR</td>
+            <td>Latihan Rutin (LARUT)</td>
+            <td class="currency">300000</td>
+            <td class="currency">0</td>
+            <td class="currency">300000</td>
+        </tr>
+                <tr>
+            <td>268</td>
+            <td>PMR</td>
+            <td>Bazaar</td>
+            <td class="currency">500000</td>
+            <td class="currency">0</td>
+            <td class="currency">500000</td>
+        </tr>
+                <tr>
+            <td>269</td>
+            <td>PMR</td>
+            <td>DIKLATSAR (Indoor/Outdoor)</td>
+            <td class="currency">10000000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">6000000</td>
+        </tr>
+                <tr>
+            <td>270</td>
+            <td>PMR</td>
+            <td>Pengadaan Tenda dan Kelengkapan</td>
+            <td class="currency">2500000</td>
+            <td class="currency">0</td>
+            <td class="currency">2500000</td>
+        </tr>
+                <tr>
+            <td>271</td>
+            <td>PMR</td>
+            <td>Bambu Panjang 225cm</td>
+            <td class="currency">210000</td>
+            <td class="currency">0</td>
+            <td class="currency">210000</td>
+        </tr>
+                <tr>
+            <td>272</td>
+            <td>PMR</td>
+            <td>Donor Darah (DODAR)</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>273</td>
+            <td>PMR</td>
+            <td>UPGRADING</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>274</td>
+            <td>PMR</td>
+            <td>Bakti Sosial (BAKSOS)</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>275</td>
+            <td>PMR</td>
+            <td>Tandu Lipat</td>
+            <td class="currency">1400000</td>
+            <td class="currency">0</td>
+            <td class="currency">1400000</td>
+        </tr>
+                <tr>
+            <td>276</td>
+            <td>PMR</td>
+            <td>Screening</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>277</td>
+            <td>PMR</td>
+            <td>Bambu Panjang 60cm</td>
+            <td class="currency">150000</td>
+            <td class="currency">0</td>
+            <td class="currency">150000</td>
+        </tr>
+                <tr>
+            <td>278</td>
+            <td>PRAKARYA</td>
+            <td>Bibit Ikan</td>
+            <td class="currency">1500000</td>
+            <td class="currency">0</td>
+            <td class="currency">1500000</td>
+        </tr>
+                <tr>
+            <td>279</td>
+            <td>PRAKARYA</td>
+            <td>Terminal Listrik</td>
+            <td class="currency">25000</td>
+            <td class="currency">0</td>
+            <td class="currency">25000</td>
+        </tr>
+                <tr>
+            <td>280</td>
+            <td>PRAKARYA</td>
+            <td>Pupuk Organik</td>
+            <td class="currency">1030000</td>
+            <td class="currency">0</td>
+            <td class="currency">1030000</td>
+        </tr>
+                <tr>
+            <td>281</td>
+            <td>PRAKARYA</td>
+            <td>Pipa Paralon 1/2 "</td>
+            <td class="currency">153000</td>
+            <td class="currency">0</td>
+            <td class="currency">153000</td>
+        </tr>
+                <tr>
+            <td>282</td>
+            <td>PRAKARYA</td>
+            <td>Dop pipi paralon</td>
+            <td class="currency">50000</td>
+            <td class="currency">0</td>
+            <td class="currency">50000</td>
+        </tr>
+                <tr>
+            <td>283</td>
+            <td>PRAKARYA</td>
+            <td>Mesin Pompa Celup</td>
+            <td class="currency">1400000</td>
+            <td class="currency">0</td>
+            <td class="currency">1400000</td>
+        </tr>
+                <tr>
+            <td>284</td>
+            <td>PRAKARYA</td>
+            <td>Rokwool (Media semai)</td>
+            <td class="currency">400000</td>
+            <td class="currency">0</td>
+            <td class="currency">400000</td>
+        </tr>
+                <tr>
+            <td>285</td>
+            <td>PRAKARYA</td>
+            <td>Lem Pipa</td>
+            <td class="currency">15000</td>
+            <td class="currency">0</td>
+            <td class="currency">15000</td>
+        </tr>
+                <tr>
+            <td>286</td>
+            <td>PRAKARYA</td>
+            <td>Kabel Listrik</td>
+            <td class="currency">400000</td>
+            <td class="currency">0</td>
+            <td class="currency">400000</td>
+        </tr>
+                <tr>
+            <td>287</td>
+            <td>PRAKARYA</td>
+            <td>Baut Baja Ringan</td>
+            <td class="currency">82000</td>
+            <td class="currency">0</td>
+            <td class="currency">82000</td>
+        </tr>
+                <tr>
+            <td>288</td>
+            <td>PRAKARYA</td>
+            <td>Erator</td>
+            <td class="currency">2190920</td>
+            <td class="currency">0</td>
+            <td class="currency">2190920</td>
+        </tr>
+                <tr>
+            <td>289</td>
+            <td>PRAKARYA</td>
+            <td>Mesin Celup</td>
+            <td class="currency">700000</td>
+            <td class="currency">0</td>
+            <td class="currency">700000</td>
+        </tr>
+                <tr>
+            <td>290</td>
+            <td>PRAKARYA</td>
+            <td>Colokan Listrik</td>
+            <td class="currency">20000</td>
+            <td class="currency">0</td>
+            <td class="currency">20000</td>
+        </tr>
+                <tr>
+            <td>291</td>
+            <td>PRAKARYA</td>
+            <td>Pipa paralon 3"</td>
+            <td class="currency">200000</td>
+            <td class="currency">0</td>
+            <td class="currency">200000</td>
+        </tr>
+                <tr>
+            <td>292</td>
+            <td>PRAKARYA</td>
+            <td>Prktek Memasak</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>293</td>
+            <td>PRAKARYA</td>
+            <td>Kolam terpal</td>
+            <td class="currency">810000</td>
+            <td class="currency">0</td>
+            <td class="currency">810000</td>
+        </tr>
+                <tr>
+            <td>294</td>
+            <td>PRAKARYA</td>
+            <td>Selang Erator</td>
+            <td class="currency">209000</td>
+            <td class="currency">0</td>
+            <td class="currency">209000</td>
+        </tr>
+                <tr>
+            <td>295</td>
+            <td>PRAKARYA</td>
+            <td>Kanel C</td>
+            <td class="currency">1710000</td>
+            <td class="currency">0</td>
+            <td class="currency">1710000</td>
+        </tr>
+                <tr>
+            <td>296</td>
+            <td>PRAKARYA</td>
+            <td>Pakan Ikan</td>
+            <td class="currency">2700000</td>
+            <td class="currency">0</td>
+            <td class="currency">2700000</td>
+        </tr>
+                <tr>
+            <td>297</td>
+            <td>PRAKARYA</td>
+            <td>Netpot</td>
+            <td class="currency">20000</td>
+            <td class="currency">0</td>
+            <td class="currency">20000</td>
+        </tr>
+                <tr>
+            <td>298</td>
+            <td>PRAKARYA</td>
+            <td>Bibit Tanaman</td>
+            <td class="currency">100000</td>
+            <td class="currency">0</td>
+            <td class="currency">100000</td>
+        </tr>
+                <tr>
+            <td>299</td>
+            <td>PRAMUKA</td>
+            <td>Pembuatan Kartu Tanda Anggota</td>
+            <td class="currency">600000</td>
+            <td class="currency">0</td>
+            <td class="currency">600000</td>
+        </tr>
+                <tr>
+            <td>300</td>
+            <td>PRAMUKA</td>
+            <td>Mengikuti/Mengadakan Lomba Tingkat Penegak & Penggalang</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>301</td>
+            <td>PRAMUKA</td>
+            <td>Pramuka Relawan Aktif Tangguh Alam Muda</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>302</td>
+            <td>PRAMUKA</td>
+            <td>Pencapaian Tingkat dan TKK</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>303</td>
+            <td>PRAMUKA</td>
+            <td>Honor Pelatih</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>304</td>
+            <td>PRAMUKA</td>
+            <td>Proses Penerimaan Aggota Baru (PPAB)</td>
+            <td class="currency">10360000</td>
+            <td class="currency">4000000</td>
+            <td class="currency">6360000</td>
+        </tr>
+                <tr>
+            <td>305</td>
+            <td>PRAMUKA</td>
+            <td>Pembenahan Sanggar</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>306</td>
+            <td>PRAMUKA</td>
+            <td>Kemah Kebangsaan</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>307</td>
+            <td>PRAMUKA</td>
+            <td>Peringatan Hari Pramuka ke-65</td>
+            <td class="currency">2000000</td>
+            <td class="currency">0</td>
+            <td class="currency">2000000</td>
+        </tr>
+                <tr>
+            <td>308</td>
+            <td>PRAMUKA</td>
+            <td>Latihan rutin</td>
+            <td class="currency">2400000</td>
+            <td class="currency">0</td>
+            <td class="currency">2400000</td>
+        </tr>
+                <tr>
+            <td>309</td>
+            <td>PROGRAM SKS DAN RISET SAINS SERTA HUMANIORA</td>
+            <td>Study Lingkungan di PPLP Puntondo Takalar</td>
+            <td class="currency">10000000</td>
+            <td class="currency">0</td>
+            <td class="currency">10000000</td>
+        </tr>
+                <tr>
+            <td>310</td>
+            <td>PROGRAM SKS DAN RISET SAINS SERTA HUMANIORA</td>
+            <td>Biaya Riset per kelompok 20 Kelompok</td>
+            <td class="currency">20000000</td>
+            <td class="currency">0</td>
+            <td class="currency">20000000</td>
+        </tr>
+                <tr>
+            <td>311</td>
+            <td>PROGRAM SKS DAN RISET SAINS SERTA HUMANIORA</td>
+            <td>Pendampingan dan Semester 3 dan 5 untuk guru yg mengajar Kls SKS</td>
+            <td class="currency">12000000</td>
+            <td class="currency">0</td>
+            <td class="currency">12000000</td>
+        </tr>
+                <tr>
+            <td>312</td>
+            <td>ROBOTIC</td>
+            <td>International Robotic Competition</td>
+            <td class="currency">25000000</td>
+            <td class="currency">0</td>
+            <td class="currency">25000000</td>
+        </tr>
+                <tr>
+            <td>313</td>
+            <td>ROBOTIC</td>
+            <td>Lemari / box penyimpanan alat - alat robotic</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>314</td>
+            <td>ROBOTIC</td>
+            <td>Honor Instruktur (pelatih)</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>315</td>
+            <td>ROBOTIC</td>
+            <td>Pengadaan alat & bahan praktek robotic</td>
+            <td class="currency">7000000</td>
+            <td class="currency">0</td>
+            <td class="currency">7000000</td>
+        </tr>
+                <tr>
+            <td>316</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Penggantian/pengaturan panel kontrol listrik yang terbakar</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>317</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Perbaikan toilet siswa buntu area gedung B</td>
+            <td class="currency">6000000</td>
+            <td class="currency">0</td>
+            <td class="currency">6000000</td>
+        </tr>
+                <tr>
+            <td>318</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Jasa Penebangan/Pemangkasan Pohon</td>
+            <td class="currency">3000000</td>
+            <td class="currency">0</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>319</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Penggantian kunci pintu kelas lantai 2 dan 3</td>
+            <td class="currency">4375000</td>
+            <td class="currency">0</td>
+            <td class="currency">4375000</td>
+        </tr>
+                <tr>
+            <td>320</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Pengadaan Plastik Sampah</td>
+            <td class="currency">6000000</td>
+            <td class="currency">3000000</td>
+            <td class="currency">3000000</td>
+        </tr>
+                <tr>
+            <td>321</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Pengadaan kuncian pintu Kelas X</td>
+            <td class="currency">2600000</td>
+            <td class="currency">0</td>
+            <td class="currency">2600000</td>
+        </tr>
+                <tr>
+            <td>322</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Penggantian engsel, roda dari 7 pintu pagar</td>
+            <td class="currency">2200000</td>
+            <td class="currency">0</td>
+            <td class="currency">2200000</td>
+        </tr>
+                <tr>
+            <td>323</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Apresiasi Kinerja bantuan tim kerja sarana</td>
+            <td class="currency">9600000</td>
+            <td class="currency">0</td>
+            <td class="currency">9600000</td>
+        </tr>
+                <tr>
+            <td>324</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Ganti kunci pintu master 12 kelas lantai 1 gedung</td>
+            <td class="currency">1800000</td>
+            <td class="currency">0</td>
+            <td class="currency">1800000</td>
+        </tr>
+                <tr>
+            <td>325</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Perbaikan dan penggantian bahlon kelas (38 kls X 4 bahlon)</td>
+            <td class="currency">9120000</td>
+            <td class="currency">7000000</td>
+            <td class="currency">2120000</td>
+        </tr>
+                <tr>
+            <td>326</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Pengadaan alat foto copy kantor</td>
+            <td class="currency">34500000</td>
+            <td class="currency">0</td>
+            <td class="currency">34500000</td>
+        </tr>
+                <tr>
+            <td>327</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Pemberantasan Rayap gedung B, C, gedung tu dan wisma</td>
+            <td class="currency">6000000</td>
+            <td class="currency">0</td>
+            <td class="currency">6000000</td>
+        </tr>
+                <tr>
+            <td>328</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Penggantian Fiber penghalang tampias dari Gedung Tua dan Ruang Guru</td>
+            <td class="currency">1800000</td>
+            <td class="currency">0</td>
+            <td class="currency">1800000</td>
+        </tr>
+                <tr>
+            <td>329</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Penggantian kran air dan pipa bocor</td>
+            <td class="currency">2137500</td>
+            <td class="currency">0</td>
+            <td class="currency">2137500</td>
+        </tr>
+                <tr>
+            <td>330</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Biaya pemeliharaan kolam air terjun 4 buah x 12 bln</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>331</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Maintenance (CUCI) AC 138 X 4 KALI</td>
+            <td class="currency">40500000</td>
+            <td class="currency">0</td>
+            <td class="currency">40500000</td>
+        </tr>
+                <tr>
+            <td>332</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Pembersihan sedimen got</td>
+            <td class="currency">4000000</td>
+            <td class="currency">0</td>
+            <td class="currency">4000000</td>
+        </tr>
+                <tr>
+            <td>333</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Maintenance Listrik : saklar stop kontak dan stand</td>
+            <td class="currency">6250000</td>
+            <td class="currency">5000000</td>
+            <td class="currency">1250000</td>
+        </tr>
+                <tr>
+            <td>334</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Biaya pakan dan bibit ikan kolam area Madrasah</td>
+            <td class="currency">7200000</td>
+            <td class="currency">0</td>
+            <td class="currency">7200000</td>
+        </tr>
+                <tr>
+            <td>335</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Perbaikan AC rusak 25 % dari total</td>
+            <td class="currency">15750000</td>
+            <td class="currency">0</td>
+            <td class="currency">15750000</td>
+        </tr>
+                <tr>
+            <td>336</td>
+            <td>SARANA & PRASARANA</td>
+            <td>Penggantian/pengaturan jalur kabel AC gedung B dan C</td>
+            <td class="currency">3600000</td>
+            <td class="currency">0</td>
+            <td class="currency">3600000</td>
+        </tr>
+                <tr>
+            <td>337</td>
+            <td>SENI</td>
+            <td>Kabel KREZT TCAS 001 KZT 50 m</td>
+            <td class="currency">1000000</td>
+            <td class="currency">0</td>
+            <td class="currency">1000000</td>
+        </tr>
+                <tr>
+            <td>338</td>
+            <td>SENI</td>
+            <td>Mixer MG16XU</td>
+            <td class="currency">8000000</td>
+            <td class="currency">0</td>
+            <td class="currency">8000000</td>
+        </tr>
+                <tr>
+            <td>339</td>
+            <td>SENI</td>
+            <td>Cermin Ukuran 7x2 meter</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+            <td class="currency">5000000</td>
+        </tr>
+                <tr>
+            <td>340</td>
+            <td>UKS</td>
+            <td>Bed Hospital</td>
+            <td class="currency">4700000</td>
+            <td class="currency">0</td>
+            <td class="currency">4700000</td>
+        </tr>
+                <tr>
+            <td>341</td>
+            <td>UKS</td>
+            <td>Obat</td>
+            <td class="currency">5000000</td>
+            <td class="currency">5000000</td>
+            <td class="currency">0</td>
+        </tr>
+            </table>
+</body>
+</html>

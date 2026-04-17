@@ -201,8 +201,6 @@ export interface DashboardSummary {
   totalBudget: number;
   usedBudget: number;
   remainingBudget: number;
-  totalDanaBos: number;
-  totalDanaKomite: number;
 }
 
 export interface Laporan {
@@ -543,7 +541,7 @@ class ApiService {
     sort_by?: string;
     order?: string;
     no_paginate?: boolean;
-  }): Promise<{ data: PaginatedResponse<RKAM> | RKAM[]; summary?: { totalBudget: number; totalDanaBos: number; totalDanaKomite: number } }> {
+  }): Promise<{ data: PaginatedResponse<RKAM> | RKAM[]; summary: { totalBudget: number; totalDanaBos: number; totalDanaKomite: number } | null }> {
     const queryParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -562,7 +560,7 @@ class ApiService {
 
     return {
       data: response.data,
-      summary: response.summary
+      summary: response.summary || null
     };
   }
 
@@ -994,7 +992,7 @@ class ApiService {
   }
 
   // PUBLIC VIEWER METHODS
-  async getPublicRKAM(params: any): Promise<{ data: PaginatedResponse<RKAM>; summary?: { totalBudget: number; totalDanaBos: number; totalDanaKomite: number } }> {
+  async getPublicRKAM(params: any): Promise<PaginatedResponse<RKAM>> {
     const url = new URL(`${this.baseURL}/public/rkam`);
     Object.keys(params).forEach(key => {
       if (params[key] !== undefined && params[key] !== null) {
@@ -1011,10 +1009,7 @@ class ApiService {
     }
 
     const result = await response.json();
-    return {
-      data: result.data,
-      summary: result.summary
-    }; // Laravel wraps in { success, data: { ...paginate }, summary: { ... } }
+    return result.data; // Laravel wraps in { success, data: { ...paginate } }
   }
 
   async getPublicRKAMOptions(): Promise<{ categories: Category[]; units: string[] }> {

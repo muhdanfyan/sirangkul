@@ -16,7 +16,6 @@ const RKAMManagement: React.FC = () => {
   const [rkamItems, setRkamItems] = useState<RKAM[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [units, setUnits] = useState<string[]>([]);
-  const [summary, setSummary] = useState<{ totalBudget: number; totalDanaBos: number; totalDanaKomite: number } | null>(null);
   
   // UI States
   const [isLoading, setIsLoading] = useState(true);
@@ -104,14 +103,16 @@ const RKAMManagement: React.FC = () => {
         order: sortConfig.direction
       });
 
-      setRkamItems(response.data.data);
+      setRkamItems(Array.isArray(response.data) ? response.data : (response.data?.data || []));
       setSummary(response.summary || null);
-      setPaginationData({
-        total: response.data.total,
-        from: response.data.from,
-        to: response.data.to,
-        last_page: response.data.last_page
-      });
+      if (!Array.isArray(response.data)) {
+        setPaginationData({
+          total: response.data.total,
+          from: response.data.from,
+          to: response.data.to,
+          last_page: response.data.last_page
+        });
+      }
     } catch (err) {
       console.error('Failed to fetch RKAM:', err);
       setToast({ type: 'error', message: 'Gagal memuat data RKAM' });
@@ -229,8 +230,9 @@ const RKAMManagement: React.FC = () => {
         no_paginate: true
       });
 
-      if (Array.isArray(response)) {
-        setFullDataForPrint(response);
+      const actualData = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+      if (actualData.length > 0) {
+        setFullDataForPrint(actualData);
         // Wait for state to update and template to render
         setTimeout(() => {
           window.print();
@@ -264,28 +266,6 @@ const RKAMManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Summary Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Anggaran (Filtered)</p>
-          <p className="text-2xl font-black text-gray-900">{formatIDR(summary?.totalBudget || 0)}</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Dana BOS</p>
-          <div className="flex items-center justify-between">
-            <p className="text-xl font-bold text-blue-600">{formatIDR(summary?.totalDanaBos || 0)}</p>
-            <span className="text-[10px] font-bold text-gray-400">{summary?.totalBudget ? ((summary.totalDanaBos / summary.totalBudget) * 100).toFixed(1) : 0}%</span>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Dana Komite</p>
-          <div className="flex items-center justify-between">
-            <p className="text-xl font-bold text-purple-600">{formatIDR(summary?.totalDanaKomite || 0)}</p>
-            <span className="text-[10px] font-bold text-gray-400">{summary?.totalBudget ? ((summary.totalDanaKomite / summary.totalBudget) * 100).toFixed(1) : 0}%</span>
-          </div>
-        </div>
-      </div>
-
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
         <div>
@@ -402,8 +382,6 @@ const RKAMManagement: React.FC = () => {
                 <th className="px-6 py-4 font-semibold text-gray-700 text-right cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('realization')}>
                   <div className="flex items-center justify-end">Terpakai <SortIcon column="realization" /></div>
                 </th>
-                <th className="px-6 py-4 font-semibold text-gray-700 text-right">BOS</th>
-                <th className="px-6 py-4 font-semibold text-gray-700 text-right">Komite</th>
                 <th className="px-6 py-4 font-semibold text-gray-700 text-right">Sisa</th>
                 <th className="px-6 py-4 font-semibold text-gray-700 w-1/6">Penyerapan</th>
                 <th className="px-6 py-4 font-semibold text-gray-700 text-center">Aksi</th>
@@ -446,12 +424,6 @@ const RKAMManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-right text-orange-600 font-medium">
                       {formatIDR(item.terpakai_filtered ?? item.terpakai)}
-                    </td>
-                    <td className="px-6 py-4 text-right text-xs font-semibold text-gray-500">
-                      {formatIDR(item.dana_bos || 0)}
-                    </td>
-                    <td className="px-6 py-4 text-right text-xs font-semibold text-gray-500">
-                      {formatIDR(item.dana_komite || 0)}
                     </td>
                     <td className="px-6 py-4 text-right text-green-600 font-medium">
                       {formatIDR(item.sisa_filtered ?? item.sisa)}
