@@ -148,19 +148,25 @@ const RAKMViewer: React.FC = () => {
            </div>
            
            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                 <h3 className="text-gray-400 font-bold text-xs uppercase tracking-widest">Update Terakhir</h3>
-                 <Calendar className="text-gray-300 h-5 w-5" />
-              </div>
-              <div className="mt-4">
-                <p className="text-3xl font-black text-gray-900 tracking-tight">{paginationData.total}</p>
-                <p className="text-sm text-gray-400 font-medium">Item anggaran yang terpublikasi</p>
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-50 flex items-center gap-2">
-                 <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                 <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Live Database Sync Active</span>
-              </div>
-           </div>
+               <div className="flex items-center justify-between">
+                  <h3 className="text-gray-400 font-bold text-xs uppercase tracking-widest">Ringkasan Alokasi 2026</h3>
+                  <Calendar className="text-gray-300 h-5 w-5" />
+               </div>
+               <div className="mt-4 grid grid-cols-2 gap-4">
+                 <div>
+                   <p className="text-sm font-bold text-green-600 uppercase tracking-tighter">Dana BOS</p>
+                   <p className="text-lg font-black text-gray-900">{formatCurrency(summary?.totalDanaBos || 0)}</p>
+                 </div>
+                 <div>
+                   <p className="text-sm font-bold text-purple-600 uppercase tracking-tighter">Dana Komite</p>
+                   <p className="text-lg font-black text-gray-900">{formatCurrency(summary?.totalDanaKomite || 0)}</p>
+                 </div>
+               </div>
+               <div className="mt-4 pt-4 border-t border-gray-50 flex items-center gap-2">
+                  <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Live Database Sync Active</span>
+               </div>
+            </div>
         </div>
 
         {/* Database Grid Section */}

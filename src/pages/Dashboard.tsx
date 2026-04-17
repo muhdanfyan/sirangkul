@@ -246,9 +246,19 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="p-6">
             <div className="space-y-6">
-              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
-                <span className="text-sm text-gray-600 font-medium">Total Pagu (RKAM)</span>
-                <span className="font-bold text-gray-900">{formatCurrency(summary?.totalBudget || 0)}</span>
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 font-medium">Total Pagu (RKAM)</span>
+                  <span className="font-bold text-gray-900">{formatCurrency(summary?.totalBudget || 0)}</span>
+                </div>
+                <div className="mt-3 flex items-center justify-between text-[10px] gap-2">
+                   <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 text-green-700 rounded-md border border-green-100 font-bold whitespace-nowrap">
+                     BOS: {formatCurrency(summary?.totalDanaBos || 0)}
+                   </div>
+                   <div className="flex items-center gap-1.5 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-md border border-purple-100 font-bold whitespace-nowrap">
+                     KOMITE: {formatCurrency(summary?.totalDanaKomite || 0)}
+                   </div>
+                </div>
               </div>
               <div className="flex justify-between items-center p-4 bg-blue-50/30 rounded-xl border border-blue-100">
                 <span className="text-sm text-gray-600 font-medium">Realisasi (Terpakai)</span>

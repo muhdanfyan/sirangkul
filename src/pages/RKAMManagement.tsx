@@ -298,6 +298,22 @@ const RKAMManagement: React.FC = () => {
         </div>
       </div>
 
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:hidden">
+        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Pagu Terdaftar</p>
+          <p className="text-2xl font-black text-gray-900">{formatIDR(summary?.totalBudget || 0)}</p>
+        </div>
+        <div className="bg-green-50/30 p-5 rounded-xl border border-green-100 shadow-sm">
+          <p className="text-[10px] font-black text-green-600 uppercase tracking-widest mb-2">Alokasi Dana BOS</p>
+          <p className="text-2xl font-black text-green-700">{formatIDR(summary?.totalDanaBos || 0)}</p>
+        </div>
+        <div className="bg-purple-50/30 p-5 rounded-xl border border-purple-100 shadow-sm">
+          <p className="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-2">Alokasi Dana Komite</p>
+          <p className="text-2xl font-black text-purple-700">{formatIDR(summary?.totalDanaKomite || 0)}</p>
+        </div>
+      </div>
+
       {/* Filter & Search Bar */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 print:hidden">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
