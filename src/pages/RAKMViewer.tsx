@@ -47,24 +47,25 @@ const RAKMViewer: React.FC = () => {
     try {
       setIsLoading(true);
       // Fetch data using the NEW public endpoint
-      const response = await apiService.getPublicRKAM({
-        page: currentPage,
-        per_page: perPage,
-        search: searchTerm,
-        category_id: selectedCategoryId,
-        sort_by: sortConfig.key,
-        order: sortConfig.direction
-      });
-
-      if ('data' in response) {
-        setRkamData(response.data);
-        setPaginationData({
-          total: response.total,
-          from: response.from,
-          to: response.to,
-          last_page: response.last_page
+        const response = await apiService.getPublicRKAM({
+          page: currentPage,
+          per_page: perPage,
+          search: searchTerm,
+          category_id: selectedCategoryId,
+          sort_by: sortConfig.key,
+          order: sortConfig.direction
         });
-      }
+  
+        setRkamData(Array.isArray(response.data) ? response.data : (response.data?.data || []));
+        setSummary(response.summary || null);
+        if (!Array.isArray(response.data)) {
+          setPaginationData({
+            total: response.data.total,
+            from: response.data.from,
+            to: response.data.to,
+            last_page: response.data.last_page
+          });
+        }
     } catch (err) {
       console.error('Failed to fetch public RKAM data:', err);
     } finally {

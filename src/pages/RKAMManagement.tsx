@@ -103,13 +103,16 @@ const RKAMManagement: React.FC = () => {
         order: sortConfig.direction
       });
 
-      setRkamItems(response.data);
-      setPaginationData({
-        total: response.total,
-        from: response.from,
-        to: response.to,
-        last_page: response.last_page
-      });
+      setRkamItems(Array.isArray(response.data) ? response.data : (response.data?.data || []));
+      setSummary(response.summary || null);
+      if (!Array.isArray(response.data)) {
+        setPaginationData({
+          total: response.data.total,
+          from: response.data.from,
+          to: response.data.to,
+          last_page: response.data.last_page
+        });
+      }
     } catch (err) {
       console.error('Failed to fetch RKAM:', err);
       setToast({ type: 'error', message: 'Gagal memuat data RKAM' });
@@ -227,8 +230,9 @@ const RKAMManagement: React.FC = () => {
         no_paginate: true
       });
 
-      if (Array.isArray(response)) {
-        setFullDataForPrint(response);
+      const actualData = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+      if (actualData.length > 0) {
+        setFullDataForPrint(actualData);
         // Wait for state to update and template to render
         setTimeout(() => {
           window.print();
