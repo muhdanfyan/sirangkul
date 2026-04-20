@@ -12,7 +12,12 @@ export interface LoginResponse {
   user: {
     id: string;
     full_name: string;
+    email: string;
     role: string;
+    status?: string;
+    is_active?: boolean;
+    bidang_id?: string | null;
+    bidang?: Bidang | null;
   };
 }
 
@@ -20,10 +25,15 @@ export interface Proposal {
   id: string;
   rkam_id: string;
   user_id: string;
+  bidang_id?: string | null;
+  bidang?: string | null;
   title: string;
   description?: string;
   jumlah_pengajuan: string | number;
   status: 'draft' | 'submitted' | 'verified' | 'approved' | 'rejected' | 'final_approved' | 'payment_processing' | 'completed';
+  urgency?: 'Rendah' | 'Normal' | 'Tinggi' | 'Mendesak';
+  start_date?: string | null;
+  end_date?: string | null;
 
   // Timestamps
   submitted_at?: string | null;
@@ -54,8 +64,11 @@ export interface Proposal {
     full_name?: string;
     email: string;
     role?: string;
+    bidang_id?: string | null;
+    bidang?: Bidang | null;
   };
   rkam?: RKAM;
+  bidangRef?: Bidang | null;
   verifier?: {
     id: string;
     full_name?: string;
@@ -83,10 +96,26 @@ export interface Proposal {
   };
   attachments?: ProposalAttachment[];  // Uploaded supporting documents
   payment?: Payment;  // NEW: Payment relationship
+  approvals?: ApprovalWorkflowEntry[];
   current_workflow?: {
     stage: string;
     status: string;
     approver_role: string;
+  };
+}
+
+export interface ApprovalWorkflowEntry {
+  id: string;
+  proposal_id: string;
+  approver_id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  notes?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  approver?: {
+    id: string;
+    full_name?: string;
+    role?: string;
   };
 }
 
@@ -95,6 +124,9 @@ export interface ProposalCreateRequest {
   title: string;
   description?: string;
   jumlah_pengajuan: number;
+  urgency?: 'Rendah' | 'Normal' | 'Tinggi' | 'Mendesak';
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface ProposalUpdateRequest {
@@ -102,6 +134,9 @@ export interface ProposalUpdateRequest {
   title?: string;
   description?: string;
   jumlah_pengajuan?: number;
+  urgency?: 'Rendah' | 'Normal' | 'Tinggi' | 'Mendesak';
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface Payment {
@@ -115,9 +150,14 @@ export interface Payment {
   payment_reference?: string;
   payment_proof_url?: string;
   payment_proof_file?: string;  // NEW: File path for uploaded proof
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'rejected';
   notes?: string;
   admin_notes?: string;
+  rejection_reason?: string | null;
+  improvement_suggestions?: string | null;
+  rejected_at?: string | null;
+  rejected_by?: string | null;
+  rejected_by_role?: string | null;
   processed_at?: string | null;
   completed_at?: string | null;
   processed_by?: string | null;
@@ -125,6 +165,7 @@ export interface Payment {
   updated_at: string;
 
   payment?: Payment;
+  proposal?: Proposal;
   processedByUser?: {
     id: string;
     full_name?: string;
@@ -140,6 +181,8 @@ export interface Category {
   created_at?: string;
   updated_at?: string;
 }
+
+export interface Bidang extends Category {}
 
 export interface PaginatedResponse<T> {
   current_page: number;
@@ -168,6 +211,10 @@ export interface PaymentProcessRequest {
 export interface PaymentCompleteRequest {
   payment_proof_url?: string;
   admin_notes?: string;
+}
+
+export interface ApprovalActionRequest {
+  notes?: string;
 }
 
 export interface ProposalRejectRequest {
@@ -201,6 +248,13 @@ export interface DashboardSummary {
   totalBudget: number;
   usedBudget: number;
   remainingBudget: number;
+  bidangBreakdown?: Array<{
+    name: string;
+    total_budget: number;
+    used_budget: number;
+    remaining_budget: number;
+    total_proposals: number;
+  }>;
 }
 
 export interface Laporan {
@@ -221,17 +275,20 @@ export interface Feedback {
 
 export interface RKAM {
   id: string;
-  category_id: string;
+  category_id?: string | null;
+  bidang_id?: string | null;
   kategori: string; // for compatibility
+  bidang?: string | null;
   item_name: string;
   pagu: number;
-  volume: number;
+  volume: number | string;
   satuan: string;
   unit_price: number;
   dana_bos: number;
   dana_komite: number;
   tahun_anggaran: number;
   deskripsi: string | null;
+  description?: string | null;
   terpakai: number;
   sisa: number;
   persentase: number;
@@ -244,11 +301,13 @@ export interface RKAM {
   
   created_at?: string;
   updated_at?: string;
-  category?: Category;
+  category?: Category | null;
+  bidangRef?: Bidang | null;
 }
 
 export interface RKAMCreateRequest {
-  category_id: string;
+  category_id?: string;
+  bidang_id?: string;
   item_name: string;
   volume: number;
   satuan: string;
@@ -272,7 +331,13 @@ export interface ProposalAttachment {
   file_path: string;
   file_size: number;
   mime_type: string;
+  attachment_type?: 'proposal' | 'lpj' | null;
   created_at: string;
+}
+
+export interface ProposalAttachmentUpload {
+  file: File;
+  attachmentType: 'proposal' | 'lpj';
 }
 
 class ApiService {
@@ -307,7 +372,6 @@ class ApiService {
     };
 
     try {
-      console.log(`🌐 API Request: ${endpoint}`);
       const response = await fetch(url, config);
       clearTimeout(timeoutId);
 
@@ -327,16 +391,19 @@ class ApiService {
         } else {
           // Non-JSON response (likely HTML error page)
           const textError = await response.text();
-          console.error('Server returned non-JSON error:', textError.substring(0, 200));
+          if (import.meta.env.DEV) {
+            console.error('Server returned non-JSON error:', textError.substring(0, 200));
+          }
           throw new Error(`Server error (${response.status}): Terjadi kesalahan pada server. Silakan periksa backend API.`);
         }
       }
 
-      console.log(`✅ API Response: ${endpoint} - OK`);
       const successContentType = response.headers.get('content-type');
       if (!successContentType || !successContentType.includes('application/json')) {
         const rawText = await response.text();
-        console.error('Expected JSON response but got:', rawText.substring(0, 200));
+        if (import.meta.env.DEV) {
+          console.error('Expected JSON response but got:', rawText.substring(0, 200));
+        }
         throw new Error('Server mengembalikan respons tidak valid. Pastikan backend Laravel sudah berjalan dan konfigurasi API benar.');
       }
       return await response.json();
@@ -345,11 +412,12 @@ class ApiService {
 
       // Handle abort error (timeout)
       if (error instanceof Error && error.name === 'AbortError') {
-        console.error('❌ API Request timeout:', endpoint);
         throw new Error('Request timeout: Server tidak merespons dalam 30 detik. Silakan coba lagi.');
       }
 
-      console.error('❌ API request failed:', error);
+      if (import.meta.env.DEV) {
+        console.error('API request failed:', error);
+      }
       throw error;
     }
   }
@@ -372,6 +440,7 @@ class ApiService {
     per_page?: number;
     search?: string;
     role?: string;
+    bidang_id?: string;
     sort_by?: string;
     order?: string;
     no_paginate?: boolean;
@@ -466,6 +535,66 @@ class ApiService {
     });
   }
 
+  async processPaymentWithFile(
+    proposalId: string,
+    data: PaymentProcessRequest,
+    proofFile: File
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      payment_id: string;
+      proposal_id: string;
+      status: string;
+      amount: string;
+      processed_at: string;
+    };
+  }> {
+    const url = `${this.baseURL}/payments/${proposalId}/process`;
+    const token = localStorage.getItem('sirangkul_token');
+    const formData = new FormData();
+    const compressed = await this.compressFile(proofFile);
+
+    formData.append('recipient_name', data.recipient_name);
+    formData.append('recipient_account', data.recipient_account);
+    formData.append('payment_method', data.payment_method);
+
+    if (data.bank_name) {
+      formData.append('bank_name', data.bank_name);
+    }
+
+    if (data.payment_reference) {
+      formData.append('payment_reference', data.payment_reference);
+    }
+
+    if (data.notes) {
+      formData.append('notes', data.notes);
+    }
+
+    formData.append('payment_proof_file', compressed, proofFile.name + '.gz');
+    formData.append('proof_original_name', proofFile.name);
+    formData.append('proof_original_size', String(proofFile.size));
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const contentType = response.headers.get('content-type') || '';
+      const errorData = contentType.includes('application/json')
+        ? await response.json().catch(() => ({}))
+        : {};
+
+      throw new Error((errorData as ApiError).message || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
   async completePayment(paymentId: string, data: PaymentCompleteRequest): Promise<{
     success: boolean;
     message: string;
@@ -531,6 +660,9 @@ class ApiService {
   // RKAM API Methods
   async getAllRKAM(params?: { 
     category_id?: string; 
+    bidang_id?: string;
+    bidang?: string;
+    kategori?: string;
     tahun_anggaran?: number; 
     search?: string;
     page?: number;
@@ -554,18 +686,58 @@ class ApiService {
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/rkam?${queryString}` : '/rkam';
 
-    const response = await this.request<{ success: boolean; message: string; data: PaginatedResponse<RKAM> | RKAM[] }>(endpoint, {
+    const response = await this.request<
+      { success: boolean; message?: string; data: PaginatedResponse<RKAM> | RKAM[] }
+      | PaginatedResponse<RKAM>
+      | RKAM[]
+    >(endpoint, {
       method: 'GET',
     });
 
-    return response.data;
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    if (response && typeof response === 'object' && 'data' in response) {
+      return response.data as PaginatedResponse<RKAM> | RKAM[];
+    }
+
+    return response as PaginatedResponse<RKAM>;
   }
 
-  async getRKAMOptions(): Promise<{ categories: Category[]; units: string[] }> {
-    const response = await this.request<{ success: boolean; data: { categories: Category[]; units: string[] } }>('/rkam/options', {
+  async getRKAMOptions(): Promise<{ categories: Category[]; bidangs: Bidang[]; units: string[] }> {
+    const response = await this.request<
+      { success?: boolean; data?: { categories?: Category[]; bidangs?: Bidang[]; units?: string[] }; categories?: Category[]; bidangs?: Bidang[]; units?: string[] }
+      | { categories?: Category[]; bidangs?: Bidang[]; units?: string[] }
+    >('/rkam/options', {
       method: 'GET',
     });
-    return response.data;
+
+    if (response && typeof response === 'object' && 'data' in response && response.data) {
+      const bidangs = Array.isArray(response.data.bidangs)
+        ? response.data.bidangs
+        : Array.isArray(response.data.categories)
+          ? response.data.categories
+          : [];
+
+      return {
+        categories: bidangs,
+        bidangs,
+        units: Array.isArray(response.data.units) ? response.data.units : [],
+      };
+    }
+
+    const bidangs = Array.isArray(response.bidangs)
+      ? response.bidangs
+      : Array.isArray(response.categories)
+        ? response.categories
+        : [];
+
+    return {
+      categories: bidangs,
+      bidangs,
+      units: Array.isArray(response.units) ? response.units : [],
+    };
   }
 
   async getRKAMById(rkamId: string): Promise<RKAM> {
@@ -609,33 +781,49 @@ class ApiService {
   }
 
   // Category API Methods
-  async getAllCategories(): Promise<Category[]> {
-    const response = await this.request<{ success: boolean; data: Category[] }>('/categories', {
+  async getAllBidangs(): Promise<Bidang[]> {
+    const response = await this.request<{ success: boolean; data: Bidang[] }>('/bidangs', {
       method: 'GET',
     });
     return response.data;
   }
 
-  async createCategory(data: Partial<Category>): Promise<Category> {
-    const response = await this.request<{ success: boolean; data: Category }>('/categories', {
+  async createBidang(data: Partial<Bidang>): Promise<Bidang> {
+    const response = await this.request<{ success: boolean; data: Bidang }>('/bidangs', {
       method: 'POST',
       body: JSON.stringify(data),
     });
     return response.data;
   }
 
-  async updateCategory(id: string, data: Partial<Category>): Promise<Category> {
-    const response = await this.request<{ success: boolean; data: Category }>(`/categories/${id}`, {
+  async updateBidang(id: string, data: Partial<Bidang>): Promise<Bidang> {
+    const response = await this.request<{ success: boolean; data: Bidang }>(`/bidangs/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
     return response.data;
   }
 
-  async deleteCategory(id: string): Promise<void> {
-    await this.request(`/categories/${id}`, {
+  async deleteBidang(id: string): Promise<void> {
+    await this.request(`/bidangs/${id}`, {
       method: 'DELETE',
     });
+  }
+
+  async getAllCategories(): Promise<Category[]> {
+    return this.getAllBidangs();
+  }
+
+  async createCategory(data: Partial<Category>): Promise<Category> {
+    return this.createBidang(data);
+  }
+
+  async updateCategory(id: string, data: Partial<Category>): Promise<Category> {
+    return this.updateBidang(id, data);
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    await this.deleteBidang(id);
   }
 
   // Proposal API Methods
@@ -702,58 +890,40 @@ class ApiService {
     });
   }
 
-  async verifyProposal(proposalId: string, data?: Record<string, never>): Promise<{
+  async verifyProposal(proposalId: string, data: ApprovalActionRequest = {}): Promise<{
     success: boolean;
     message: string;
-    data: {
-      id: string;
-      status: string;
-      verified_at: string;
-      verified_by: string;
-      next_approver: string;
-    };
+    data: Proposal;
   }> {
     return this.request(`/proposals/${proposalId}/verify`, {
       method: 'POST',
-      body: JSON.stringify(data || {}),
+      body: JSON.stringify(data),
     });
   }
 
-  async approveProposal(proposalId: string, data?: Record<string, never>): Promise<{
+  async approveProposal(proposalId: string, data: ApprovalActionRequest = {}): Promise<{
     success: boolean;
     message: string;
     data: {
-      id: string;
-      status: string;
-      approved_at: string;
-      approved_by?: string;
-      final_approved_at?: string;
-      final_approved_by?: string;
-      requires_committee_approval?: boolean;
+      proposal: Proposal;
       next_approver?: string;
       next_step?: string;
     };
   }> {
     return this.request(`/proposals/${proposalId}/approve`, {
       method: 'POST',
-      body: JSON.stringify(data || {}),
+      body: JSON.stringify(data),
     });
   }
 
-  async finalApproveProposal(proposalId: string, data?: Record<string, never>): Promise<{
+  async finalApproveProposal(proposalId: string, data: ApprovalActionRequest = {}): Promise<{
     success: boolean;
     message: string;
-    data: {
-      id: string;
-      status: string;
-      final_approved_at: string;
-      final_approved_by: string;
-      next_step?: string;
-    };
+    data: Proposal;
   }> {
     return this.request(`/proposals/${proposalId}/final-approve`, {
       method: 'POST',
-      body: JSON.stringify(data || {}),
+      body: JSON.stringify(data),
     });
   }
 
@@ -889,18 +1059,19 @@ class ApiService {
   }
 
   // Upload 1–5 attachments for a proposal (compresses each file with gzip before sending)
-  async uploadProposalAttachments(proposalId: string, files: File[]): Promise<ProposalAttachment[]> {
+  async uploadProposalAttachments(proposalId: string, files: ProposalAttachmentUpload[]): Promise<ProposalAttachment[]> {
     const url = `${this.baseURL}/proposals/${proposalId}/attachments`;
     const token = localStorage.getItem('sirangkul_token');
 
     const formData = new FormData();
 
-    for (const file of files) {
-      const compressed = await this.compressFile(file);
-      formData.append('files[]', compressed, file.name + '.gz');
-      formData.append('original_names[]', file.name);
-      formData.append('mime_types[]', file.type || 'application/octet-stream');
-      formData.append('file_sizes[]', String(file.size));
+    for (const item of files) {
+      const compressed = await this.compressFile(item.file);
+      formData.append('files[]', compressed, item.file.name + '.gz');
+      formData.append('original_names[]', item.file.name);
+      formData.append('mime_types[]', item.file.type || 'application/octet-stream');
+      formData.append('file_sizes[]', String(item.file.size));
+      formData.append('attachment_types[]', item.attachmentType);
     }
 
     const response = await fetch(url, {
@@ -926,6 +1097,28 @@ class ApiService {
     return uploadResult.data as ProposalAttachment[];
   }
 
+  async deleteAttachment(attachmentId: string): Promise<void> {
+    const url = `${this.baseURL}/attachments/${attachmentId}`;
+    const token = localStorage.getItem('sirangkul_token');
+
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const contentType = response.headers.get('content-type') || '';
+      const errorData = contentType.includes('application/json')
+        ? await response.json().catch(() => ({}))
+        : {};
+
+      throw new Error((errorData as ApiError).message || `Gagal menghapus lampiran proposal (${response.status}).`);
+    }
+  }
+
   // Download an attachment by its ID
   async downloadAttachment(attachmentId: string, fileName: string): Promise<void> {
     const url = `${this.baseURL}/attachments/${attachmentId}/download`;
@@ -939,8 +1132,16 @@ class ApiService {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: `HTTP error ${response.status}` }));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      const contentType = response.headers.get('content-type') || '';
+      const errorData = contentType.includes('application/json')
+        ? await response.json().catch(() => ({}))
+        : {};
+
+      if (response.status === 404) {
+        throw new Error((errorData as ApiError).message || 'File lampiran proposal tidak ditemukan di server.');
+      }
+
+      throw new Error((errorData as ApiError).message || `Gagal mengunduh lampiran proposal (${response.status}).`);
     }
 
     const blob = await response.blob();
@@ -1009,7 +1210,7 @@ class ApiService {
     return result.data; // Laravel wraps in { success, data: { ...paginate } }
   }
 
-  async getPublicRKAMOptions(): Promise<{ categories: Category[]; units: string[] }> {
+  async getPublicRKAMOptions(): Promise<{ categories: Category[]; bidangs: Bidang[]; units: string[] }> {
     const response = await fetch(`${this.baseURL}/public/rkam/options`, {
       method: 'GET',
     });
@@ -1019,7 +1220,18 @@ class ApiService {
     }
 
     const result = await response.json();
-    return result.data; // Laravel wraps in { success, data: { categories, units } }
+    const data = result.data || {};
+    const bidangs = Array.isArray(data.bidangs)
+      ? data.bidangs
+      : Array.isArray(data.categories)
+        ? data.categories
+        : [];
+
+    return {
+      categories: bidangs,
+      bidangs,
+      units: Array.isArray(data.units) ? data.units : [],
+    };
   }
 
   // Fetch an attachment as a Blob URL for in-browser preview
@@ -1035,8 +1247,16 @@ class ApiService {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: `HTTP error ${response.status}` }));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      const contentType = response.headers.get('content-type') || '';
+      const errorData = contentType.includes('application/json')
+        ? await response.json().catch(() => ({}))
+        : {};
+
+      if (response.status === 404) {
+        throw new Error((errorData as ApiError).message || 'File lampiran proposal tidak ditemukan di server.');
+      }
+
+      throw new Error((errorData as ApiError).message || `Gagal memuat lampiran proposal (${response.status}).`);
     }
 
     const blob = await response.blob();
@@ -1071,3 +1291,4 @@ class ApiService {
 }
 
 export const apiService = new ApiService();
+export type { User };

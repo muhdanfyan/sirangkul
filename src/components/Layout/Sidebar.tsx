@@ -18,6 +18,8 @@ import {
   FilePlus,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiService } from '../../services/api';
+import { getApprovalAttentionCount, getProposalAttentionCount } from '../../utils/proposalWorkflow';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -28,13 +30,81 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const location = useLocation();
   const [proposalMenuOpen, setProposalMenuOpen] = useState(false);
+  const [menuCounts, setMenuCounts] = useState({
+    proposals: 0,
+    approvals: 0,
+    payments: 0,
+  });
+
+  const isProposalRoute = location.pathname.includes('/proposal') || location.pathname.includes('/my-proposals');
 
   // Auto-expand Proposal menu if user is on a proposal page
   useEffect(() => {
-    if (location.pathname.includes('/proposal')) {
+    if (isProposalRoute) {
       setProposalMenuOpen(true);
     }
-  }, [location.pathname]);
+  }, [isProposalRoute]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadMenuCounts = async () => {
+      if (!user) {
+        if (isMounted) {
+          setMenuCounts({ proposals: 0, approvals: 0, payments: 0 });
+        }
+        return;
+      }
+
+      const shouldLoadProposals = ['Pengusul', 'Verifikator', 'Kepala Madrasah', 'Komite Madrasah', 'Bendahara'].includes(user.role);
+      const shouldLoadPayments = ['Administrator', 'Bendahara'].includes(user.role);
+
+      try {
+        const [proposals, pendingPayments] = await Promise.all([
+          shouldLoadProposals ? apiService.getAllProposals() : Promise.resolve([]),
+          shouldLoadPayments ? apiService.getPendingPayments() : Promise.resolve([]),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setMenuCounts({
+          proposals: getProposalAttentionCount(user, proposals),
+          approvals: getApprovalAttentionCount(user, proposals),
+          payments: pendingPayments.length,
+        });
+      } catch (error) {
+        console.error('Failed to load sidebar notification counts:', error);
+
+        if (isMounted) {
+          setMenuCounts({ proposals: 0, approvals: 0, payments: 0 });
+        }
+      }
+    };
+
+    loadMenuCounts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [location.pathname, user]);
+
+  const renderCountBadge = (count: number, tone: 'blue' | 'amber' = 'blue') => {
+    if (count <= 0) {
+      return null;
+    }
+
+    const toneClassName = tone === 'amber'
+      ? 'bg-amber-100 text-amber-700'
+      : 'bg-blue-100 text-blue-700';
+
+    return (
+      <span className={`ml-auto inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold ${toneClassName}`}>
+        {count}
+      </span>
+    );
+  };
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -100,7 +170,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               onClick={onClose}
             >
               <item.icon className="h-5 w-5 mr-3" />
-              {item.label}
+              <span className="min-w-0 flex-1">{item.label}</span>
+              {item.path === '/approvals' && renderCountBadge(menuCounts.approvals)}
+              {item.path === '/payments' && renderCountBadge(menuCounts.payments, 'amber')}
             </NavLink>
           ))}
 
@@ -108,12 +180,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="mb-1">
             <button
               onClick={() => setProposalMenuOpen(!proposalMenuOpen)}
-              className="flex items-center justify-between w-full px-3 py-3 text-sm font-medium rounded-lg transition-colors duration-150 text-gray-700 hover:bg-gray-100"
+              className={`flex items-center justify-between w-full px-3 py-3 text-sm font-medium rounded-lg transition-colors duration-150 ${
+                isProposalRoute
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
             >
               <div className="flex items-center">
                 <FileText className="h-5 w-5 mr-3" />
                 <span>Proposal</span>
               </div>
+              {renderCountBadge(menuCounts.proposals)}
               {proposalMenuOpen ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (

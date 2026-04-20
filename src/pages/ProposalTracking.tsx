@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Search, Eye, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { apiService, Proposal } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { filterProposalsForUserView } from '../utils/proposalWorkflow';
 
 const ProposalTracking: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,14 +17,14 @@ const ProposalTracking: React.FC = () => {
 
   useEffect(() => {
     fetchProposals();
-  }, []);
+  }, [user]);
 
   const fetchProposals = async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await apiService.getAllProposals();
-      setProposals(data);
+      setProposals(filterProposalsForUserView(user, data));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Gagal memuat proposals';
       setError(errorMessage);
@@ -51,11 +54,11 @@ const ProposalTracking: React.FC = () => {
     const stageMap: Record<string, string> = {
       'draft': 'Draft',
       'submitted': 'Verifikator',
-      'verified': 'Kepala Madrasah',
-      'approved': 'Komite Madrasah',
+      'verified': 'Komite Madrasah',
+      'approved': 'Kepala Madrasah',
       'final_approved': 'Bendahara',
       'payment_processing': 'Bendahara',
-      'completed': 'Selesai',
+      'completed': 'Terbayar',
       'rejected': 'Ditolak',
     };
     return stageMap[status] || 'Unknown';
@@ -118,13 +121,13 @@ const ProposalTracking: React.FC = () => {
   const getStatusLabel = (status: string) => {
     const labelMap: Record<string, string> = {
       'draft': 'Draft',
-      'submitted': 'Menunggu Verifikasi',
-      'verified': 'Terverifikasi',
-      'approved': 'Disetujui Kepala',
+      'submitted': 'Menunggu Verifikator',
+      'verified': 'Menunggu Komite Madrasah',
+      'approved': 'Menunggu Kepala Madrasah',
       'rejected': 'Ditolak',
-      'final_approved': 'Disetujui Akhir',
+      'final_approved': 'Siap Dibayar',
       'payment_processing': 'Proses Pembayaran',
-      'completed': 'Selesai',
+      'completed': 'Sudah Terbayar',
     };
     return labelMap[status] || status;
   };
@@ -194,13 +197,13 @@ const ProposalTracking: React.FC = () => {
           >
             <option value="">Semua Status</option>
             <option value="draft">Draft</option>
-            <option value="submitted">Menunggu Verifikasi</option>
-            <option value="verified">Terverifikasi</option>
-            <option value="approved">Disetujui Kepala</option>
+            <option value="submitted">Menunggu Verifikator</option>
+            <option value="verified">Menunggu Komite Madrasah</option>
+            <option value="approved">Menunggu Kepala Madrasah</option>
             <option value="rejected">Ditolak</option>
-            <option value="final_approved">Disetujui Akhir</option>
+            <option value="final_approved">Siap Dibayar</option>
             <option value="payment_processing">Proses Pembayaran</option>
-            <option value="completed">Selesai</option>
+            <option value="completed">Sudah Terbayar</option>
           </select>
         </div>
       </div>
@@ -358,7 +361,7 @@ const ProposalTracking: React.FC = () => {
                   {selectedProposal.requires_committee_approval && (
                     <div className="col-span-2">
                       <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
-                        ⚠️ Memerlukan persetujuan Komite Madrasah (budget &gt; Rp 50.000.000)
+                        Proposal ini mengikuti alur verifikator → komite → kepala madrasah pada bidang yang sama.
                       </div>
                     </div>
                   )}
@@ -416,7 +419,7 @@ const ProposalTracking: React.FC = () => {
                     <div className="flex items-start">
                       <div className="w-3 h-3 rounded-full bg-purple-600 mt-0.5 mr-3"></div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">Disetujui Kepala Madrasah</p>
+                        <p className="text-sm font-medium text-gray-900">Disetujui Komite Madrasah</p>
                         <p className="text-xs text-gray-600">
                           {formatDate(selectedProposal.approved_at)}
                           {selectedProposal.approver && ` • ${selectedProposal.approver.full_name}`}
@@ -430,7 +433,7 @@ const ProposalTracking: React.FC = () => {
                     <div className="flex items-start">
                       <div className="w-3 h-3 rounded-full bg-green-600 mt-0.5 mr-3"></div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">Disetujui Akhir</p>
+                        <p className="text-sm font-medium text-gray-900">Disetujui Kepala Madrasah</p>
                         <p className="text-xs text-gray-600">
                           {formatDate(selectedProposal.final_approved_at)}
                           {selectedProposal.final_approver && ` • ${selectedProposal.final_approver.full_name}`}
@@ -444,7 +447,7 @@ const ProposalTracking: React.FC = () => {
                     <div className="flex items-start">
                       <div className="w-3 h-3 rounded-full bg-emerald-600 mt-0.5 mr-3"></div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">Selesai</p>
+                        <p className="text-sm font-medium text-gray-900">Sudah Terbayar</p>
                         <p className="text-xs text-gray-600">{formatDate(selectedProposal.completed_at)}</p>
                       </div>
                     </div>

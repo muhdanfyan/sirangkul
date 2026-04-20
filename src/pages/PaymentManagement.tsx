@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, DollarSign, Receipt, CheckCircle, Clock, Search, AlertCircle, XCircle, FileText, Eye, Download } from 'lucide-react';
 import { apiService, Payment, Proposal, PaymentProcessRequest, PaymentCompleteRequest } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
 import Toast, { ToastType } from '../components/Toast';
 import InfoModal from '../components/InfoModal';
-import RejectionModal from '../components/RejectionModal';
 
 const PaymentManagement: React.FC = () => {
-  const { user } = useAuth();
-  
   // State management
   const [payments, setPayments] = useState<Payment[]>([]);
   const [pendingProposals, setPendingProposals] = useState<Proposal[]>([]);
@@ -17,7 +13,7 @@ const PaymentManagement: React.FC = () => {
   const [actionLoading, setActionLoading] = useState(false);
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'All' | 'pending' | 'processing' | 'completed' | 'failed'>('All');
+  const [statusFilter, setStatusFilter] = useState<'All' | 'pending' | 'processing' | 'completed' | 'failed' | 'rejected'>('All');
   
   // Modal states
   const [showProcessModal, setShowProcessModal] = useState(false);
@@ -37,7 +33,6 @@ const PaymentManagement: React.FC = () => {
   });
   
   const [completeForm, setCompleteForm] = useState<PaymentCompleteRequest>({
-    payment_proof_url: '',
     admin_notes: ''
   });
 
@@ -70,13 +65,6 @@ const PaymentManagement: React.FC = () => {
     message: '',
     type: 'info'
   });
-  const [showRejectionModal, setShowRejectionModal] = useState(false);
-  const [rejectionTarget, setRejectionTarget] = useState<{
-    type: 'proposal' | 'payment';
-    id: string;
-    title: string;
-  } | null>(null);
-
   // Fetch data on mount
   useEffect(() => {
     fetchData();
@@ -95,29 +83,33 @@ const PaymentManagement: React.FC = () => {
       
       setPendingProposals(pending);
       setPayments(allPayments);
-      
-      console.log('✅ Payment data loaded:', { 
-        pendingProposals: pending,
-        pendingCount: pending.length, 
-        payments: allPayments,
-        paymentsCount: allPayments.length,
-        user: user?.role 
-      });
     } catch (err: unknown) {
-      console.error('❌ Error fetching payment data:', err);
       setError(err instanceof Error ? err.message : 'Gagal memuat data pembayaran');
     } finally {
       setLoading(false);
     }
   };
 
+  const resetProofUpload = () => {
+    setProofFile(null);
+    setProofPreview(null);
+  };
+
   const handleProcessPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProposal) return;
 
+    if (!proofFile) {
+      setToast({
+        message: 'Bukti pembayaran wajib diupload saat proses pembayaran.',
+        type: 'error'
+      });
+      return;
+    }
+
     try {
       setActionLoading(true);
-      const response = await apiService.processPayment(selectedProposal.id, processForm);
+      const response = await apiService.processPaymentWithFile(selectedProposal.id, processForm, proofFile);
       
       setToast({
         message: `Pembayaran berhasil diproses!\nPayment ID: ${response.data.payment_id}\nStatus: ${response.data.status}`,
@@ -132,6 +124,7 @@ const PaymentManagement: React.FC = () => {
         payment_reference: '',
         notes: ''
       });
+      resetProofUpload();
       setShowProcessModal(false);
       setSelectedProposal(null);
       await fetchData();
@@ -149,43 +142,9 @@ const PaymentManagement: React.FC = () => {
     e.preventDefault();
     if (!selectedPayment) return;
 
-    // Validation: Must have either file or URL
-    if (!proofFile && !completeForm.payment_proof_url) {
-      setToast({
-        message: 'Bukti pembayaran wajib diupload atau URL harus diisi!',
-        type: 'error'
-      });
-      return;
-    }
-
     try {
       setActionLoading(true);
-
-      // Compress file before uploading (gzip via browser's CompressionStream)
-      let fileToUpload: Blob | null = null;
-      let proofOriginalName = '';
-      if (proofFile) {
-        fileToUpload = await apiService.compressFile(proofFile);
-        proofOriginalName = proofFile.name;
-      }
-
-      // Create FormData for file upload
-      const formData = new FormData();
-      
-      if (fileToUpload && proofOriginalName) {
-        formData.append('payment_proof_file', fileToUpload, proofOriginalName + '.gz');
-        formData.append('proof_original_name', proofOriginalName);
-      }
-      
-      if (completeForm.payment_proof_url) {
-        formData.append('payment_proof_url', completeForm.payment_proof_url);
-      }
-      
-      if (completeForm.admin_notes) {
-        formData.append('admin_notes', completeForm.admin_notes);
-      }
-
-      const response = await apiService.completePaymentWithFile(selectedPayment.id, formData);
+      const response = await apiService.completePayment(selectedPayment.id, completeForm);
       const { rkam_update } = response.data;
       
       setInfoModal({
@@ -199,10 +158,7 @@ const PaymentManagement: React.FC = () => {
         type: 'success'
       });
       
-      // Reset form and file
-      setCompleteForm({ payment_proof_url: '', admin_notes: '' });
-      setProofFile(null);
-      setProofPreview(null);
+      setCompleteForm({ admin_notes: '' });
       setShowCompleteModal(false);
       setSelectedPayment(null);
       await fetchData();
@@ -240,71 +196,15 @@ const PaymentManagement: React.FC = () => {
     }
   };
 
-  // NEW: Handle rejection with improvement suggestions
-  const handleRejectWithImprovements = async (reason: string, improvements: string) => {
-    if (!rejectionTarget) return;
-
-    try {
-      setActionLoading(true);
-      
-      if (rejectionTarget.type === 'proposal') {
-        // Reject proposal (prevent payment processing)
-        const result = await apiService.rejectProposal(rejectionTarget.id, {
-          rejection_reason: reason,
-          improvement_suggestions: improvements
-        });
-        setToast({ message: result.message, type: 'success' });
-      } else {
-        // Reject payment
-        const result = await apiService.rejectPayment(rejectionTarget.id, {
-          rejection_reason: reason,
-          improvement_suggestions: improvements
-        });
-        setToast({ message: result.message, type: 'success' });
-      }
-      
-      setShowRejectionModal(false);
-      setRejectionTarget(null);
-      await fetchData();
-    } catch (err: unknown) {
-      setToast({
-        message: `Gagal menolak: ${err instanceof Error ? err.message : 'Terjadi kesalahan'}`,
-        type: 'error'
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Open rejection modal for proposal
-  const openRejectProposal = (proposal: Proposal) => {
-    setRejectionTarget({
-      type: 'proposal',
-      id: proposal.id,
-      title: proposal.title
-    });
-    setShowRejectionModal(true);
-  };
-
-  // Open rejection modal for payment
-  const openRejectPayment = (payment: Payment) => {
-    setRejectionTarget({
-      type: 'payment',
-      id: payment.id,
-      title: payment.proposal?.title || `Payment ${payment.id.substring(0, 8)}`
-    });
-    setShowRejectionModal(true);
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size (max 1MB)
+    const maxSize = 1 * 1024 * 1024; // 1MB
     if (file.size > maxSize) {
       setToast({
-        message: 'Ukuran file terlalu besar! Maksimal 5MB.',
+        message: 'Ukuran file terlalu besar! Maksimal 1MB.',
         type: 'error'
       });
       return;
@@ -335,8 +235,7 @@ const PaymentManagement: React.FC = () => {
   };
 
   const removeProofFile = () => {
-    setProofFile(null);
-    setProofPreview(null);
+    resetProofUpload();
   };
 
   const formatRupiah = (amount: string | number) => {
@@ -362,6 +261,7 @@ const PaymentManagement: React.FC = () => {
       case 'processing': return 'bg-blue-100 text-blue-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'failed': return 'bg-red-100 text-red-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -372,6 +272,7 @@ const PaymentManagement: React.FC = () => {
       case 'processing': return <Clock className="h-4 w-4 text-blue-500" />;
       case 'pending': return <Clock className="h-4 w-4 text-yellow-500" />;
       case 'failed': return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'rejected': return <XCircle className="h-4 w-4 text-red-500" />;
       default: return <Receipt className="h-4 w-4 text-gray-500" />;
     }
   };
@@ -508,7 +409,7 @@ const PaymentManagement: React.FC = () => {
           </div>
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'All' | 'pending' | 'processing' | 'completed' | 'failed')}
+            onChange={(e) => setStatusFilter(e.target.value as 'All' | 'pending' | 'processing' | 'completed' | 'failed' | 'rejected')}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="All">Semua Status</option>
@@ -516,6 +417,7 @@ const PaymentManagement: React.FC = () => {
             <option value="processing">Processing</option>
             <option value="completed">Completed</option>
             <option value="failed">Failed</option>
+            <option value="rejected">Rejected</option>
           </select>
         </div>
       </div>
@@ -531,7 +433,7 @@ const PaymentManagement: React.FC = () => {
           <div className="px-6 py-12 text-center text-gray-500">
             <Clock className="h-12 w-12 mx-auto mb-3 text-gray-400" />
             <p className="font-medium">Tidak ada proposal yang perlu dibayar</p>
-            <p className="text-sm mt-1">Proposal yang telah disetujui Kepala Madrasah akan muncul di sini</p>
+            <p className="text-sm mt-1">Proposal yang sudah disetujui kepala madrasah dan siap dibayar akan muncul di sini</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -581,20 +483,13 @@ const PaymentManagement: React.FC = () => {
                               ...prev,
                               recipient_name: proposal.user?.full_name || proposal.user?.name || ''
                             }));
+                            resetProofUpload();
                             setShowProcessModal(true);
                           }}
                           disabled={actionLoading}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                         >
                           Proses Pembayaran
-                        </button>
-                        <button
-                          onClick={() => openRejectProposal(proposal)}
-                          disabled={actionLoading}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-                          title="Tolak Proposal"
-                        >
-                          Tolak
                         </button>
                       </div>
                     </td>
@@ -685,19 +580,13 @@ const PaymentManagement: React.FC = () => {
                             <button
                               onClick={() => {
                                 setSelectedPayment(payment);
+                                setCompleteForm({ admin_notes: '' });
                                 setShowCompleteModal(true);
                               }}
                               className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
                               title="Selesaikan Pembayaran"
                             >
                               Selesaikan
-                            </button>
-                            <button
-                              onClick={() => openRejectPayment(payment)}
-                              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-                              title="Tolak Pembayaran"
-                            >
-                              Tolak
                             </button>
                           </>
                         )}
@@ -738,7 +627,7 @@ const PaymentManagement: React.FC = () => {
       {/* Process Payment Modal */}
       {showProcessModal && selectedProposal && (
         <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => { setShowProcessModal(false); setSelectedProposal(null); }} />
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => { setShowProcessModal(false); setSelectedProposal(null); resetProofUpload(); }} />
           <div className="fixed z-50 bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-auto left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ maxHeight: '90vh' }}>
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Proses Pembayaran</h3>
@@ -821,12 +710,65 @@ const PaymentManagement: React.FC = () => {
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bukti Pembayaran * <span className="text-red-500">(Wajib)</span>
+                </label>
+
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors mb-3">
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="process-proof-upload"
+                  />
+                  <label htmlFor="process-proof-upload" className="cursor-pointer">
+                    <FileText className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600 font-medium">
+                      Klik untuk upload bukti pembayaran
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      PNG, JPG, PDF (maksimal 1MB)
+                    </p>
+                  </label>
+                </div>
+
+                {proofFile && (
+                  <div className="mt-2 flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-green-900 truncate">{proofFile.name}</p>
+                      <p className="text-xs text-green-700">{(proofFile.size / 1024).toFixed(2)} KB</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeProofFile}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <XCircle className="h-5 w-5" />
+                    </button>
+                  </div>
+                )}
+
+                {proofPreview && (
+                  <div className="mt-2">
+                    <img
+                      src={proofPreview}
+                      alt="Preview"
+                      className="max-w-full h-40 object-contain rounded border border-gray-200"
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => {
                     setShowProcessModal(false);
                     setSelectedProposal(null);
+                    resetProofUpload();
                   }}
                   disabled={actionLoading}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
@@ -849,7 +791,7 @@ const PaymentManagement: React.FC = () => {
       {/* Complete Payment Modal */}
       {showCompleteModal && selectedPayment && (
         <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => { setShowCompleteModal(false); setSelectedPayment(null); }} />
+          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => { setShowCompleteModal(false); setSelectedPayment(null); setCompleteForm({ admin_notes: '' }); }} />
           <div className="fixed z-50 bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-auto left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ maxHeight: '90vh' }}>
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Selesaikan Pembayaran</h3>
@@ -865,76 +807,16 @@ const PaymentManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bukti Pembayaran * <span className="text-red-500">(Wajib)</span>
-                </label>
-                
-                {/* Option 1: Upload File */}
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors mb-3">
-                  <input
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="proof-upload"
-                  />
-                  <label htmlFor="proof-upload" className="cursor-pointer">
-                    <FileText className="mx-auto h-12 w-12 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-600 font-medium">
-                      Klik untuk upload atau drag and drop
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                        PNG, JPG, PDF (maksimal 5MB)
-                      </p>
-                  </label>
-                </div>
-
-                {/* Preview uploaded file */}
-                {proofFile && (
-                  <div className="mt-2 flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-green-900 truncate">{proofFile.name}</p>
-                      <p className="text-xs text-green-700">{(proofFile.size / 1024).toFixed(2)} KB</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={removeProofFile}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <XCircle className="h-5 w-5" />
-                    </button>
-                  </div>
-                )}
-
-                {/* Preview image */}
-                {proofPreview && (
-                  <div className="mt-2">
-                    <img 
-                      src={proofPreview} 
-                      alt="Preview" 
-                      className="max-w-full h-40 object-contain rounded border border-gray-200"
-                    />
-                  </div>
-                )}
-
-                {/* Option 2: Or paste URL */}
-                <div className="mt-4">
-                  <label className="block text-xs text-gray-600 mb-1">
-                    Atau paste URL bukti pembayaran:
-                  </label>
-                  <input
-                    type="url"
-                    value={completeForm.payment_proof_url}
-                    onChange={(e) => setCompleteForm({ ...completeForm, payment_proof_url: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
-                    placeholder="https://example.com/bukti-pembayaran.jpg"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Minimal salah satu (file upload atau URL) harus diisi
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <p className="text-sm font-medium text-blue-900">Bukti pembayaran</p>
+                <p className="text-sm text-blue-800 mt-1">
+                  Bukti pembayaran diunggah saat proses pembayaran. Tahap ini hanya untuk finalisasi dan catatan admin.
+                </p>
+                {!selectedPayment.payment_proof_file && !selectedPayment.payment_proof_url && (
+                  <p className="text-xs text-red-600 mt-2">
+                    Record ini belum memiliki bukti pembayaran. Ini kemungkinan data lama sebelum alur upload dipindahkan ke tahap proses.
                   </p>
-                </div>
+                )}
               </div>
 
               <div>
@@ -963,6 +845,7 @@ const PaymentManagement: React.FC = () => {
                   onClick={() => {
                     setShowCompleteModal(false);
                     setSelectedPayment(null);
+                    setCompleteForm({ admin_notes: '' });
                   }}
                   disabled={actionLoading}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
@@ -1216,18 +1099,6 @@ const PaymentManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Rejection Modal */}
-      <RejectionModal
-        isOpen={showRejectionModal}
-        onClose={() => {
-          setShowRejectionModal(false);
-          setRejectionTarget(null);
-        }}
-        onConfirm={handleRejectWithImprovements}
-        proposalTitle={rejectionTarget?.title || ''}
-        isLoading={actionLoading}
-        userRole="bendahara"
-      />
     </div>
   );
 };

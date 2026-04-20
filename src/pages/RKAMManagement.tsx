@@ -3,17 +3,21 @@ import { createPortal } from 'react-dom';
 import { 
   Search, Plus, Edit2, Trash2, AlertCircle, TrendingUp, 
   DollarSign, Activity, Printer, Settings, ChevronLeft, 
-  ChevronRight, Calendar, Filter, ArrowUpDown, ChevronUp, ChevronDown, X as XIcon
+  ChevronRight, Calendar, Filter, ArrowUpDown, ChevronUp, ChevronDown, Eye, X as XIcon
 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import Toast from '../components/Toast';
-import { apiService, RKAM, Category } from '../services/api';
+import { apiService, RKAM, Category, Payment, Proposal } from '../services/api';
 import CategoryManagementModal from '../components/CategoryManagementModal';
 import RKAMPrintTemplate from './RKAMPrintTemplate';
+import { applyCompletedPaymentUsageToRKAM, resolveBudgetDateFilter } from '../utils/rkamBudget';
+import { parseAmountValue } from '../utils/currency';
+import { getPaymentStatusLabel } from '../utils/paymentStatus';
 
 const RKAMManagement: React.FC = () => {
   // Data States
   const [rkamItems, setRkamItems] = useState<RKAM[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [units, setUnits] = useState<string[]>([]);
   
@@ -23,6 +27,9 @@ const RKAMManagement: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
+  const [detailRkam, setDetailRkam] = useState<RKAM | null>(null);
+  const [detailProposals, setDetailProposals] = useState<Proposal[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
   
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,7 +54,7 @@ const RKAMManagement: React.FC = () => {
   // Form State
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    category_id: '',
+    bidang_id: '',
     item_name: '',
     volume: '',
     satuan: '',
@@ -69,14 +76,66 @@ const RKAMManagement: React.FC = () => {
     return Number(formData.volume || 0) * Number(formData.unit_price || 0);
   }, [formData.volume, formData.unit_price]);
 
+  const normalizeText = (value?: string | null) => (value || '').trim().toLowerCase();
+
+  const categoryFilterOptions = useMemo(() => {
+    const optionsMap = new Map<string, { value: string; label: string }>();
+
+    categories.forEach((category) => {
+      const label = category.name?.trim();
+      if (!label) {
+        return;
+      }
+
+      const normalizedLabel = normalizeText(label);
+      optionsMap.set(normalizedLabel, {
+        value: category.id,
+        label,
+      });
+    });
+
+    rkamItems.forEach((item) => {
+      const label = (item.bidangRef?.name || item.bidang || item.category?.name || item.kategori || '').trim();
+      if (!label) {
+        return;
+      }
+
+      const normalizedLabel = normalizeText(label);
+      if (!optionsMap.has(normalizedLabel)) {
+        optionsMap.set(normalizedLabel, {
+          value: `legacy:${label}`,
+          label,
+        });
+      }
+    });
+
+    return Array.from(optionsMap.values()).sort((left, right) => left.label.localeCompare(right.label));
+  }, [categories, rkamItems]);
+
   // Fetch Options (Categories & Units)
   const fetchOptions = useCallback(async () => {
     try {
-      const { categories, units } = await apiService.getRKAMOptions();
-      setCategories(categories);
-      setUnits(units);
+      const [options, categoryList] = await Promise.allSettled([
+        apiService.getRKAMOptions(),
+        apiService.getAllCategories(),
+      ]);
+
+      const optionCategories = options.status === 'fulfilled' ? options.value.bidangs : [];
+      const optionUnits = options.status === 'fulfilled' ? options.value.units : [];
+      const directCategories = categoryList.status === 'fulfilled' ? categoryList.value : [];
+
+      const mergedCategories = [...optionCategories, ...directCategories].reduce<Category[]>((accumulator, category) => {
+        if (!accumulator.some((item) => item.id === category.id)) {
+          accumulator.push(category);
+        }
+        return accumulator;
+      }, []).sort((a, b) => a.name.localeCompare(b.name));
+
+      setCategories(mergedCategories);
+      setUnits(optionUnits);
     } catch (err) {
       console.error('Failed to fetch options:', err);
+      setToast({ type: 'error', message: 'Gagal memuat opsi bidang RKAM.' });
     }
   }, []);
 
@@ -84,43 +143,158 @@ const RKAMManagement: React.FC = () => {
   const fetchRKAMData = useCallback(async () => {
     try {
       setIsLoading(true);
-      
-      // Prepare timeframe filters
-      let start_date = dateRange.start;
-      let end_date = dateRange.end;
-      let preset = timeframe;
 
-      const response = await apiService.getAllRKAM({
-        page: currentPage,
-        per_page: perPage,
-        category_id: selectedCategoryId,
-        search: searchTerm,
-        tahun_anggaran: timeframe === 'year' ? new Date().getFullYear() : undefined,
-        start_date,
-        end_date,
-        preset: timeframe !== 'custom' ? timeframe : undefined,
-        sort_by: sortConfig.key,
-        order: sortConfig.direction
+      const [rkamResult, paymentResult] = await Promise.allSettled([
+        apiService.getAllRKAM({
+          tahun_anggaran: timeframe === 'year' ? new Date().getFullYear() : undefined,
+          start_date: dateRange.start,
+          end_date: dateRange.end,
+          preset: timeframe !== 'custom' ? timeframe : undefined,
+          no_paginate: true,
+        }),
+        apiService.getAllPayments(),
+      ]);
+
+      if (rkamResult.status !== 'fulfilled') {
+        throw rkamResult.reason;
+      }
+
+      const rawRkams = Array.isArray(rkamResult.value) ? rkamResult.value : rkamResult.value.data;
+
+      if (paymentResult.status !== 'fulfilled') {
+        console.warn('Failed to sync completed payment usage for RKAM page:', paymentResult.reason);
+        setPayments([]);
+        setRkamItems(rawRkams);
+        return;
+      }
+
+      const paymentDateFilter = resolveBudgetDateFilter(timeframe, {
+        start: dateRange.start,
+        end: dateRange.end,
       });
 
-      setRkamItems(response.data);
-      setPaginationData({
-        total: response.total,
-        from: response.from,
-        to: response.to,
-        last_page: response.last_page
-      });
+      setPayments(paymentResult.value);
+      setRkamItems(applyCompletedPaymentUsageToRKAM(rawRkams, paymentResult.value, paymentDateFilter));
     } catch (err) {
       console.error('Failed to fetch RKAM:', err);
       setToast({ type: 'error', message: 'Gagal memuat data RKAM' });
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, perPage, selectedCategoryId, searchTerm, timeframe, dateRange, sortConfig]);
+  }, [timeframe, dateRange.start, dateRange.end]);
 
   useEffect(() => {
     fetchRKAMData();
   }, [fetchRKAMData]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategoryId, searchTerm, timeframe, dateRange.start, dateRange.end, perPage]);
+
+  const filteredRkamItems = useMemo(() => {
+    const selectedCategory = categories.find((category) => category.id === selectedCategoryId);
+    const selectedLegacyCategoryName = selectedCategoryId.startsWith('legacy:')
+      ? selectedCategoryId.replace(/^legacy:/, '')
+      : undefined;
+
+    const categoryFiltered = rkamItems.filter((item) => {
+      if (selectedCategoryId === 'all') {
+        return true;
+      }
+
+      const itemCategoryId = item.bidang_id || item.category?.id || item.category_id;
+      if (itemCategoryId && itemCategoryId === selectedCategoryId) {
+        return true;
+      }
+
+      const selectedName = normalizeText(selectedCategory?.name || selectedLegacyCategoryName);
+      const itemCategoryName = normalizeText(item.bidangRef?.name || item.bidang || item.category?.name || item.kategori);
+
+      return Boolean(selectedName) && itemCategoryName === selectedName;
+    });
+
+    const searchFiltered = categoryFiltered.filter((item) => {
+      if (!searchTerm.trim()) {
+        return true;
+      }
+
+      const keyword = normalizeText(searchTerm);
+      return [
+        item.item_name,
+        item.bidang,
+        item.kategori,
+        item.bidangRef?.name,
+        item.category?.name,
+        item.deskripsi,
+      ].some((value) => normalizeText(value).includes(keyword));
+    });
+
+    const getSortableValue = (item: RKAM) => {
+      switch (sortConfig.key) {
+        case 'kategori':
+          return normalizeText(item.bidangRef?.name || item.bidang || item.category?.name || item.kategori);
+        case 'item_name':
+          return normalizeText(item.item_name);
+        case 'pagu':
+          return Number(item.pagu);
+        case 'realization':
+          return Number(item.terpakai_filtered ?? item.terpakai);
+        case 'created_at':
+          return new Date(item.created_at || 0).getTime();
+        default:
+          return normalizeText(String((item as unknown as Record<string, unknown>)[sortConfig.key] || ''));
+      }
+    };
+
+    return [...searchFiltered].sort((left, right) => {
+      const leftValue = getSortableValue(left);
+      const rightValue = getSortableValue(right);
+
+      if (leftValue < rightValue) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
+      }
+
+      if (leftValue > rightValue) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+
+      return 0;
+    });
+  }, [categories, rkamItems, searchTerm, selectedCategoryId, sortConfig]);
+
+  const computedPagination = useMemo(() => {
+    const total = filteredRkamItems.length;
+    const lastPage = Math.max(1, Math.ceil(total / perPage));
+    const safeCurrentPage = Math.min(currentPage, lastPage);
+    const from = total === 0 ? 0 : (safeCurrentPage - 1) * perPage + 1;
+    const to = total === 0 ? 0 : Math.min(safeCurrentPage * perPage, total);
+
+    return {
+      total,
+      from,
+      to,
+      last_page: lastPage,
+      safeCurrentPage,
+    };
+  }, [currentPage, filteredRkamItems.length, perPage]);
+
+  const paginatedRkamItems = useMemo(() => {
+    const startIndex = (computedPagination.safeCurrentPage - 1) * perPage;
+    return filteredRkamItems.slice(startIndex, startIndex + perPage);
+  }, [computedPagination.safeCurrentPage, filteredRkamItems, perPage]);
+
+  useEffect(() => {
+    setPaginationData({
+      total: computedPagination.total,
+      from: computedPagination.from,
+      to: computedPagination.to,
+      last_page: computedPagination.last_page,
+    });
+
+    if (currentPage !== computedPagination.safeCurrentPage) {
+      setCurrentPage(computedPagination.safeCurrentPage);
+    }
+  }, [computedPagination, currentPage]);
 
   const handleSort = (key: string) => {
     setSortConfig(prev => ({
@@ -146,7 +320,7 @@ const RKAMManagement: React.FC = () => {
     if (item) {
       setEditingId(item.id);
       setFormData({
-        category_id: item.category_id,
+        bidang_id: item.bidang_id || item.category_id || '',
         item_name: item.item_name,
         volume: String(item.volume),
         satuan: item.satuan,
@@ -159,7 +333,7 @@ const RKAMManagement: React.FC = () => {
     } else {
       setEditingId(null);
       setFormData({
-        category_id: '',
+        bidang_id: '',
         item_name: '',
         volume: '',
         satuan: '',
@@ -210,39 +384,45 @@ const RKAMManagement: React.FC = () => {
     setConfirmDelete(null);
   };
 
-  const handlePrint = async () => {
+  const handleOpenDetail = async (item: RKAM) => {
+    setDetailRkam(item);
+    setDetailLoading(true);
+    setDetailProposals([]);
+
+    try {
+      const response = await apiService.getRKAMProposals(item.id);
+      setDetailRkam(response.rkam);
+      setDetailProposals(response.proposals);
+    } catch (err: any) {
+      console.error('Failed to fetch RKAM proposals:', err);
+      setToast({ type: 'error', message: err.message || 'Gagal memuat detail proposal RKAM.' });
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeDetailModal = () => {
+    setDetailRkam(null);
+    setDetailProposals([]);
+    setDetailLoading(false);
+  };
+
+  const handlePrint = useCallback(async () => {
     try {
       setIsPreparingPrint(true);
       setToast({ type: 'info', message: 'Menyiapkan dokumen cetak...' });
-      
-      const response = await apiService.getAllRKAM({
-        category_id: selectedCategoryId,
-        search: searchTerm,
-        tahun_anggaran: timeframe === 'year' ? new Date().getFullYear() : undefined,
-        start_date: dateRange.start,
-        end_date: dateRange.end,
-        preset: timeframe !== 'custom' ? timeframe : undefined,
-        sort_by: sortConfig.key,
-        order: sortConfig.direction,
-        no_paginate: true
-      });
 
-      if (Array.isArray(response)) {
-        setFullDataForPrint(response);
-        // Wait for state to update and template to render
-        setTimeout(() => {
-          window.print();
-          setIsPreparingPrint(false);
-        }, 800);
-      } else {
-        throw new Error('Gagal mengambil data lengkap untuk pencetakan.');
-      }
+      setFullDataForPrint(filteredRkamItems);
+      setTimeout(() => {
+        window.print();
+        setIsPreparingPrint(false);
+      }, 800);
     } catch (err: any) {
       console.error('Print failed:', err);
       setToast({ type: 'error', message: err.message || 'Gagal menyiapkan cetakan.' });
       setIsPreparingPrint(false);
     }
-  };
+  }, [filteredRkamItems]);
 
   const formatIDR = (num: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -252,6 +432,58 @@ const RKAMManagement: React.FC = () => {
       maximumFractionDigits: 0,
     }).format(num);
   };
+
+  const formatDate = (value?: string | null) => {
+    if (!value) {
+      return '-';
+    }
+
+    return new Date(value).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  const getProposalStatusConfig = (status: string) => {
+    const config: Record<string, { label: string; className: string }> = {
+      draft: { label: 'Draft', className: 'bg-gray-100 text-gray-700' },
+      submitted: { label: 'Menunggu Verifikator', className: 'bg-blue-100 text-blue-700' },
+      verified: { label: 'Menunggu Komite Madrasah', className: 'bg-cyan-100 text-cyan-700' },
+      approved: { label: 'Menunggu Kepala Madrasah', className: 'bg-purple-100 text-purple-700' },
+      rejected: { label: 'Ditolak', className: 'bg-red-100 text-red-700' },
+      final_approved: { label: 'Siap Dibayar', className: 'bg-green-100 text-green-700' },
+      payment_processing: { label: 'Proses Pembayaran', className: 'bg-yellow-100 text-yellow-700' },
+      completed: { label: 'Sudah Terbayar', className: 'bg-emerald-100 text-emerald-700' },
+    };
+
+    return config[status] || { label: status, className: 'bg-gray-100 text-gray-700' };
+  };
+
+  const getPaymentByProposalId = useCallback((proposalId: string) => (
+    payments.find((payment) => payment.proposal_id === proposalId)
+  ), [payments]);
+
+  const detailSummary = useMemo(() => {
+    const totalPengajuan = detailProposals.reduce((sum, proposal) => (
+      sum + parseAmountValue(proposal.jumlah_pengajuan)
+    ), 0);
+
+    const totalTerbayar = detailProposals.reduce((sum, proposal) => {
+      const payment = getPaymentByProposalId(proposal.id);
+      if (payment?.status !== 'completed') {
+        return sum;
+      }
+
+      return sum + parseAmountValue(payment.amount);
+    }, 0);
+
+    return {
+      totalProposal: detailProposals.length,
+      totalPengajuan,
+      totalTerbayar,
+    };
+  }, [detailProposals, getPaymentByProposalId]);
 
   // Helper for progress bar
   const getProgressColor = (percentage: number) => {
@@ -274,7 +506,7 @@ const RKAMManagement: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
           >
             <Settings size={18} />
-            Kelola Kategori
+            Kelola Bidang
           </button>
           <button 
             onClick={handlePrint}
@@ -316,9 +548,9 @@ const RKAMManagement: React.FC = () => {
               onChange={(e) => setSelectedCategoryId(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg appearance-none bg-white outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">Semua Kategori</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option value="all">Semua Bidang</option>
+              {categoryFilterOptions.map((categoryOption) => (
+                <option key={categoryOption.value} value={categoryOption.value}>{categoryOption.label}</option>
               ))}
             </select>
           </div>
@@ -367,7 +599,7 @@ const RKAMManagement: React.FC = () => {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 font-semibold text-gray-700 w-32 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('kategori')}>
-                  <div className="flex items-center">Kategori <SortIcon column="kategori" /></div>
+                  <div className="flex items-center">Bidang <SortIcon column="kategori" /></div>
                 </th>
                 <th className="px-6 py-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('item_name')}>
                   <div className="flex items-center">Uraian Anggaran <SortIcon column="item_name" /></div>
@@ -392,23 +624,23 @@ const RKAMManagement: React.FC = () => {
                     ))}
                   </tr>
                 ))
-              ) : rkamItems.length === 0 ? (
+              ) : filteredRkamItems.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-gray-500 italic">Data tidak ditemukan.</td>
                 </tr>
               ) : (
-                rkamItems.map(item => (
+                paginatedRkamItems.map(item => (
                   <tr key={item.id} className="hover:bg-gray-50 transition-colors group">
                     <td className="px-6 py-4">
                       <span 
                         className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border"
                         style={{ 
-                          borderColor: item.category?.color || '#e5e7eb',
-                          color: item.category?.color || '#6b7280',
-                          backgroundColor: `${item.category?.color || '#6b7280'}10`
+                          borderColor: item.bidangRef?.color || item.category?.color || '#e5e7eb',
+                          color: item.bidangRef?.color || item.category?.color || '#6b7280',
+                          backgroundColor: `${item.bidangRef?.color || item.category?.color || '#6b7280'}10`
                         }}
                       >
-                        {item.category?.name || item.kategori}
+                        {item.bidangRef?.name || item.bidang || item.category?.name || item.kategori}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -436,7 +668,14 @@ const RKAMManagement: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-center gap-2">
+                        <button 
+                          onClick={() => handleOpenDetail(item)}
+                          className="p-1.5 text-slate-700 hover:bg-slate-100 rounded"
+                          title="Detail RKAM"
+                        >
+                          <Eye size={14} />
+                        </button>
                         <button 
                           onClick={() => handleOpenForm(item)}
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
@@ -555,14 +794,14 @@ const RKAMManagement: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Kategori</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Bidang</label>
                   <select
                     required
-                    value={formData.category_id}
-                    onChange={e => setFormData({ ...formData, category_id: e.target.value })}
+                    value={formData.bidang_id}
+                    onChange={e => setFormData({ ...formData, bidang_id: e.target.value })}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   >
-                    <option value="">Pilih Kategori</option>
+                    <option value="">Pilih Bidang</option>
                     {categories.map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
@@ -660,6 +899,129 @@ const RKAMManagement: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>, document.body)
+      }
+
+      {detailRkam && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-5">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Detail RKAM</p>
+                <h2 className="mt-1 text-2xl font-bold text-gray-900">{detailRkam.item_name}</h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  {detailRkam.bidangRef?.name || detailRkam.bidang || detailRkam.category?.name || detailRkam.kategori} • Tahun Anggaran {detailRkam.tahun_anggaran}
+                </p>
+              </div>
+              <button
+                onClick={closeDetailModal}
+                className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              >
+                <XIcon size={22} />
+              </button>
+            </div>
+
+            <div className="space-y-6 p-6">
+              <div className="grid gap-4 md:grid-cols-4">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="text-sm text-gray-500">Pagu RKAM</p>
+                  <p className="mt-1 text-lg font-bold text-gray-900">{formatIDR(Number(detailRkam.pagu))}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="text-sm text-gray-500">Terpakai</p>
+                  <p className="mt-1 text-lg font-bold text-orange-600">
+                    {formatIDR(Number(detailRkam.terpakai_filtered ?? detailRkam.terpakai))}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="text-sm text-gray-500">Total Pengajuan</p>
+                  <p className="mt-1 text-lg font-bold text-blue-700">{formatIDR(detailSummary.totalPengajuan)}</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="text-sm text-gray-500">Total Terbayar</p>
+                  <p className="mt-1 text-lg font-bold text-emerald-700">{formatIDR(detailSummary.totalTerbayar)}</p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200">
+                <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Proposal yang Menggunakan RKAM Ini</h3>
+                    <p className="text-sm text-gray-500">
+                      Total {detailSummary.totalProposal} proposal terkait dengan RKAM ini.
+                    </p>
+                  </div>
+                </div>
+
+                {detailLoading ? (
+                  <div className="flex items-center justify-center px-6 py-16">
+                    <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600"></div>
+                  </div>
+                ) : detailProposals.length === 0 ? (
+                  <div className="px-6 py-14 text-center text-gray-500">
+                    Belum ada proposal yang menggunakan RKAM ini.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 text-sm">
+                      <thead className="bg-white">
+                        <tr>
+                          <th className="px-6 py-3 text-left font-semibold text-gray-500">Proposal</th>
+                          <th className="px-6 py-3 text-left font-semibold text-gray-500">Pengusul</th>
+                          <th className="px-6 py-3 text-right font-semibold text-gray-500">Nominal Pengajuan</th>
+                          <th className="px-6 py-3 text-left font-semibold text-gray-500">Status Proposal</th>
+                          <th className="px-6 py-3 text-left font-semibold text-gray-500">Status Pembayaran</th>
+                          <th className="px-6 py-3 text-left font-semibold text-gray-500">Tanggal</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 bg-white">
+                        {detailProposals.map((proposal) => {
+                          const proposalStatus = getProposalStatusConfig(proposal.status);
+                          const payment = getPaymentByProposalId(proposal.id);
+
+                          return (
+                            <tr key={proposal.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4">
+                                <div>
+                                  <p className="font-semibold text-gray-900">{proposal.title}</p>
+                                  <p className="mt-1 text-xs text-gray-500">{proposal.description || 'Tanpa deskripsi tambahan.'}</p>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-gray-700">
+                                {proposal.user?.full_name || proposal.user?.name || '-'}
+                              </td>
+                              <td className="px-6 py-4 text-right font-semibold text-gray-900">
+                                {formatIDR(parseAmountValue(proposal.jumlah_pengajuan))}
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${proposalStatus.className}`}>
+                                  {proposalStatus.label}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-gray-700">
+                                {payment
+                                  ? getPaymentStatusLabel(payment.status)
+                                  : (proposal.status === 'completed' ? 'Sudah Terbayar' : 'Belum Diproses')}
+                              </td>
+                              <td className="px-6 py-4 text-gray-500">
+                                {formatDate(
+                                  proposal.completed_at
+                                  || proposal.final_approved_at
+                                  || proposal.approved_at
+                                  || proposal.submitted_at
+                                  || proposal.created_at,
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>, document.body)
       }

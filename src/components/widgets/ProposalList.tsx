@@ -5,6 +5,7 @@ import { Plus, Search, Filter, Info, Edit3, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import ConfirmModal from '../../components/ConfirmModal';
+import { filterProposalsForUserView } from '../../utils/proposalWorkflow';
 
 const ProposalList: React.FC = () => {
   const { user } = useAuth();
@@ -23,7 +24,7 @@ const ProposalList: React.FC = () => {
         setLoading(true);
         setError(null);
         const data = await apiService.getAllProposals(filters.status ? { status: filters.status } : undefined);
-        setProposals(data);
+        setProposals(filterProposalsForUserView(user, data));
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch proposals';
         setError(errorMessage);
@@ -34,14 +35,14 @@ const ProposalList: React.FC = () => {
     };
     
     loadProposals();
-  }, [filters]);
+  }, [filters, user]);
 
   const fetchProposals = async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await apiService.getAllProposals(filters.status ? { status: filters.status } : undefined);
-      setProposals(data);
+      setProposals(filterProposalsForUserView(user, data));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch proposals';
       setError(errorMessage);
@@ -101,13 +102,13 @@ const ProposalList: React.FC = () => {
     
     const statusLabels: Record<string, string> = {
       draft: 'Draft',
-      submitted: 'Menunggu Verifikasi',
-      verified: 'Terverifikasi',
-      approved: 'Disetujui Kepala',
+      submitted: 'Menunggu Verifikator',
+      verified: 'Menunggu Komite Madrasah',
+      approved: 'Menunggu Kepala Madrasah',
       rejected: 'Ditolak',
-      final_approved: 'Disetujui Akhir',
+      final_approved: 'Siap Dibayar',
       payment_processing: 'Proses Pembayaran',
-      completed: 'Selesai',
+      completed: 'Sudah Terbayar',
     };
     
     return (
@@ -181,13 +182,13 @@ const ProposalList: React.FC = () => {
           >
             <option value="">Semua Status</option>
             <option value="draft">Draft</option>
-            <option value="submitted">Menunggu Verifikasi</option>
-            <option value="verified">Terverifikasi</option>
-            <option value="approved">Disetujui Kepala</option>
+            <option value="submitted">Menunggu Verifikator</option>
+            <option value="verified">Menunggu Komite Madrasah</option>
+            <option value="approved">Menunggu Kepala Madrasah</option>
             <option value="rejected">Ditolak</option>
-            <option value="final_approved">Disetujui Akhir</option>
+            <option value="final_approved">Siap Dibayar</option>
             <option value="payment_processing">Proses Pembayaran</option>
-            <option value="completed">Selesai</option>
+            <option value="completed">Sudah Terbayar</option>
           </select>
         </div>
       </div>
@@ -279,14 +280,16 @@ const ProposalList: React.FC = () => {
                           <Info className="h-5 w-5 text-blue-600" />
                         </Link>
 
-                        {proposal.status === 'draft' ? (
+                        {proposal.status === 'draft' || proposal.status === 'rejected' ? (
                           <>
                             <button onClick={() => handleEditNavigate(proposal.id)} title="Edit" className="p-2 rounded-md hover:bg-gray-100">
                               <Edit3 className="h-5 w-5 text-green-600" />
                             </button>
-                            <button onClick={() => handleDeleteRequest(proposal.id)} title="Hapus" className="p-2 rounded-md hover:bg-gray-100">
-                              <Trash2 className="h-5 w-5 text-red-600" />
-                            </button>
+                            {proposal.status === 'draft' && (
+                              <button onClick={() => handleDeleteRequest(proposal.id)} title="Hapus" className="p-2 rounded-md hover:bg-gray-100">
+                                <Trash2 className="h-5 w-5 text-red-600" />
+                              </button>
+                            )}
                           </>
                         ) : null}
                       </div>

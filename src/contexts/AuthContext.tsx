@@ -1,6 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiService as api } from '../services/api';
 
+export interface BidangInfo {
+  id: string;
+  name: string;
+  description?: string | null;
+  color?: string | null;
+  sort_order?: number;
+}
+
 export interface User {
   id: string;
   name?: string;
@@ -8,6 +16,12 @@ export interface User {
   email: string;
   role: string;
   avatar?: string;
+  status?: string;
+  is_active?: boolean;
+  bidang_id?: string | null;
+  bidang?: BidangInfo | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface AuthContextType {
@@ -47,7 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      console.log('Attempting login for:', email);
       const response = await api.login({ email, password });
       
       if (response.token && response.user) {
@@ -56,19 +69,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: response.user.id,
           name: response.user.full_name,
           full_name: response.user.full_name,
-          email: email,
+          email: response.user.email || email,
           role: mappedRole,
+          status: response.user.status,
+          is_active: response.user.is_active,
+          bidang_id: response.user.bidang_id ?? null,
+          bidang: response.user.bidang ?? null,
         };
         
         localStorage.setItem('sirangkul_token', response.token);
         localStorage.setItem('sirangkul_user', JSON.stringify(userData));
         setUser(userData);
-        console.log('Login successful:', userData);
         return true;
       }
       return false;
     } catch (error) {
-      console.error('Login failed:', error);
+      if (import.meta.env.DEV) {
+        console.error('Login failed:', error);
+      }
       return false;
     }
   };

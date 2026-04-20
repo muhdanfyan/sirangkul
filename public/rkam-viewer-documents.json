@@ -1,0 +1,39 @@
+{
+  "documents": [
+    {
+      "name": "RKAM tahun 2026.pdf",
+      "path": "/file/RKAM tahun 2026.pdf",
+      "type": "pdf",
+      "visible": true,
+      "description": "Dokumen RKAM Tahun Anggaran 2026"
+    },
+    {
+      "name": "FIX RKAM INFAK - Revisi TA 2025.pdf",
+      "path": "/file/FIX RKAM INFAK - Revisi TA 2025.pdf",
+      "type": "pdf",
+      "visible": true,
+      "description": "Dokumen revisi RKAM infak"
+    },
+    {
+      "name": "RKAM JARIAH REVISI TA 2025.pdf",
+      "path": "/file/RKAM JARIAH REVISI TA 2025.pdf",
+      "type": "pdf",
+      "visible": true,
+      "description": "Dokumen revisi RKAM jariah"
+    },
+    {
+      "name": "SOP PELATIHAN SiRANGKUL.pdf",
+      "path": "/file/SOP PELATIHAN SiRANGKUL.pdf",
+      "type": "document",
+      "visible": true,
+      "description": "Dokumen SOP pelatihan SiRangkul"
+    },
+    {
+      "name": "LAP KEUANGAN BNI 1998986678 INFAK - SEPT 2025.pdf",
+      "path": "/file/LAP KEUANGAN BNI 1998986678 INFAK - SEPT 2025.pdf",
+      "type": "pdf",
+      "visible": false,
+      "description": "Contoh dokumen yang disembunyikan lewat konfigurasi"
+    }
+  ]
+}

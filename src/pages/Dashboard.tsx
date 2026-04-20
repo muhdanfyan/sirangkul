@@ -11,6 +11,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { apiService, DashboardSummary, Proposal } from '../services/api';
+import { filterProposalsForUserView } from '../utils/proposalWorkflow';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -20,27 +21,48 @@ const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isCancelled = false;
+
+    if (!user?.id) {
+      setSummary(null);
+      setProposals([]);
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const [sumData, propData] = await Promise.all([
           apiService.getDashboardSummary(),
           apiService.getAllProposals()
         ]);
+        if (isCancelled) {
+          return;
+        }
         setSummary(sumData);
-        // Take only 5 most recent
-        setProposals(propData.slice(0, 5));
-        setError(null);
+        setProposals(filterProposalsForUserView(user, propData).slice(0, 5));
       } catch (err) {
-        console.error('Error fetching dashboard data:', err);
+        if (isCancelled) {
+          return;
+        }
+        setSummary(null);
+        setProposals([]);
         setError('Gagal mengambil data dashboard. Silakan coba lagi.');
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
-  }, []);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user?.id, user?.role, user?.bidang_id]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -70,6 +92,8 @@ const Dashboard: React.FC = () => {
   };
 
   const isPengusul = (user?.role || '').toLowerCase() === 'pengusul';
+  const canSeeBidangBreakdown = ['Administrator', 'Kepala Madrasah'].includes(user?.role || '')
+    && (summary?.bidangBreakdown?.length || 0) > 0;
 
   const banners = [
     'https://man2kotamakassar.sch.id/images/banner2.jpg',
@@ -181,6 +205,11 @@ const Dashboard: React.FC = () => {
         <div className="relative z-10">
           <h1 className="text-3xl font-bold mb-2">Selamat Datang, {user?.full_name}</h1>
           <p className="text-cyan-100 opacity-90">Anda masuk sebagai <span className="font-semibold uppercase tracking-wider">{user?.role}</span></p>
+          {user?.bidang?.name && (
+            <p className="mt-2 text-sm text-cyan-100/90">
+              Bidang aktif: <span className="font-semibold">{user.bidang.name}</span>
+            </p>
+          )}
         </div>
         <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-10">
           <PieChart className="h-32 w-32" />
@@ -293,6 +322,45 @@ const Dashboard: React.FC = () => {
                   <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Selesai/Disetujui</div>
                 </div>
               </div>
+
+              {canSeeBidangBreakdown && (
+                <div className="mt-8 space-y-3 border-t border-gray-100 pt-6">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold uppercase tracking-wider text-gray-600">Ringkasan per Bidang</h4>
+                    <span className="text-xs text-gray-400">{summary?.bidangBreakdown?.length} bidang</span>
+                  </div>
+                  <div className="space-y-3">
+                    {summary?.bidangBreakdown?.map((item) => (
+                      <div key={item.name} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="font-semibold text-gray-900">{item.name}</p>
+                            <p className="mt-1 text-xs text-gray-500">{item.total_proposals} proposal terkait</p>
+                          </div>
+                          <div className="text-right text-sm">
+                            <p className="font-semibold text-gray-900">{formatCurrency(item.remaining_budget)}</p>
+                            <p className="text-xs text-gray-500">Sisa Anggaran</p>
+                          </div>
+                        </div>
+                        <div className="mt-3 grid grid-cols-3 gap-3 text-xs text-gray-600">
+                          <div>
+                            <p className="text-gray-400">Pagu</p>
+                            <p className="mt-1 font-semibold text-gray-900">{formatCurrency(item.total_budget)}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400">Terpakai</p>
+                            <p className="mt-1 font-semibold text-blue-700">{formatCurrency(item.used_budget)}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-400">Proposal</p>
+                            <p className="mt-1 font-semibold text-gray-900">{item.total_proposals}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

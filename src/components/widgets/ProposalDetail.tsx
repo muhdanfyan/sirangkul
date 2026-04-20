@@ -1,302 +1,216 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import {
+  ArrowLeft,
+  Calendar,
+  CheckCircle,
+  DollarSign,
+  Download,
+  Edit,
+  Eye,
+  FileText,
+  Paperclip,
+  Send,
+  Trash2,
+  User,
+  XCircle,
+} from 'lucide-react';
 import { apiService, Proposal, ProposalAttachment } from '../../services/api';
-import { ArrowLeft, Edit, Trash2, User, Calendar, FileText, CheckCircle, Send, XCircle, Download, Eye, Paperclip } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import ConfirmModal from '../../components/ConfirmModal';
-import Toast from '../../components/Toast';
 import RejectionModal from '../../components/RejectionModal';
+import SectionAccordion from '../../components/SectionAccordion';
+import Toast from '../../components/Toast';
+import { canApproveProposalForUser, canRejectProposalForUser } from '../../utils/proposalWorkflow';
+import { getPaymentStatusLabel, isPaymentCompleted } from '../../utils/paymentStatus';
+import { applyCompletedPaymentUsageToRKAM } from '../../utils/rkamBudget';
+
+type ToastState = {
+  type: 'success' | 'error' | 'info' | 'warning';
+  message: string;
+};
 
 const ProposalDetail: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  
+
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info' | 'warning'; message: string } | null>(null);
-  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; action: 'delete' | 'submit' | 'approve' | null }>(
-    { isOpen: false, action: null }
-  );
+  const [actionLoading, setActionLoading] = useState(false);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; action: 'delete' | 'submit' | null }>({
+    isOpen: false,
+    action: null,
+  });
   const [showRejectionModal, setShowRejectionModal] = useState(false);
-  const [rejecting, setRejecting] = useState(false);
-  const [approving, setApproving] = useState(false);
-  const [fetchAttempts, setFetchAttempts] = useState(0);
-  const [isFetching, setIsFetching] = useState(false);
-  const MAX_FETCH_ATTEMPTS = 3;
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approvalNotes, setApprovalNotes] = useState('');
 
-  // Attachment preview state
   const [previewAttachment, setPreviewAttachment] = useState<ProposalAttachment | null>(null);
   const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only fetch once when component mounts or ID changes
     if (id) {
-      console.log('🔷 useEffect triggered for ID:', id);
       fetchProposal(id);
     }
-    
-    // Cleanup function to prevent memory leaks
+  }, [id]);
+
+  useEffect(() => {
     return () => {
-      console.log('🧹 Cleanup: Component unmounting or ID changed');
+      if (previewBlobUrl) {
+        URL.revokeObjectURL(previewBlobUrl);
+      }
     };
-  }, [id]); // Only dependency is ID
+  }, [previewBlobUrl]);
 
   const fetchProposal = async (proposalId: string) => {
-    // Prevent concurrent requests
-    if (isFetching) {
-      console.log('⚠️ Already fetching, skipping duplicate request...');
-      return;
-    }
-    
-    // Check retry limit
-    if (fetchAttempts >= MAX_FETCH_ATTEMPTS) {
-      console.error('❌ Max fetch attempts reached, not retrying');
-      setError(`Gagal memuat proposal setelah ${MAX_FETCH_ATTEMPTS} percobaan. Silakan refresh halaman.`);
-      return;
-    }
-
     try {
-      setIsFetching(true);
       setLoading(true);
       setError(null);
-      
-      console.log(`📡 Fetching proposal (attempt ${fetchAttempts + 1}/${MAX_FETCH_ATTEMPTS})...`);
-      const currentAttempt = fetchAttempts + 1;
-      setFetchAttempts(currentAttempt);
-      const data = await apiService.getProposalById(proposalId);
-      
-      // Validate proposal data structure
-      if (!data || !data.id) {
-        throw new Error('Data proposal tidak valid');
+      const [proposalResult, paymentResult] = await Promise.allSettled([
+        apiService.getProposalById(proposalId),
+        apiService.getAllPayments(),
+      ]);
+
+      if (proposalResult.status !== 'fulfilled') {
+        throw proposalResult.reason;
       }
-      
-      setProposal(data);
-      
-      // Debug info
-      console.log('📋 Proposal loaded:', {
-        id: data.id,
-        title: data.title,
-        status: data.status,
-        userRole: user?.role,
-        hasRejectionInfo: !!data.rejected_by_user,
-        rejectedByRole: data.rejected_by_role,
-        canShowSubmitButton: data.status === 'draft' && user?.role === 'Pengusul'
-      });
-      
-      // Check rejection permission after proposal is loaded
-      setTimeout(() => {
-        const canReject = canRejectProposal();
-        console.log('🎯 Can reject after load:', canReject);
-      }, 100);
+
+      let nextProposal = proposalResult.value;
+
+      if (paymentResult.status === 'fulfilled' && nextProposal.rkam) {
+        const [normalizedRkam] = applyCompletedPaymentUsageToRKAM([nextProposal.rkam], paymentResult.value);
+        nextProposal = {
+          ...nextProposal,
+          rkam: normalizedRkam,
+        };
+      } else if (paymentResult.status === 'rejected') {
+        console.warn('Failed to sync completed payment usage for proposal detail:', paymentResult.reason);
+      }
+
+      setProposal(nextProposal);
     } catch (err) {
-      let errorMessage = 'Gagal memuat proposal';
-      
-      if (err instanceof Error) {
-        // Handle specific error messages from backend
-        if (err.message.includes('Server error')) {
-          errorMessage = 'Terjadi kesalahan pada server. Silakan hubungi administrator.';
-        } else {
-          errorMessage = err.message;
-        }
-      }
-      
-      setError(errorMessage);
-      console.error('❌ Error fetching proposal (attempt ' + fetchAttempts + '):', err);
-      
-      // Show toast notification for better UX
-      setToast({
-        type: 'error',
-        message: errorMessage
-      });
-      
-      // Check if max attempts reached
-      if (fetchAttempts >= MAX_FETCH_ATTEMPTS - 1) {
-        console.error(`❌ Max fetch attempts (${MAX_FETCH_ATTEMPTS}) reached. Stopping retries.`);
-        setToast({
-          type: 'error',
-          message: 'Gagal memuat proposal setelah beberapa percobaan. Silakan refresh halaman atau hubungi administrator.'
-        });
-      }
+      const message = err instanceof Error ? err.message : 'Gagal memuat proposal';
+      setError(message);
     } finally {
       setLoading(false);
-      setIsFetching(false);
-      console.log('✅ Fetch completed, isFetching reset to false');
     }
   };
 
-  const handleDeleteRequest = () => {
-    if (!proposal) return;
-    setConfirmModal({ isOpen: true, action: 'delete' });
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+
+    navigate('/proposal-tracking');
   };
 
   const handleDeleteConfirm = async () => {
     if (!proposal) return;
-    setConfirmModal({ isOpen: false, action: null });
+
     try {
+      setActionLoading(true);
       await apiService.deleteProposal(proposal.id);
-      setToast({ type: 'success', message: 'Proposal berhasil dihapus' });
+      setConfirmModal({ isOpen: false, action: null });
+      setToast({ type: 'success', message: 'Proposal berhasil dihapus.' });
       navigate('/proposal-tracking');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Gagal menghapus proposal';
-      setToast({ type: 'error', message: errorMessage });
+      setToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Gagal menghapus proposal',
+      });
+    } finally {
+      setActionLoading(false);
     }
-  };
-
-  const handleSubmitRequest = () => {
-    if (!proposal) return;
-    setConfirmModal({ isOpen: true, action: 'submit' });
   };
 
   const handleSubmitConfirm = async () => {
     if (!proposal) return;
-    setConfirmModal({ isOpen: false, action: null });
+
     try {
-      setSubmitting(true);
+      setActionLoading(true);
       const result = await apiService.submitProposal(proposal.id);
-      setToast({ type: 'success', message: result?.message || 'Proposal berhasil diajukan' });
+      setConfirmModal({ isOpen: false, action: null });
+      setToast({
+        type: 'success',
+        message: result?.message || 'Proposal berhasil diajukan.',
+      });
       await fetchProposal(proposal.id);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Gagal mengajukan proposal';
-      setToast({ type: 'error', message: errorMessage });
+      setToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Gagal mengajukan proposal',
+      });
     } finally {
-      setSubmitting(false);
+      setActionLoading(false);
+    }
+  };
+
+  const handleApproveConfirm = async () => {
+    if (!proposal || !user) return;
+
+    try {
+      setActionLoading(true);
+
+      const notes = approvalNotes.trim() || undefined;
+      let message = 'Proposal berhasil disetujui.';
+
+      if (user.role === 'Verifikator' && proposal.status === 'submitted') {
+        const result = await apiService.verifyProposal(proposal.id, { notes });
+        message = result.message || message;
+      } else if (user.role === 'Komite Madrasah' && proposal.status === 'verified') {
+        const result = await apiService.approveProposal(proposal.id, { notes });
+        message = result.message || message;
+      } else if (user.role === 'Kepala Madrasah' && proposal.status === 'approved') {
+        const result = await apiService.finalApproveProposal(proposal.id, { notes });
+        message = result.message || message;
+      } else {
+        throw new Error('Aksi persetujuan tidak tersedia untuk status proposal ini.');
+      }
+
+      setShowApprovalModal(false);
+      setApprovalNotes('');
+      setToast({ type: 'success', message });
+      await fetchProposal(proposal.id);
+    } catch (err) {
+      setToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Gagal memproses persetujuan',
+      });
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleRejectWithImprovements = async (reason: string, improvements: string) => {
     if (!proposal) return;
-    
+
     try {
-      setRejecting(true);
+      setActionLoading(true);
       await apiService.rejectProposal(proposal.id, {
         rejection_reason: reason,
-        improvement_suggestions: improvements
+        improvement_suggestions: improvements,
       });
-      
-      setToast({ 
-        type: 'success', 
-        message: 'Proposal berhasil ditolak dengan saran perbaikan' 
-      });
-      
+
       setShowRejectionModal(false);
-      await fetchProposal(proposal.id);
-    } catch (err) {
-      console.error('Error rejecting proposal:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Gagal menolak proposal';
-      setToast({ type: 'error', message: errorMessage });
-    } finally {
-      setRejecting(false);
-    }
-  };
-
-  const handleApproveRequest = () => {
-    if (!proposal) return;
-    setConfirmModal({ isOpen: true, action: 'approve' });
-  };
-
-  const handleApproveConfirm = async () => {
-    if (!proposal) return;
-    setConfirmModal({ isOpen: false, action: null });
-    
-    try {
-      setApproving(true);
-      const userRole = user?.role;
-      let result;
-      let successMessage = 'Proposal berhasil disetujui';
-      
-      if (userRole === 'Verifikator') {
-        result = await apiService.verifyProposal(proposal.id);
-        successMessage = 'Proposal berhasil diverifikasi';
-      } else if (userRole === 'Kepala Madrasah') {
-        result = await apiService.approveProposal(proposal.id);
-        successMessage = 'Proposal berhasil disetujui Kepala Madrasah';
-      } else if (userRole === 'Komite Madrasah') {
-        result = await apiService.finalApproveProposal(proposal.id);
-        successMessage = 'Proposal berhasil disetujui Komite Madrasah';
-      }
-      
-      setToast({ 
-        type: 'success', 
-        message: result?.message || successMessage 
+      setToast({
+        type: 'success',
+        message: 'Proposal berhasil ditolak dan catatan perbaikan telah dikirim.',
       });
-      
       await fetchProposal(proposal.id);
     } catch (err) {
-      console.error('Error approving proposal:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Gagal menyetujui proposal';
-      setToast({ type: 'error', message: errorMessage });
+      setToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Gagal menolak proposal',
+      });
     } finally {
-      setApproving(false);
+      setActionLoading(false);
     }
-  };
-
-  const canApproveProposal = () => {
-    if (!user || !proposal) return false;
-    
-    const userRole = user.role;
-    const proposalStatus = proposal.status?.toLowerCase();
-    
-    // Verifikator can approve if status is submitted
-    if (userRole === 'Verifikator' && proposalStatus === 'submitted') {
-      return true;
-    }
-    
-    // Kepala Madrasah can approve if status is verified
-    if (userRole === 'Kepala Madrasah' && proposalStatus === 'verified') {
-      return true;
-    }
-    
-    // Komite can approve if status is approved and requires committee
-    if (userRole === 'Komite Madrasah' && proposalStatus === 'approved' && proposal.requires_committee_approval) {
-      return true;
-    }
-    
-    // Note: Bendahara does NOT approve, they process payment in Payment Management page
-    
-    return false;
-  };
-
-  const canRejectProposal = () => {
-    if (!user || !proposal) return false;
-    
-    const userRole = user.role;
-    const proposalStatus = proposal.status?.toLowerCase();
-    
-    // Debug log
-    console.log('🔍 Checking rejection permission:', {
-      userRole,
-      proposalStatus: proposal.status,
-      proposalStatusLower: proposalStatus,
-      requiresCommittee: proposal.requires_committee_approval
-    });
-    
-    // Verifikator can reject if status is submitted
-    if (userRole === 'Verifikator' && proposalStatus === 'submitted') {
-      console.log('✅ Verifikator can reject');
-      return true;
-    }
-    
-    // Kepala Madrasah can reject if status is verified
-    if (userRole === 'Kepala Madrasah' && proposalStatus === 'verified') {
-      console.log('✅ Kepala Madrasah can reject');
-      return true;
-    }
-    
-    // Komite can reject if status is approved and requires committee
-    if (userRole === 'Komite Madrasah' && proposalStatus === 'approved' && proposal.requires_committee_approval) {
-      console.log('✅ Komite can reject');
-      return true;
-    }
-    
-    // Note: Bendahara does NOT reject proposals, they reject payments in Payment Management page
-    
-    console.log('❌ User cannot reject this proposal');
-    return false;
   };
 
   const getStatusBadge = (status: string) => {
@@ -310,81 +224,57 @@ const ProposalDetail: React.FC = () => {
       payment_processing: 'bg-yellow-100 text-yellow-800',
       completed: 'bg-emerald-100 text-emerald-800',
     };
-    
+
     const statusLabels: Record<string, string> = {
       draft: 'Draft',
-      submitted: 'Menunggu Verifikasi',
-      verified: 'Terverifikasi',
-      approved: 'Disetujui Kepala',
+      submitted: 'Menunggu Verifikator',
+      verified: 'Menunggu Komite Madrasah',
+      approved: 'Menunggu Kepala Madrasah',
       rejected: 'Ditolak',
-      final_approved: 'Disetujui Akhir',
+      final_approved: 'Siap Dibayar',
       payment_processing: 'Proses Pembayaran',
-      completed: 'Selesai',
+      completed: 'Sudah Terbayar',
     };
-    
+
     return (
-      <span className={`px-4 py-2 text-sm font-medium rounded-full ${statusColors[status] || 'bg-gray-100 text-gray-800'}`}>
+      <span className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium ${statusColors[status] || 'bg-gray-100 text-gray-800'}`}>
         {statusLabels[status] || status}
       </span>
     );
   };
 
-  const formatRupiah = (amount: string | number) => {
-    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  const getUrgencyBadge = (urgency?: Proposal['urgency']) => {
+    if (!urgency) return null;
+
+    const tone = urgency === 'Mendesak'
+      ? 'bg-red-100 text-red-700'
+      : urgency === 'Tinggi'
+        ? 'bg-orange-100 text-orange-700'
+        : urgency === 'Normal'
+          ? 'bg-blue-100 text-blue-700'
+          : 'bg-gray-100 text-gray-700';
+
+    return (
+      <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${tone}`}>
+        Urgensi {urgency}
+      </span>
+    );
+  };
+
+  const formatRupiah = (amount: string | number | undefined | null) => {
+    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount || 0;
+
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(num);
+    }).format(numericAmount);
   };
 
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType === 'application/pdf') return '📄';
-    if (mimeType.includes('word')) return '📝';
-    if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return '📊';
-    return '📎';
-  };
-
-  const handlePreview = async (attachment: ProposalAttachment) => {
-    // Only PDF can be previewed inline; others trigger download
-    if (attachment.mime_type !== 'application/pdf') {
-      handleDownload(attachment);
-      return;
-    }
-    setPreviewAttachment(attachment);
-    setPreviewLoading(true);
-    setPreviewBlobUrl(null);
-    try {
-      const blobUrl = await apiService.fetchAttachmentBlobUrl(attachment.id);
-      setPreviewBlobUrl(blobUrl);
-    } catch (err) {
-      setToast({ type: 'error', message: err instanceof Error ? err.message : 'Gagal memuat preview' });
-      setPreviewAttachment(null);
-    } finally {
-      setPreviewLoading(false);
-    }
-  };
-
-  const handleClosePreview = () => {
-    if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl);
-    setPreviewBlobUrl(null);
-    setPreviewAttachment(null);
-  };
-
-  const handleDownload = async (attachment: ProposalAttachment) => {
-    setDownloadingId(attachment.id);
-    try {
-      await apiService.downloadAttachment(attachment.id, attachment.file_name);
-    } catch (err) {
-      setToast({ type: 'error', message: err instanceof Error ? err.message : 'Gagal mengunduh file' });
-    } finally {
-      setDownloadingId(null);
-    }
-  };
-
-  const formatDate = (dateString: string | null | undefined) => {
+  const formatDate = (dateString?: string | null) => {
     if (!dateString) return '-';
+
     return new Date(dateString).toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
@@ -394,162 +284,237 @@ const ProposalDetail: React.FC = () => {
     });
   };
 
+  const getFileIcon = (mimeType: string) => {
+    if (mimeType === 'application/pdf') return 'PDF';
+    if (mimeType.includes('word')) return 'DOC';
+    if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'XLS';
+    return 'FILE';
+  };
+
+  const getAttachmentTypeLabel = (attachmentType?: string | null) => {
+    if (attachmentType === 'proposal') return 'File Proposal';
+    if (attachmentType === 'lpj') return 'File LPJ';
+    return 'Lampiran';
+  };
+
+  const getRoleLabel = (role?: string | null) => {
+    switch (role) {
+      case 'administrator':
+      case 'Administrator':
+        return 'Administrator';
+      case 'pengusul':
+      case 'Pengusul':
+        return 'Pengusul';
+      case 'verifikator':
+      case 'Verifikator':
+        return 'Verifikator';
+      case 'kepala_madrasah':
+      case 'Kepala Madrasah':
+        return 'Kepala Madrasah';
+      case 'komite_madrasah':
+      case 'komite':
+      case 'Komite Madrasah':
+        return 'Komite Madrasah';
+      case 'bendahara':
+      case 'Bendahara':
+        return 'Bendahara';
+      default:
+        return role || '-';
+    }
+  };
+
+  const handlePreview = async (attachment: ProposalAttachment) => {
+    if (attachment.mime_type !== 'application/pdf') {
+      handleDownload(attachment);
+      return;
+    }
+
+    if (previewBlobUrl) {
+      URL.revokeObjectURL(previewBlobUrl);
+    }
+
+    setPreviewAttachment(attachment);
+    setPreviewBlobUrl(null);
+    setPreviewLoading(true);
+
+    try {
+      const blobUrl = await apiService.fetchAttachmentBlobUrl(attachment.id);
+      setPreviewBlobUrl(blobUrl);
+    } catch (err) {
+      setPreviewAttachment(null);
+      setToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Gagal memuat pratinjau file',
+      });
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleClosePreview = () => {
+    if (previewBlobUrl) {
+      URL.revokeObjectURL(previewBlobUrl);
+    }
+
+    setPreviewBlobUrl(null);
+    setPreviewAttachment(null);
+  };
+
+  const handleDownload = async (attachment: ProposalAttachment) => {
+    try {
+      setDownloadingId(attachment.id);
+      await apiService.downloadAttachment(attachment.id, attachment.file_name);
+    } catch (err) {
+      setToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Gagal mengunduh lampiran',
+      });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (error || !proposal) {
     return (
-      <div className="max-w-2xl mx-auto mt-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            {error ? 'Gagal Memuat Proposal' : 'Proposal Tidak Ditemukan'}
-          </h3>
-          <p className="text-red-600 mb-4">{error || 'Proposal tidak ditemukan'}</p>
-          {fetchAttempts >= MAX_FETCH_ATTEMPTS && (
-            <div className="bg-orange-50 border border-orange-200 rounded p-3 mb-4">
-              <p className="text-sm text-orange-700">
-                ⚠️ Sudah mencoba {MAX_FETCH_ATTEMPTS}x fetch. Kemungkinan masalah di backend server.
-              </p>
-              <p className="text-xs text-orange-600 mt-1">
-                Silakan cek: <code className="bg-orange-100 px-1">storage/logs/laravel.log</code>
-              </p>
-            </div>
-          )}
-          <div className="flex gap-3 justify-center">
-            {error && (
-              <button
-                onClick={() => {
-                  console.log('🔄 Manual retry button clicked');
-                  setFetchAttempts(0);
-                  setError(null);
-                  setIsFetching(false);
-                  if (id) fetchProposal(id);
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
-                disabled={loading || isFetching}
-              >
-                {loading || isFetching ? 'Memuat...' : '🔄 Coba Lagi'}
-              </button>
-            )}
-            <button
-              onClick={() => navigate('/proposal-tracking')}
-              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-            >
-              ← Kembali ke Daftar
-            </button>
-          </div>
-          <p className="text-xs text-gray-500 mt-4">
-            Jika masalah terus berlanjut, silakan hubungi administrator atau cek dokumentasi backend.
-          </p>
+      <div className="mx-auto mt-8 max-w-2xl rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+        <XCircle className="mx-auto mb-3 h-12 w-12 text-red-500" />
+        <h3 className="text-lg font-semibold text-gray-900">
+          {error ? 'Gagal Memuat Proposal' : 'Proposal Tidak Ditemukan'}
+        </h3>
+        <p className="mt-2 text-red-700">{error || 'Proposal tidak ditemukan.'}</p>
+        <div className="mt-5 flex justify-center gap-3">
+          <button
+            onClick={() => id && fetchProposal(id)}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            Coba Lagi
+          </button>
+          <button
+            onClick={handleBack}
+            className="rounded-lg bg-gray-700 px-4 py-2 text-white hover:bg-gray-800"
+          >
+            Kembali
+          </button>
         </div>
       </div>
     );
   }
 
-  // Debug: Log proposal status and user role for troubleshooting buttons visibility
-  console.log('🐛 Proposal Detail Render Debug:', {
-    proposalId: proposal.id,
-    proposalStatus: proposal.status,
-    proposalStatusLower: proposal.status?.toLowerCase(),
-    userRole: user?.role,
-    isDraft: proposal.status?.toLowerCase() === 'draft',
-    isRejected: proposal.status?.toLowerCase() === 'rejected',
-    isPengusul: user?.role === 'Pengusul',
-    shouldShowRejectedButtons: proposal.status?.toLowerCase() === 'rejected' && user?.role === 'Pengusul'
-  });
+  const canApprove = canApproveProposalForUser(user, proposal);
+  const canReject = canRejectProposalForUser(user, proposal);
+  const approvalCount = proposal.approvals?.length || 0;
+
+  const timelineItems = [
+    { label: 'Dibuat', value: proposal.created_at, tone: 'text-gray-900' },
+    { label: 'Terakhir Diubah', value: proposal.updated_at, tone: 'text-gray-900' },
+    { label: 'Diajukan', value: proposal.submitted_at, tone: 'text-blue-700' },
+    { label: 'Diverifikasi', value: proposal.verified_at, tone: 'text-cyan-700' },
+    { label: 'Disetujui Komite Madrasah', value: proposal.approved_at, tone: 'text-purple-700' },
+    { label: 'Disetujui Kepala Madrasah', value: proposal.final_approved_at, tone: 'text-green-700' },
+    { label: 'Pembayaran Selesai', value: proposal.completed_at, tone: 'text-emerald-700' },
+    { label: 'Ditolak', value: proposal.rejected_at, tone: 'text-red-700' },
+  ].filter((item) => item.value);
+
+  const showPaymentSection = Boolean(proposal.payment)
+    || ['final_approved', 'payment_processing', 'completed'].includes(proposal.status);
+
+  const paymentStatusLabel = getPaymentStatusLabel(
+    proposal.payment?.status
+      || (proposal.status === 'completed'
+        ? 'completed'
+        : proposal.status === 'payment_processing'
+          ? 'processing'
+          : proposal.status === 'final_approved'
+            ? 'pending'
+            : undefined),
+  );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-7xl space-y-6">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate('/proposal-tracking')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            onClick={handleBack}
+            className="rounded-lg p-2 transition-colors hover:bg-gray-100"
           >
             <ArrowLeft size={20} />
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Detail Proposal</h1>
-            <p className="text-gray-600 mt-1">Informasi lengkap proposal</p>
+            <p className="mt-1 text-gray-600">Tinjau proposal, dokumen, timeline, dan riwayat persetujuan.</p>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          {canApproveProposal() && (
+        <div className="flex flex-wrap gap-2">
+          {canApprove && (
             <button
-              onClick={handleApproveRequest}
-              disabled={approving}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => setShowApprovalModal(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700"
             >
               <CheckCircle size={16} />
-              {approving ? 'Memproses...' : 'Setujui Proposal'}
+              Setujui Proposal
             </button>
           )}
-          {canRejectProposal() && (
+
+          {canReject && (
             <button
-              onClick={() => {
-                console.log('🔴 Reject button clicked');
-                setShowRejectionModal(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              onClick={() => setShowRejectionModal(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
             >
               <XCircle size={16} />
               Tolak Proposal
             </button>
           )}
-          {/* Draft: Submit, Edit, Delete buttons */}
-          {proposal.status?.toLowerCase() === 'draft' && user?.role === 'Pengusul' && (
+
+          {proposal.status === 'draft' && user?.role === 'Pengusul' && (
             <>
               <button
-                onClick={handleSubmitRequest}
-                disabled={submitting}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => setConfirmModal({ isOpen: true, action: 'submit' })}
+                disabled={actionLoading}
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Send size={16} />
-                {submitting ? 'Mengirim...' : 'Ajukan Proposal'}
+                {actionLoading ? 'Mengirim...' : 'Ajukan Proposal'}
               </button>
               <Link
                 to={`/proposals/${proposal.id}/edit`}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-white transition-colors hover:bg-emerald-700"
               >
                 <Edit size={16} />
                 Edit
               </Link>
               <button
-                onClick={handleDeleteRequest}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                onClick={() => setConfirmModal({ isOpen: true, action: 'delete' })}
+                disabled={actionLoading}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Trash2 size={16} />
                 Hapus
               </button>
             </>
           )}
-          {/* Rejected: Edit and Submit button (so pengusul can fix and resubmit) */}
-          {proposal.status?.toLowerCase() === 'rejected' && user?.role === 'Pengusul' && (
+
+          {proposal.status === 'rejected' && user?.role === 'Pengusul' && (
             <>
               <button
-                onClick={() => {
-                  console.log('🔄 Ajukan Ulang button clicked for rejected proposal');
-                  handleSubmitRequest();
-                }}
-                disabled={submitting}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => setConfirmModal({ isOpen: true, action: 'submit' })}
+                disabled={actionLoading}
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Send size={16} />
-                {submitting ? 'Mengirim...' : 'Ajukan Ulang'}
+                {actionLoading ? 'Mengirim...' : 'Ajukan Ulang'}
               </button>
               <Link
                 to={`/proposals/${proposal.id}/edit`}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                onClick={() => console.log('✏️ Edit Proposal button clicked for rejected proposal')}
+                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-white transition-colors hover:bg-emerald-700"
               >
                 <Edit size={16} />
                 Edit Proposal
@@ -559,40 +524,517 @@ const ProposalDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Confirm Modal */}
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-200 bg-gradient-to-r from-slate-50 to-blue-50 px-6 py-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {getStatusBadge(proposal.status)}
+                {getUrgencyBadge(proposal.urgency)}
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{proposal.title}</h2>
+                {proposal.description && (
+                  <p className="mt-2 max-w-3xl text-gray-600">{proposal.description}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="min-w-full rounded-2xl border border-blue-200 bg-white/90 p-5 xl:min-w-[320px] xl:max-w-sm">
+              <p className="text-sm font-medium text-blue-600">Jumlah Pengajuan</p>
+              <p className="mt-2 text-3xl font-bold text-blue-900">
+                {formatRupiah(proposal.jumlah_pengajuan)}
+              </p>
+              {proposal.requires_committee_approval && (
+                <p className="mt-3 text-sm text-amber-700">
+                  Proposal ini akan melewati tahap persetujuan komite sesuai alur bidang.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.95fr)]">
+          <div className="space-y-6">
+            <SectionAccordion
+              title="Informasi RKAM"
+              icon={<FileText size={18} />}
+              defaultOpen
+            >
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="rounded-xl bg-gray-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Data RKAM</p>
+                  {proposal.rkam ? (
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <p className="text-sm text-gray-500">Bidang</p>
+                        <p className="font-semibold text-gray-900">{proposal.rkam.bidang || proposal.rkam.kategori}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Item</p>
+                        <p className="font-semibold text-gray-900">{proposal.rkam.item_name}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Tahun Anggaran</p>
+                        <p className="font-semibold text-gray-900">{proposal.rkam.tahun_anggaran || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Deskripsi RKAM</p>
+                        <p className="font-semibold text-gray-900">{proposal.rkam.deskripsi || '-'}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-gray-600">Informasi RKAM belum tersedia.</p>
+                  )}
+                </div>
+
+                <div className="rounded-xl bg-gray-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Pembuat Proposal</p>
+                  {proposal.user ? (
+                    <div className="mt-4 space-y-3">
+                      <div>
+                        <p className="text-sm text-gray-500">Nama</p>
+                        <p className="font-semibold text-gray-900">
+                          {proposal.user.full_name || proposal.user.name || '-'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Email</p>
+                        <p className="font-semibold text-gray-900">{proposal.user.email}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Role</p>
+                        <p className="font-semibold text-gray-900">{getRoleLabel(proposal.user.role)}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-gray-600">Informasi pembuat proposal belum tersedia.</p>
+                  )}
+                </div>
+              </div>
+
+              {proposal.rkam && (
+                <div className="mt-4 grid gap-4 md:grid-cols-3">
+                  <div className="rounded-xl border border-gray-200 p-4">
+                    <p className="text-sm text-gray-500">Pagu</p>
+                    <p className="mt-1 text-lg font-semibold text-gray-900">{formatRupiah(proposal.rkam.pagu)}</p>
+                  </div>
+                  <div className="rounded-xl border border-gray-200 p-4">
+                    <p className="text-sm text-gray-500">Terpakai</p>
+                    <p className="mt-1 text-lg font-semibold text-gray-900">{formatRupiah(proposal.rkam.terpakai)}</p>
+                  </div>
+                  <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+                    <p className="text-sm text-green-700">Sisa</p>
+                    <p className="mt-1 text-lg font-bold text-green-700">{formatRupiah(proposal.rkam.sisa)}</p>
+                  </div>
+                </div>
+              )}
+
+              {(proposal.urgency || proposal.start_date || proposal.end_date) && (
+                <div className="mt-4 grid gap-4 md:grid-cols-3">
+                  <div className="rounded-xl border border-gray-200 p-4">
+                    <p className="text-sm text-gray-500">Urgensi</p>
+                    <p className="mt-1 font-semibold text-gray-900">{proposal.urgency || '-'}</p>
+                  </div>
+                  <div className="rounded-xl border border-gray-200 p-4">
+                    <p className="text-sm text-gray-500">Mulai Kegiatan</p>
+                    <p className="mt-1 font-semibold text-gray-900">{formatDate(proposal.start_date)}</p>
+                  </div>
+                  <div className="rounded-xl border border-gray-200 p-4">
+                    <p className="text-sm text-gray-500">Selesai Kegiatan</p>
+                    <p className="mt-1 font-semibold text-gray-900">{formatDate(proposal.end_date)}</p>
+                  </div>
+                </div>
+              )}
+            </SectionAccordion>
+
+            <SectionAccordion
+              title="Timeline"
+              icon={<Calendar size={18} />}
+              defaultOpen
+            >
+              {timelineItems.length > 0 ? (
+                <div className="space-y-4">
+                  {timelineItems.map((item) => (
+                    <div key={item.label} className="flex items-start justify-between gap-4 rounded-xl border border-gray-200 p-4">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{item.label}</p>
+                        <p className="text-sm text-gray-500">Status dan perubahan waktu proposal.</p>
+                      </div>
+                      <p className={`text-sm font-semibold ${item.tone}`}>{formatDate(item.value)}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-600">Belum ada timeline yang dapat ditampilkan.</p>
+              )}
+            </SectionAccordion>
+
+            <SectionAccordion
+              title="Dokumen Pendukung"
+              icon={<Paperclip size={18} />}
+              badge={
+                <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                  {proposal.attachments?.length || 0} file
+                </span>
+              }
+              defaultOpen
+            >
+              {proposal.attachments && proposal.attachments.length > 0 ? (
+                <div className="space-y-3">
+                  {proposal.attachments.map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center"
+                    >
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-xs font-bold text-blue-700 shadow-sm">
+                        {getFileIcon(attachment.mime_type)}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+                          {getAttachmentTypeLabel(attachment.attachment_type)}
+                        </p>
+                        <p className="truncate text-sm font-semibold text-gray-900">{attachment.file_name}</p>
+                        <p className="text-xs text-gray-500">
+                          {(attachment.file_size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handlePreview(attachment)}
+                          className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
+                        >
+                          <Eye size={16} />
+                          Lihat
+                        </button>
+                        <button
+                          onClick={() => handleDownload(attachment)}
+                          disabled={downloadingId === attachment.id}
+                          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {downloadingId === attachment.id
+                            ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+                            : <Download size={16} />}
+                          Unduh
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center text-sm text-gray-600">
+                  Belum ada dokumen pendukung yang diunggah.
+                </div>
+              )}
+            </SectionAccordion>
+          </div>
+
+          <div className="space-y-6">
+            <SectionAccordion
+              title="Catatan Persetujuan"
+              icon={<CheckCircle size={18} />}
+              badge={
+                <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">
+                  {approvalCount} catatan
+                </span>
+              }
+              defaultOpen
+            >
+              {proposal.approvals && proposal.approvals.length > 0 ? (
+                <div className="space-y-3">
+                  {proposal.approvals.map((approval) => (
+                    <div key={approval.id} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {getRoleLabel(approval.approver?.role)}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {approval.approver?.full_name || 'Pengguna tidak diketahui'}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            {approval.status === 'approved'
+                              ? 'Disetujui'
+                              : approval.status === 'rejected'
+                                ? 'Ditolak'
+                                : 'Menunggu'}
+                          </p>
+                          <p className="text-xs text-gray-500">{formatDate(approval.created_at)}</p>
+                        </div>
+                      </div>
+                      <p className="mt-3 whitespace-pre-wrap text-sm text-gray-700">
+                        {approval.notes?.trim() || 'Tidak ada catatan.'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center text-sm text-gray-600">
+                  Belum ada catatan persetujuan untuk proposal ini.
+                </div>
+              )}
+            </SectionAccordion>
+
+            {showPaymentSection && (
+              <SectionAccordion
+                title="Status Pembayaran"
+                icon={<DollarSign size={18} />}
+                defaultOpen
+              >
+                <div
+                  className={`rounded-xl border p-4 ${
+                    isPaymentCompleted(proposal.payment)
+                      ? 'border-emerald-200 bg-emerald-50'
+                      : proposal.payment?.status === 'processing' || proposal.status === 'payment_processing'
+                        ? 'border-yellow-200 bg-yellow-50'
+                        : 'border-blue-200 bg-blue-50'
+                  }`}
+                >
+                  <p
+                    className={`text-sm font-semibold ${
+                      isPaymentCompleted(proposal.payment)
+                        ? 'text-emerald-900'
+                        : proposal.payment?.status === 'processing' || proposal.status === 'payment_processing'
+                          ? 'text-yellow-900'
+                          : 'text-blue-900'
+                    }`}
+                  >
+                    {isPaymentCompleted(proposal.payment)
+                      ? 'Proposal ini sudah terbayarkan.'
+                      : proposal.payment?.status === 'processing' || proposal.status === 'payment_processing'
+                        ? 'Pembayaran sedang diproses oleh bendahara.'
+                        : 'Proposal sudah siap masuk ke tahap pembayaran.'}
+                  </p>
+                  <p
+                    className={`mt-1 text-sm ${
+                      isPaymentCompleted(proposal.payment)
+                        ? 'text-emerald-700'
+                        : proposal.payment?.status === 'processing' || proposal.status === 'payment_processing'
+                          ? 'text-yellow-800'
+                          : 'text-blue-700'
+                    }`}
+                  >
+                    {isPaymentCompleted(proposal.payment)
+                      ? `Dana dibayarkan pada ${formatDate(proposal.payment?.completed_at || proposal.completed_at)}.`
+                      : proposal.payment?.status === 'processing' || proposal.status === 'payment_processing'
+                        ? 'Menunggu finalisasi pembayaran dan konfirmasi selesai.'
+                        : 'Bendahara dapat mulai memproses pembayaran untuk proposal ini.'}
+                  </p>
+                </div>
+
+                {proposal.payment && (
+                  <>
+                    <div className="mt-4 grid gap-4 md:grid-cols-2">
+                      <div className="rounded-xl border border-gray-200 p-4">
+                        <p className="text-sm text-gray-500">Status Pembayaran</p>
+                        <p className="mt-1 text-lg font-semibold text-gray-900">{paymentStatusLabel}</p>
+                      </div>
+                      <div className="rounded-xl border border-gray-200 p-4">
+                        <p className="text-sm text-gray-500">Tanggal Selesai</p>
+                        <p className="mt-1 text-lg font-semibold text-gray-900">
+                          {formatDate(proposal.payment.completed_at || proposal.completed_at)}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-gray-200 p-4">
+                        <p className="text-sm text-gray-500">Penerima</p>
+                        <p className="mt-1 font-semibold text-gray-900">{proposal.payment.recipient_name || '-'}</p>
+                      </div>
+                      <div className="rounded-xl border border-gray-200 p-4">
+                        <p className="text-sm text-gray-500">Metode</p>
+                        <p className="mt-1 font-semibold capitalize text-gray-900">{proposal.payment.payment_method || '-'}</p>
+                      </div>
+                    </div>
+
+                    {proposal.payment.admin_notes && (
+                      <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                        <p className="text-sm font-semibold text-gray-900">Catatan Bendahara</p>
+                        <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">{proposal.payment.admin_notes}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </SectionAccordion>
+            )}
+
+            {proposal.requires_committee_approval && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm font-semibold text-amber-800">Tahap Komite Aktif</p>
+                <p className="mt-1 text-sm text-amber-700">
+                  Proposal pada alur baru akan diproses oleh verifikator, komite, lalu kepala madrasah dalam bidang yang sama.
+                </p>
+              </div>
+            )}
+
+            {(proposal.rejection_reason || proposal.improvement_suggestions) && (
+              <div className="space-y-4">
+                {proposal.rejection_reason && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+                    <p className="flex items-center gap-2 text-sm font-semibold text-red-800">
+                      <XCircle size={16} />
+                      Alasan Penolakan
+                    </p>
+                    <p className="mt-2 whitespace-pre-wrap text-sm text-red-700">{proposal.rejection_reason}</p>
+                    {(proposal.rejected_by_user || proposal.rejected_by_role) && (
+                      <div className="mt-3 border-t border-red-200 pt-3 text-xs text-red-600">
+                        Ditolak oleh{' '}
+                        <span className="font-semibold">
+                          {proposal.rejected_by_user?.full_name || getRoleLabel(proposal.rejected_by_role)}
+                        </span>
+                        {proposal.rejected_by_user?.role && (
+                          <span> ({getRoleLabel(proposal.rejected_by_user.role)})</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {proposal.improvement_suggestions && (
+                  <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                    <p className="flex items-center gap-2 text-sm font-semibold text-blue-800">
+                      <FileText size={16} />
+                      Saran Perbaikan
+                    </p>
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-blue-700">
+                      {proposal.improvement_suggestions}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <ConfirmModal
         isOpen={confirmModal.isOpen}
-        title={
-          confirmModal.action === 'delete' ? 'Hapus Proposal' : 
-          confirmModal.action === 'approve' ? 'Setujui Proposal' : 
-          'Ajukan Proposal'
-        }
+        title={confirmModal.action === 'delete' ? 'Hapus Proposal' : 'Ajukan Proposal'}
         message={
-          confirmModal.action === 'delete' ? 'Apakah Anda yakin ingin menghapus proposal ini?' : 
-          confirmModal.action === 'approve' ? 'Apakah Anda yakin ingin menyetujui proposal ini?' : 
-          'Apakah Anda yakin ingin mengajukan proposal ini untuk verifikasi?'
+          confirmModal.action === 'delete'
+            ? 'Apakah Anda yakin ingin menghapus proposal ini?'
+            : 'Apakah Anda yakin ingin mengajukan proposal ini untuk diproses lebih lanjut?'
         }
-        type={
-          confirmModal.action === 'delete' ? 'danger' : 
-          confirmModal.action === 'approve' ? 'success' : 
-          'warning'
-        }
-        confirmText={
-          confirmModal.action === 'delete' ? 'Ya, Hapus' : 
-          confirmModal.action === 'approve' ? 'Ya, Setujui' : 
-          'Ya, Ajukan'
-        }
+        type={confirmModal.action === 'delete' ? 'danger' : 'warning'}
+        confirmText={confirmModal.action === 'delete' ? 'Ya, Hapus' : 'Ya, Ajukan'}
         cancelText="Batal"
-        onConfirm={
-          confirmModal.action === 'delete' ? handleDeleteConfirm : 
-          confirmModal.action === 'approve' ? handleApproveConfirm : 
-          handleSubmitConfirm
-        }
+        onConfirm={confirmModal.action === 'delete' ? handleDeleteConfirm : handleSubmitConfirm}
         onCancel={() => setConfirmModal({ isOpen: false, action: null })}
-        loading={submitting || approving}
+        loading={actionLoading}
       />
 
-      {/* Toast */}
+      {showApprovalModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="border-b border-gray-200 px-6 py-4">
+              <h3 className="text-lg font-semibold text-gray-900">Setujui Proposal</h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Satu tombol ini langsung membuka form catatan persetujuan sebelum proposal disetujui.
+              </p>
+            </div>
+
+            <div className="px-6 py-5">
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                Catatan Persetujuan
+              </label>
+              <textarea
+                value={approvalNotes}
+                onChange={(event) => setApprovalNotes(event.target.value)}
+                rows={5}
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                placeholder="Isi catatan jika diperlukan. Boleh dikosongkan."
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 border-t border-gray-200 px-6 py-4">
+              <button
+                onClick={() => {
+                  setShowApprovalModal(false);
+                  setApprovalNotes('');
+                }}
+                disabled={actionLoading}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleApproveConfirm}
+                disabled={actionLoading}
+                className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {actionLoading ? 'Memproses...' : 'Ya, Setujui'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <RejectionModal
+        isOpen={showRejectionModal}
+        onClose={() => setShowRejectionModal(false)}
+        onConfirm={handleRejectWithImprovements}
+        isLoading={actionLoading}
+        proposalTitle={proposal.title}
+        userRole={(user?.role === 'Verifikator'
+          ? 'verifikator'
+          : user?.role === 'Komite Madrasah'
+            ? 'komite_madrasah'
+            : user?.role === 'Kepala Madrasah'
+              ? 'kepala_madrasah'
+              : 'bendahara') as 'verifikator' | 'kepala_madrasah' | 'komite_madrasah' | 'bendahara'}
+      />
+
+      {previewAttachment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-4">
+              <Paperclip size={18} className="shrink-0 text-gray-400" />
+              <p className="flex-1 truncate text-sm font-medium text-gray-900">
+                {previewAttachment.file_name}
+              </p>
+              <button
+                onClick={() => handleDownload(previewAttachment)}
+                disabled={downloadingId === previewAttachment.id}
+                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                title="Unduh"
+              >
+                <Download size={18} />
+              </button>
+              <button
+                onClick={handleClosePreview}
+                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                title="Tutup"
+              >
+                <XCircle size={18} />
+              </button>
+            </div>
+
+            <div className="flex min-h-64 flex-1 items-center justify-center overflow-hidden bg-gray-100">
+              {previewLoading ? (
+                <div className="flex flex-col items-center gap-3 text-gray-500">
+                  <span className="h-8 w-8 animate-spin rounded-full border-4 border-blue-400 border-t-transparent" />
+                  <span className="text-sm">Memuat pratinjau...</span>
+                </div>
+              ) : previewBlobUrl ? (
+                <iframe
+                  src={previewBlobUrl}
+                  className="h-full w-full"
+                  style={{ minHeight: '70vh' }}
+                  title={previewAttachment.file_name}
+                />
+              ) : (
+                <div className="p-8 text-center text-gray-500">
+                  <FileText size={48} className="mx-auto mb-3 text-gray-300" />
+                  <p className="text-sm">Pratinjau tidak tersedia untuk file ini.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {toast && (
         <Toast
           type={toast.type}
@@ -600,304 +1042,6 @@ const ProposalDetail: React.FC = () => {
           onClose={() => setToast(null)}
         />
       )}
-
-      {/* Main Content */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        {/* Title and Status */}
-        <div className="p-6 border-b border-gray-200 bg-gray-50">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-900">{proposal.title}</h2>
-              {proposal.description && (
-                <p className="text-gray-600 mt-2">{proposal.description}</p>
-              )}
-            </div>
-            <div className="ml-4">
-              {getStatusBadge(proposal.status)}
-            </div>
-          </div>
-        </div>
-
-        {/* Jumlah Pengajuan (Featured) */}
-        <div className="p-6 bg-blue-50 border-b border-blue-200">
-          <p className="text-sm text-blue-600 font-medium mb-1">Jumlah Pengajuan</p>
-          <p className="text-3xl font-bold text-blue-900">{formatRupiah(proposal.jumlah_pengajuan)}</p>
-        </div>
-
-        {/* RKAM Information */}
-        {proposal.rkam && (
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center gap-2 mb-4">
-              <FileText className="text-gray-400" size={20} />
-              <h3 className="font-semibold text-gray-900">Informasi RKAM</h3>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Kategori</p>
-                  <p className="font-medium text-gray-900">{proposal.rkam.kategori}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Item</p>
-                  <p className="font-medium text-gray-900">{proposal.rkam.item_name}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 pt-3 border-t border-gray-200">
-                <div>
-                  <p className="text-sm text-gray-600">Pagu</p>
-                  <p className="font-medium text-gray-900">{formatRupiah(proposal.rkam.pagu)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Terpakai</p>
-                  <p className="font-medium text-gray-900">{formatRupiah(proposal.rkam.terpakai)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Sisa</p>
-                  <p className="font-bold text-green-600">{formatRupiah(proposal.rkam.sisa)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* User Information */}
-        {proposal.user && (
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center gap-2 mb-4">
-              <User className="text-gray-400" size={20} />
-              <h3 className="font-semibold text-gray-900">Pembuat Proposal</h3>
-            </div>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="font-medium text-gray-900">{proposal.user.name}</p>
-              <p className="text-sm text-gray-600">{proposal.user.email}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Timestamps */}
-        <div className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Calendar className="text-gray-400" size={20} />
-            <h3 className="font-semibold text-gray-900">Timeline</h3>
-          </div>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Dibuat</span>
-              <span className="text-sm font-medium text-gray-900">{formatDate(proposal.created_at)}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Terakhir Diubah</span>
-              <span className="text-sm font-medium text-gray-900">{formatDate(proposal.updated_at)}</span>
-            </div>
-            {proposal.submitted_at && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Diajukan</span>
-                <span className="text-sm font-medium text-blue-600">{formatDate(proposal.submitted_at)}</span>
-              </div>
-            )}
-            {proposal.verified_at && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Diverifikasi</span>
-                <span className="text-sm font-medium text-indigo-600">{formatDate(proposal.verified_at)}</span>
-              </div>
-            )}
-            {proposal.approved_at && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Disetujui Kepala</span>
-                <span className="text-sm font-medium text-purple-600">{formatDate(proposal.approved_at)}</span>
-              </div>
-            )}
-            {proposal.final_approved_at && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Disetujui Akhir</span>
-                <span className="text-sm font-medium text-green-600">{formatDate(proposal.final_approved_at)}</span>
-              </div>
-            )}
-            {proposal.completed_at && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Selesai</span>
-                <span className="text-sm font-medium text-emerald-600">{formatDate(proposal.completed_at)}</span>
-              </div>
-            )}
-            {proposal.rejected_at && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Ditolak</span>
-                <span className="text-sm font-medium text-red-600">{formatDate(proposal.rejected_at)}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Dokumen Pendukung */}
-        {proposal.attachments && proposal.attachments.length > 0 && (
-          <div className="p-6 border-t border-gray-200">
-            <div className="flex items-center gap-2 mb-4">
-              <Paperclip className="text-gray-400" size={20} />
-              <h3 className="font-semibold text-gray-900">Dokumen Pendukung</h3>
-              <span className="ml-auto text-xs text-gray-500">{proposal.attachments.length} file</span>
-            </div>
-            <div className="space-y-2">
-              {proposal.attachments.map((attachment) => (
-                <div key={attachment.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <span className="text-xl">{getFileIcon(attachment.mime_type)}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{attachment.file_name}</p>
-                    <p className="text-xs text-gray-500">{(attachment.file_size / 1024 / 1024).toFixed(2)} MB</p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handlePreview(attachment)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="Pratinjau"
-                    >
-                      <Eye size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDownload(attachment)}
-                      disabled={downloadingId === attachment.id}
-                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-                      title="Unduh"
-                    >
-                      {downloadingId === attachment.id
-                        ? <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                        : <Download size={16} />}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Committee Requirement & Rejection Reason */}
-        {(proposal.requires_committee_approval || proposal.rejection_reason || proposal.improvement_suggestions) && (
-          <div className="p-6 border-t border-gray-200 space-y-4">
-            {proposal.requires_committee_approval && (
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm font-medium text-yellow-800">
-                  ⚠️ Proposal ini memerlukan persetujuan Komite Madrasah
-                </p>
-                <p className="text-xs text-yellow-600 mt-1">
-                  Jumlah pengajuan melebihi Rp 50.000.000
-                </p>
-              </div>
-            )}
-            {proposal.rejection_reason && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">
-                  <XCircle size={16} />
-                  Alasan Penolakan
-                </p>
-                <p className="text-sm text-red-700 whitespace-pre-wrap">{proposal.rejection_reason}</p>
-                
-                {/* Show rejector info for Pengusul */}
-                {user?.role === 'Pengusul' && (
-                  <div className="mt-3 pt-3 border-t border-red-200">
-                    <p className="text-xs text-red-600 mb-1">
-                      <span className="font-semibold">Ditolak oleh:</span>
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <User size={14} className="text-red-500" />
-                      <span className="text-xs text-red-700">
-                        {/* Prioritize rejected_by_user data, fallback to rejected_by_role */}
-                        {proposal.rejected_by_user?.full_name 
-                          ? `${proposal.rejected_by_user.full_name} (${proposal.rejected_by_user.role || proposal.rejected_by_role || 'Role tidak diketahui'})` 
-                          : proposal.rejected_by_role 
-                            ? `Role: ${proposal.rejected_by_role}`
-                            : 'Informasi penolak tidak tersedia'}
-                      </span>
-                    </div>
-                    {proposal.rejected_at && (
-                      <p className="text-xs text-red-500 mt-1">
-                        📅 {formatDate(proposal.rejected_at)}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-            {proposal.improvement_suggestions && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
-                  <FileText size={16} />
-                  Saran Perbaikan Proposal
-                </p>
-                <p className="text-sm text-blue-700 whitespace-pre-wrap leading-relaxed">{proposal.improvement_suggestions}</p>
-                <div className="mt-3 pt-3 border-t border-blue-200">
-                  <p className="text-xs text-blue-600">
-                    💡 Silakan perbaiki proposal sesuai saran di atas dan ajukan kembali
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Rejection Modal */}
-      <RejectionModal
-        isOpen={showRejectionModal}
-        onClose={() => setShowRejectionModal(false)}
-        onConfirm={handleRejectWithImprovements}
-        isLoading={rejecting}
-        proposalTitle={proposal.title}
-        userRole={(user?.role === 'Verifikator' ? 'verifikator' : 
-                   user?.role === 'Kepala Madrasah' ? 'kepala_madrasah' : 
-                   user?.role === 'Komite Madrasah' ? 'komite_madrasah' : 
-                   'bendahara') as 'verifikator' | 'kepala_madrasah' | 'komite_madrasah' | 'bendahara'}
-      />
-
-      {/* Attachment Preview Modal */}
-      {previewAttachment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 flex flex-col max-h-[90vh]">
-            {/* Header */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-200">
-              <Paperclip size={18} className="text-gray-400 shrink-0" />
-              <p className="flex-1 text-sm font-medium text-gray-900 truncate">{previewAttachment.file_name}</p>
-              <button
-                onClick={() => handleDownload(previewAttachment)}
-                disabled={downloadingId === previewAttachment.id}
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Unduh"
-              >
-                <Download size={18} />
-              </button>
-              <button
-                onClick={handleClosePreview}
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Tutup"
-              >
-                <XCircle size={18} />
-              </button>
-            </div>
-            {/* Body */}
-            <div className="flex-1 overflow-hidden bg-gray-100 flex items-center justify-center min-h-64">
-              {previewLoading ? (
-                <div className="flex flex-col items-center gap-3 text-gray-500">
-                  <span className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-sm">Memuat pratinjau…</span>
-                </div>
-              ) : previewBlobUrl ? (
-                <iframe
-                  src={previewBlobUrl}
-                  className="w-full h-full"
-                  style={{ minHeight: '60vh' }}
-                  title={previewAttachment.file_name}
-                />
-              ) : (
-                <div className="text-center text-gray-500 p-8">
-                  <FileText size={48} className="mx-auto mb-3 text-gray-300" />
-                  <p className="text-sm">Pratinjau tidak tersedia untuk tipe file ini.</p>
-                  <p className="text-xs mt-1">Silakan unduh file untuk membukanya.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Back Link removed - header has back button */}
     </div>
   );
 };

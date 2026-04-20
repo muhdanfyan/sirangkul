@@ -2,16 +2,24 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Eye, Download, FileText, Search, Filter, 
   ArrowUpDown, ChevronUp, ChevronDown, 
-  ChevronLeft, ChevronRight, X as XIcon,
-  CheckCircle, Landmark, Calendar,
-  ExternalLink, FileSpreadsheet
+  ChevronLeft, ChevronRight,
+  CheckCircle, Landmark, Calendar
 } from 'lucide-react';
-import { apiService, RKAM, PaginatedResponse, Category } from '../services/api';
+import { apiService, RKAM, Category } from '../services/api';
+
+interface TransparencyDocument {
+  name: string;
+  path: string;
+  type: 'pdf' | 'document';
+  visible?: boolean;
+  description?: string;
+}
 
 const RAKMViewer: React.FC = () => {
   // Data States
   const [rkamData, setRkamData] = useState<RKAM[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [transparencyDocuments, setTransparencyDocuments] = useState<TransparencyDocument[]>([]);
   
   // UI States
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +28,7 @@ const RAKMViewer: React.FC = () => {
   
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  const perPage = 10;
   const [paginationData, setPaginationData] = useState({
     total: 0,
     from: 0,
@@ -34,14 +42,6 @@ const RAKMViewer: React.FC = () => {
     direction: 'asc'
   });
 
-  // Static Background Files
-  const rakmFiles = [
-    { name: 'RKAM tahun 2026.pdf', path: '/file/RKAM tahun 2026.pdf', type: 'pdf' },
-    { name: 'FIX RKAM INFAK - Revisi TA 2025.pdf', path: '/file/FIX RKAM INFAK - Revisi TA 2025.pdf', type: 'pdf' },
-    { name: 'RKAM PERUBAHAN-REVISI TA 2025 - 17092025.xls', path: '/file/RKAM PERUBAHAN-REVISI TA 2025 - 17092025.xls', type: 'excel' },
-    { name: 'SOP PELATIHAN SiRANGKUL.pdf', path: '/file/SOP PELATIHAN SiRANGKUL.pdf', type: 'pdf' },
-  ];
-
   // Fetch Public RKAM Data
   const fetchPublicData = useCallback(async () => {
     try {
@@ -51,7 +51,7 @@ const RAKMViewer: React.FC = () => {
         page: currentPage,
         per_page: perPage,
         search: searchTerm,
-        category_id: selectedCategoryId,
+        bidang_id: selectedCategoryId,
         sort_by: sortConfig.key,
         order: sortConfig.direction
       });
@@ -77,12 +77,32 @@ const RAKMViewer: React.FC = () => {
     const fetchOptions = async () => {
       try {
         const response = await apiService.getPublicRKAMOptions();
-        setCategories(response.categories);
+        setCategories(response.bidangs);
       } catch (err) {
-        console.error('Failed to fetch categories:', err);
+        console.error('Failed to fetch bidangs:', err);
       }
     };
     fetchOptions();
+  }, []);
+
+  useEffect(() => {
+    const fetchTransparencyDocuments = async () => {
+      try {
+        const response = await fetch('/rkam-viewer-documents.json');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json() as { documents?: TransparencyDocument[] };
+        const documents = Array.isArray(result.documents) ? result.documents : [];
+        setTransparencyDocuments(documents.filter((document) => document.visible !== false));
+      } catch (err) {
+        console.error('Failed to fetch transparency documents:', err);
+        setTransparencyDocuments([]);
+      }
+    };
+
+    fetchTransparencyDocuments();
   }, []);
 
   useEffect(() => {
@@ -190,7 +210,7 @@ const RAKMViewer: React.FC = () => {
                   onChange={(e) => setSelectedCategoryId(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl appearance-none outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
                 >
-                  <option value="all">Semua Kategori</option>
+                  <option value="all">Semua Bidang</option>
                   {categories.map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
@@ -203,7 +223,7 @@ const RAKMViewer: React.FC = () => {
               <table className="w-full text-sm text-left">
                 <thead className="bg-[#F8FAFC] border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px]">Kategori</th>
+                    <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px]">Bidang</th>
                     <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-widest text-[10px] cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('item_name')}>
                        <div className="flex items-center">Uraian Kegitan <SortIcon column="item_name" /></div>
                     </th>
@@ -234,7 +254,7 @@ const RAKMViewer: React.FC = () => {
                       <tr key={item.id} className="hover:bg-blue-50/30 transition-colors group">
                         <td className="px-6 py-4">
                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 border border-gray-200">
-                              {item.category?.name || 'Umum'}
+                              {item.bidangRef?.name || item.bidang || item.category?.name || item.kategori || 'Umum'}
                            </span>
                         </td>
                         <td className="px-6 py-4">
@@ -290,17 +310,19 @@ const RAKMViewer: React.FC = () => {
         <div className="pt-8 border-t border-gray-200 space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
              <FileText className="text-green-600" size={20} />
-             Arsip Dokumen Pendukung
+             Arsip Dokumen Transparansi
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-             {rakmFiles.map((file, i) => (
-               <div key={i} className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
+          {transparencyDocuments.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-8 text-center">
+              <p className="text-sm font-medium text-gray-600">Belum ada dokumen transparansi yang ditampilkan.</p>
+              <p className="text-xs text-gray-400 mt-2">Atur daftar file melalui `public/rkam-viewer-documents.json`.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+             {transparencyDocuments.map((file) => (
+               <div key={file.path} className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
                   <div className="flex items-start justify-between mb-3">
-                     {file.type === 'pdf' ? (
-                       <FileText className="text-red-500 h-8 w-8" />
-                     ) : (
-                       <FileSpreadsheet className="text-green-600 h-8 w-8" />
-                     )}
+                     <FileText className="text-red-500 h-8 w-8" />
                      <div className="flex gap-1.5">
                         <a href={file.path} target="_blank" rel="noopener" className="p-1.5 bg-gray-50 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
                            <Eye size={16} />
@@ -311,10 +333,11 @@ const RAKMViewer: React.FC = () => {
                      </div>
                   </div>
                   <h4 className="font-bold text-gray-900 text-sm line-clamp-2 mb-1 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{file.name}</h4>
-                  <p className="text-[10px] text-gray-400 font-medium">Dokumen Resmi Madrasah</p>
+                  <p className="text-[10px] text-gray-400 font-medium">{file.description || 'Dokumen Resmi Madrasah'}</p>
                </div>
              ))}
-          </div>
+            </div>
+          )}
         </div>
 
       </main>

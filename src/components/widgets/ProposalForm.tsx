@@ -1,63 +1,144 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
-import { apiService, RKAM, ProposalCreateRequest } from '../../services/api';
-import { AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import {
+  apiService,
+  ProposalAttachment,
+  ProposalAttachmentUpload,
+  ProposalCreateRequest,
+  RKAM,
+} from '../../services/api';
+import { AlertCircle, CheckCircle, ArrowLeft, FileText, Upload, X } from 'lucide-react';
+import { formatRupiah, parseAmountValue } from '../../utils/currency';
+import { applyCompletedPaymentUsageToRKAM } from '../../utils/rkamBudget';
 
 interface ProposalFormProps {
   isEdit?: boolean;
 }
 
+type AttachmentType = 'proposal' | 'lpj';
+
+const MAX_FILE_SIZE_BYTES = 1 * 1024 * 1024;
+const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx'];
+const REQUIRED_ATTACHMENTS: Array<{
+  key: AttachmentType;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: 'proposal',
+    label: 'File Proposal',
+    description: 'Dokumen proposal utama.',
+  },
+  {
+    key: 'lpj',
+    label: 'File LPJ',
+    description: 'Dokumen LPJ pendukung.',
+  },
+];
+
+const getTodayDateString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const toast = useToast();
+  const todayString = getTodayDateString();
 
   const [rkams, setRkams] = useState<RKAM[]>([]);
   const [selectedRkam, setSelectedRkam] = useState<RKAM | null>(null);
+  const [existingAttachments, setExistingAttachments] = useState<ProposalAttachment[]>([]);
+  const [attachments, setAttachments] = useState<Record<AttachmentType, File | null>>({
+    proposal: null,
+    lpj: null,
+  });
+  const [fileErrors, setFileErrors] = useState<Record<AttachmentType, string | null>>({
+    proposal: null,
+    lpj: null,
+  });
   const [loading, setLoading] = useState(false);
   const [loadingRkams, setLoadingRkams] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
-  const toast = useToast();
-  const location = useLocation();
 
   const [formData, setFormData] = useState<ProposalCreateRequest>({
     rkam_id: '',
     title: '',
     description: '',
     jumlah_pengajuan: 0,
+    urgency: 'Normal',
+    start_date: '',
+    end_date: '',
   });
 
   useEffect(() => {
     fetchRkams();
-      if (isEdit && id) {
+    if (isEdit && id) {
       fetchProposal(id);
     }
   }, [isEdit, id]);
 
-  // If we've been navigated here with a toast payload, show it once and clear history state
+  useEffect(() => {
+    if (!formData.rkam_id || rkams.length === 0) {
+      return;
+    }
+
+    const matchedRkam = rkams.find((item) => item.id === formData.rkam_id);
+    if (matchedRkam) {
+      setSelectedRkam(matchedRkam);
+    }
+  }, [formData.rkam_id, rkams]);
+
   useEffect(() => {
     const state = (location.state as { toast?: { message: string; type?: 'success' | 'error' | 'info' | 'warning' } } | undefined) || undefined;
     if (state?.toast) {
-      const t = state.toast as { message: string; type?: 'success' | 'error' | 'info' | 'warning' };
-      toast(t.message, t.type ?? 'info');
-      // clear navigation state so the toast doesn't replay if user refreshes
+      const notification = state.toast;
+      toast(notification.message, notification.type ?? 'info');
       try {
         navigate(location.pathname, { replace: true, state: undefined });
       } catch {
         // ignore
       }
     }
-  // only run on mount or when location.pathname changes
   }, [location.pathname, navigate, toast]);
+
+  const attachmentMap = existingAttachments.reduce<Record<string, ProposalAttachment>>((acc, item) => {
+    if (item.attachment_type) {
+      acc[item.attachment_type] = item;
+    }
+    return acc;
+  }, {});
 
   const fetchRkams = async () => {
     try {
       setLoadingRkams(true);
-      const data = await apiService.getAllRKAM();
-      // Only show RKAM items that have budget remaining
-      const availableRkams = data.filter(rkam => {
-        const sisa = typeof rkam.sisa === 'string' ? parseFloat(rkam.sisa) : rkam.sisa;
+      const [rkamResult, paymentResult] = await Promise.allSettled([
+        apiService.getAllRKAM({ no_paginate: true }),
+        apiService.getAllPayments(),
+      ]);
+
+      if (rkamResult.status !== 'fulfilled') {
+        throw rkamResult.reason;
+      }
+
+      const data = Array.isArray(rkamResult.value) ? rkamResult.value : rkamResult.value?.data ?? [];
+      const normalizedRkams = paymentResult.status === 'fulfilled'
+        ? applyCompletedPaymentUsageToRKAM(data, paymentResult.value)
+        : data;
+
+      if (paymentResult.status === 'rejected') {
+        console.warn('Failed to sync completed payment usage for RKAM form:', paymentResult.reason);
+      }
+
+      const availableRkams = normalizedRkams.filter((rkam: RKAM) => {
+        const sisa = parseAmountValue(rkam.sisa);
         return sisa > 0;
       });
       setRkams(availableRkams);
@@ -77,70 +158,144 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
         rkam_id: proposal.rkam_id,
         title: proposal.title,
         description: proposal.description || '',
-        jumlah_pengajuan: typeof proposal.jumlah_pengajuan === 'string' 
-          ? parseFloat(proposal.jumlah_pengajuan) 
+        jumlah_pengajuan: typeof proposal.jumlah_pengajuan === 'string'
+          ? parseFloat(proposal.jumlah_pengajuan)
           : proposal.jumlah_pengajuan,
+        urgency: proposal.urgency ?? 'Normal',
+        start_date: proposal.start_date ?? '',
+        end_date: proposal.end_date ?? '',
       });
-      
-      // Set selected RKAM
-      if (proposal.rkam) {
-        setSelectedRkam(proposal.rkam);
-      }
+
+      setExistingAttachments(proposal.attachments || []);
     } catch (err) {
       console.error('Error fetching proposal:', err);
       setError('Gagal memuat data proposal');
-    }
-    finally {
+    } finally {
       setLoadingRkams(false);
     }
   };
 
   const handleRkamChange = (rkamId: string) => {
-    const rkam = rkams.find(r => r.id === rkamId);
+    const rkam = rkams.find((item) => item.id === rkamId);
     setSelectedRkam(rkam || null);
-    setFormData({ ...formData, rkam_id: rkamId });
+    setFormData((prev) => ({ ...prev, rkam_id: rkamId }));
   };
 
   const validateBudget = (): { isValid: boolean; message: string } => {
-    if (!selectedRkam) return { isValid: false, message: '' };
-    
-    const sisa = typeof selectedRkam.sisa === 'string' 
-      ? parseFloat(selectedRkam.sisa) 
-      : selectedRkam.sisa;
-    
+    if (!selectedRkam) {
+      return { isValid: false, message: '' };
+    }
+
+    const sisa = parseAmountValue(selectedRkam.sisa);
+
     const requested = formData.jumlah_pengajuan;
-    
+
     if (requested <= 0) {
       return { isValid: false, message: 'Jumlah pengajuan harus lebih dari 0' };
     }
-    
+
     if (requested > sisa) {
-      return { 
-        isValid: false, 
-        message: `Jumlah pengajuan melebihi sisa anggaran RKAM (${formatRupiah(sisa)})` 
+      return {
+        isValid: false,
+        message: `Jumlah pengajuan melebihi sisa anggaran RKAM (${formatRupiah(sisa)})`,
       };
     }
-    
+
     return { isValid: true, message: 'Jumlah pengajuan valid' };
   };
 
-  const formatRupiah = (amount: string | number) => {
-    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(num);
+  const validateSelectedFile = (file: File) => {
+    const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      return 'Tipe file tidak didukung. Gunakan PDF, DOC, DOCX, XLS, atau XLSX.';
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return `Ukuran file ${(file.size / 1024 / 1024).toFixed(2)} MB melebihi batas 1 MB.`;
+    }
+
+    return null;
   };
+
+  const handleFileUpload = (type: AttachmentType, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const validationMessage = validateSelectedFile(file);
+    if (validationMessage) {
+      setFileErrors((prev) => ({ ...prev, [type]: validationMessage }));
+      event.target.value = '';
+      return;
+    }
+
+    setAttachments((prev) => ({ ...prev, [type]: file }));
+    setFileErrors((prev) => ({ ...prev, [type]: null }));
+    event.target.value = '';
+  };
+
+  const handleRemoveFile = (type: AttachmentType) => {
+    setAttachments((prev) => ({ ...prev, [type]: null }));
+    setFileErrors((prev) => ({ ...prev, [type]: null }));
+  };
+
+  const validateAttachmentPresence = () => {
+    for (const item of REQUIRED_ATTACHMENTS) {
+      const hasExisting = !!attachmentMap[item.key];
+      const hasNew = !!attachments[item.key];
+
+      if (!hasExisting && !hasNew) {
+        return `${item.label} wajib tersedia sebelum proposal disimpan.`;
+      }
+    }
+
+    return null;
+  };
+
+  const validateDates = () => {
+    if (!formData.start_date || !formData.end_date) {
+      return 'Tanggal mulai dan tanggal selesai wajib diisi.';
+    }
+
+    if (formData.start_date > todayString) {
+      return 'Tanggal mulai proposal tidak boleh melebihi hari ini.';
+    }
+
+    if (formData.end_date < formData.start_date) {
+      return 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai.';
+    }
+
+    return null;
+  };
+
+  const getPendingUploads = (): ProposalAttachmentUpload[] =>
+    REQUIRED_ATTACHMENTS
+      .filter((item) => attachments[item.key])
+      .map((item) => ({
+        file: attachments[item.key] as File,
+        attachmentType: item.key,
+      }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate budget
+
     const budgetValidation = validateBudget();
     if (!budgetValidation.isValid) {
       setError(budgetValidation.message);
+      return;
+    }
+
+    const dateMessage = validateDates();
+    if (dateMessage) {
+      setError(dateMessage);
+      return;
+    }
+
+    const attachmentMessage = validateAttachmentPresence();
+    if (attachmentMessage) {
+      setError(attachmentMessage);
       return;
     }
 
@@ -151,17 +306,52 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
     try {
       if (isEdit && id) {
         await apiService.updateProposal(id, formData);
+
+        const hasLegacyUntypedAttachments = existingAttachments.some((item) => !item.attachment_type);
+
+        if (hasLegacyUntypedAttachments) {
+          for (const attachment of existingAttachments) {
+            await apiService.deleteAttachment(attachment.id);
+          }
+        } else {
+          for (const item of REQUIRED_ATTACHMENTS) {
+            if (!attachments[item.key]) {
+              continue;
+            }
+
+            const existingAttachment = attachmentMap[item.key];
+            if (existingAttachment) {
+              await apiService.deleteAttachment(existingAttachment.id);
+            }
+          }
+        }
+
+        const uploads = getPendingUploads();
+        if (uploads.length > 0) {
+          await apiService.uploadProposalAttachments(id, uploads);
+        }
+
         toast('Proposal berhasil diperbarui', 'success');
-        navigate('/proposal-tracking', { state: { toast: { message: 'Proposal berhasil diperbarui', type: 'success' } } });
+        navigate(`/proposals/${id}`, {
+          state: {
+            toast: { message: 'Proposal berhasil diperbarui', type: 'success' },
+          },
+        });
       } else {
-        await apiService.createProposal(formData);
+        const createdProposal = await apiService.createProposal(formData);
+        await apiService.uploadProposalAttachments(createdProposal.id, getPendingUploads());
+
         toast('Proposal berhasil dibuat', 'success');
-        navigate('/proposal-tracking', { state: { toast: { message: 'Proposal berhasil dibuat', type: 'success' } } });
+        navigate('/proposal-tracking', {
+          state: {
+            toast: { message: 'Proposal berhasil dibuat', type: 'success' },
+          },
+        });
       }
-    } catch (err) {
-      if (err && typeof err === 'object' && 'errors' in err) {
-        // Backend validation errors
-        setValidationErrors(err.errors as Record<string, string[]>);
+    } catch (err: any) {
+      const errorResponse = err?.response?.data;
+      if (errorResponse?.errors) {
+        setValidationErrors(errorResponse.errors as Record<string, string[]>);
         setError('Terdapat kesalahan pada form. Silakan periksa kembali.');
       } else {
         const errorMessage = err instanceof Error ? err.message : 'Gagal menyimpan proposal';
@@ -185,7 +375,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate(-1)}
@@ -198,12 +387,11 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
             {isEdit ? 'Edit Proposal' : 'Buat Proposal Baru'}
           </h1>
           <p className="text-gray-600 mt-1">
-            {isEdit ? 'Perbarui informasi proposal' : 'Buat pengajuan proposal anggaran baru'}
+            {isEdit ? 'Perbarui informasi proposal dan lampiran revisi' : 'Buat pengajuan proposal anggaran baru'}
           </p>
         </div>
       </div>
 
-      {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
           <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
@@ -214,9 +402,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
         </div>
       )}
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
-        {/* RKAM Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Pilih RKAM <span className="text-red-500">*</span>
@@ -226,7 +412,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
             onChange={(e) => handleRkamChange(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
-            disabled={isEdit} // Disable RKAM change when editing
+            disabled={isEdit}
           >
             <option value="">-- Pilih RKAM --</option>
             {rkams.map((rkam) => (
@@ -240,7 +426,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
           )}
         </div>
 
-        {/* RKAM Info Card */}
         {selectedRkam && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
             <h3 className="font-medium text-blue-900">Informasi RKAM</h3>
@@ -261,7 +446,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
           </div>
         )}
 
-        {/* Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Judul Proposal <span className="text-red-500">*</span>
@@ -279,24 +463,41 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
           )}
         </div>
 
-        {/* Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Deskripsi
+            Deskripsi <span className="text-red-500">*</span>
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Masukkan deskripsi proposal (opsional)"
+            placeholder="Masukkan deskripsi proposal"
             rows={4}
+            required
           />
           {validationErrors.description && (
             <p className="text-red-500 text-sm mt-1">{validationErrors.description[0]}</p>
           )}
         </div>
 
-        {/* Jumlah Pengajuan */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tingkat Urgensi
+            </label>
+            <select
+              value={formData.urgency}
+              onChange={(e) => setFormData({ ...formData, urgency: e.target.value as ProposalCreateRequest['urgency'] })}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="Rendah">Rendah</option>
+              <option value="Normal">Normal</option>
+              <option value="Tinggi">Tinggi</option>
+              <option value="Mendesak">Mendesak</option>
+            </select>
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Jumlah Pengajuan <span className="text-red-500">*</span>
@@ -314,8 +515,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
           {validationErrors.jumlah_pengajuan && (
             <p className="text-red-500 text-sm mt-1">{validationErrors.jumlah_pengajuan[0]}</p>
           )}
-          
-          {/* Budget Validation Feedback */}
+
           {selectedRkam && formData.jumlah_pengajuan > 0 && (
             <div className={`mt-2 flex items-center gap-2 ${budgetValidation.isValid ? 'text-green-600' : 'text-red-600'}`}>
               {budgetValidation.isValid ? (
@@ -333,7 +533,121 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
           )}
         </div>
 
-        {/* Action Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tanggal Mulai <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={formData.start_date || ''}
+              onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+              max={todayString}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">Tanggal mulai tidak boleh melebihi hari ini.</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tanggal Selesai <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={formData.end_date || ''}
+              onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+              min={formData.start_date || undefined}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4 border-t pt-6">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Dokumen Wajib</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Upload 2 file wajib: file proposal dan file LPJ. Maksimal 1 MB per file.
+            </p>
+          </div>
+
+          {REQUIRED_ATTACHMENTS.map((item) => {
+            const existingAttachment = attachmentMap[item.key];
+            const selectedFile = attachments[item.key];
+            const fileError = fileErrors[item.key];
+
+            return (
+              <div key={item.key} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      {item.label} <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                  </div>
+                  <span className="text-[11px] px-2 py-1 rounded-full bg-blue-50 text-blue-700 font-medium uppercase">
+                    1 MB Max
+                  </span>
+                </div>
+
+                {existingAttachment && (
+                  <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <FileText className="h-4 w-4 text-emerald-600" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-emerald-900 truncate">{existingAttachment.file_name}</p>
+                      <p className="text-xs text-emerald-700">Lampiran aktif saat ini</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 text-center transition-colors hover:border-blue-500 hover:bg-blue-50">
+                  <label className="block cursor-pointer">
+                    <Upload className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                    <div className="text-sm text-gray-600">
+                      <span className="text-blue-600 hover:text-blue-500">Klik untuk upload</span>
+                      <span> {existingAttachment ? 'file pengganti' : item.label}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      PDF, DOC, DOCX, XLS, XLSX
+                    </p>
+                    <input
+                      type="file"
+                      onChange={(event) => handleFileUpload(item.key, event)}
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx"
+                    />
+                  </label>
+                </div>
+
+                {fileError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+                    {fileError}
+                  </div>
+                )}
+
+                {selectedFile && (
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <FileText className="h-4 w-4 text-blue-600" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-blue-900 truncate">{selectedFile.name}</p>
+                      <p className="text-xs text-blue-700">File ini akan menggantikan lampiran sebelumnya saat disimpan.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFile(item.key)}
+                      className="text-red-400 hover:text-red-600 flex-shrink-0"
+                      title="Hapus file"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
         <div className="flex justify-end gap-3 pt-4 border-t">
           <button
             type="button"
@@ -351,7 +665,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ isEdit = false }) => {
           </button>
         </div>
       </form>
-      {/* toasts are displayed by the global ToastProvider */}
     </div>
   );
 };
