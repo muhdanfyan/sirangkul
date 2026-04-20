@@ -93,7 +93,8 @@ const ProposalSubmission: React.FC = () => {
         throw rkamResult.reason;
       }
 
-      const data = Array.isArray(rkamResult.value) ? rkamResult.value : rkamResult.value?.data ?? [];
+      const rkamPayload = Array.isArray(rkamResult.value) ? rkamResult.value : rkamResult.value?.data ?? [];
+      const data = Array.isArray(rkamPayload) ? rkamPayload : rkamPayload.data ?? [];
       const normalizedRkams = paymentResult.status === 'fulfilled'
         ? applyCompletedPaymentUsageToRKAM(data, paymentResult.value)
         : data;

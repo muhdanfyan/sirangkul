@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { 
-  Search, Plus, Edit2, Trash2, AlertCircle, TrendingUp, 
-  DollarSign, Activity, Printer, Settings, ChevronLeft, 
+  Search, Plus, Edit2, Trash2, Printer, Settings, ChevronLeft, 
   ChevronRight, Calendar, Filter, ArrowUpDown, ChevronUp, ChevronDown, Eye, X as XIcon
 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
@@ -19,7 +18,7 @@ const RKAMManagement: React.FC = () => {
   const [rkamItems, setRkamItems] = useState<RKAM[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [units, setUnits] = useState<string[]>([]);
+  const [, setUnits] = useState<string[]>([]);
   
   // UI States
   const [isLoading, setIsLoading] = useState(true);
@@ -70,6 +69,7 @@ const RKAMManagement: React.FC = () => {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
   const [fullDataForPrint, setFullDataForPrint] = useState<RKAM[]>([]);
+  const [summary, setSummary] = useState<{ totalBudget: number; totalDanaBos: number; totalDanaKomite: number } | null>(null);
 
   // Auto-calculated pagu in form
   const computedPagu = useMemo(() => {
@@ -159,12 +159,16 @@ const RKAMManagement: React.FC = () => {
         throw rkamResult.reason;
       }
 
-      const rawRkams = Array.isArray(rkamResult.value) ? rkamResult.value : rkamResult.value.data;
+      const rawRkamResponse = rkamResult.value;
+      const rawRkamPayload = Array.isArray(rawRkamResponse) ? rawRkamResponse : rawRkamResponse.data;
+      const rawRkams = Array.isArray(rawRkamPayload) ? rawRkamPayload : rawRkamPayload.data;
+      const rawSummary = Array.isArray(rawRkamResponse) ? null : rawRkamResponse.summary;
 
       if (paymentResult.status !== 'fulfilled') {
         console.warn('Failed to sync completed payment usage for RKAM page:', paymentResult.reason);
         setPayments([]);
         setRkamItems(rawRkams);
+        setSummary(rawSummary);
         return;
       }
 
@@ -175,6 +179,7 @@ const RKAMManagement: React.FC = () => {
 
       setPayments(paymentResult.value);
       setRkamItems(applyCompletedPaymentUsageToRKAM(rawRkams, paymentResult.value, paymentDateFilter));
+      setSummary(rawSummary);
     } catch (err) {
       console.error('Failed to fetch RKAM:', err);
       setToast({ type: 'error', message: 'Gagal memuat data RKAM' });
@@ -522,6 +527,22 @@ const RKAMManagement: React.FC = () => {
             <Plus size={18} />
             Tambah RKAM
           </button>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:hidden">
+        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Pagu Terdaftar</p>
+          <p className="text-2xl font-black text-gray-900">{formatIDR(summary?.totalBudget || 0)}</p>
+        </div>
+        <div className="bg-green-50/30 p-5 rounded-xl border border-green-100 shadow-sm">
+          <p className="text-[10px] font-black text-green-600 uppercase tracking-widest mb-2">Alokasi Dana BOS</p>
+          <p className="text-2xl font-black text-green-700">{formatIDR(summary?.totalDanaBos || 0)}</p>
+        </div>
+        <div className="bg-purple-50/30 p-5 rounded-xl border border-purple-100 shadow-sm">
+          <p className="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-2">Alokasi Dana Komite</p>
+          <p className="text-2xl font-black text-purple-700">{formatIDR(summary?.totalDanaKomite || 0)}</p>
         </div>
       </div>
 

@@ -240,12 +240,17 @@ export interface ProposalStats {
   total_amount_completed: number;
 }
 
-export interface DashboardSummary {
+export interface RKAMSummary {
+  totalBudget: number;
+  totalDanaBos: number;
+  totalDanaKomite: number;
+}
+
+export interface DashboardSummary extends RKAMSummary {
   totalProposals: number;
   approvedProposals: number;
   rejectedProposals: number;
   pendingProposals: number;
-  totalBudget: number;
   usedBudget: number;
   remainingBudget: number;
   bidangBreakdown?: Array<{
@@ -673,7 +678,7 @@ class ApiService {
     sort_by?: string;
     order?: string;
     no_paginate?: boolean;
-  }): Promise<PaginatedResponse<RKAM> | RKAM[]> {
+  }): Promise<{ data: PaginatedResponse<RKAM> | RKAM[]; summary: RKAMSummary | null }> {
     const queryParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -687,7 +692,7 @@ class ApiService {
     const endpoint = queryString ? `/rkam?${queryString}` : '/rkam';
 
     const response = await this.request<
-      { success: boolean; message?: string; data: PaginatedResponse<RKAM> | RKAM[] }
+      { success?: boolean; message?: string; data?: PaginatedResponse<RKAM> | RKAM[]; summary?: RKAMSummary | null }
       | PaginatedResponse<RKAM>
       | RKAM[]
     >(endpoint, {
@@ -695,14 +700,36 @@ class ApiService {
     });
 
     if (Array.isArray(response)) {
-      return response;
+      return {
+        data: response,
+        summary: null,
+      };
     }
 
-    if (response && typeof response === 'object' && 'data' in response) {
-      return response.data as PaginatedResponse<RKAM> | RKAM[];
+    const isPaginatedResponse = Boolean(
+      response
+      && typeof response === 'object'
+      && 'current_page' in response
+      && 'last_page' in response
+      && 'total' in response,
+    );
+
+    if (response && typeof response === 'object' && !isPaginatedResponse && 'data' in response) {
+      const wrappedResponse = response as {
+        data?: PaginatedResponse<RKAM> | RKAM[];
+        summary?: RKAMSummary | null;
+      };
+
+      return {
+        data: wrappedResponse.data ?? [],
+        summary: wrappedResponse.summary ?? null,
+      };
     }
 
-    return response as PaginatedResponse<RKAM>;
+    return {
+      data: response as PaginatedResponse<RKAM>,
+      summary: null,
+    };
   }
 
   async getRKAMOptions(): Promise<{ categories: Category[]; bidangs: Bidang[]; units: string[] }> {
@@ -1184,13 +1211,31 @@ class ApiService {
   }
 
   async getDashboardSummary(): Promise<DashboardSummary> {
-    return this.request<DashboardSummary>('/reporting/summary', {
+    const response = await this.request<DashboardSummary | { success?: boolean; data?: DashboardSummary }>('/reporting/summary', {
+      method: 'GET',
+    });
+
+    if (response && typeof response === 'object' && 'data' in response && response.data) {
+      return response.data;
+    }
+
+    return response as DashboardSummary;
+  }
+
+  async getMonthlyTrends(): Promise<any[]> {
+    return this.request<any[]>('/reporting/monthly-trends', {
+      method: 'GET',
+    });
+  }
+
+  async getCategoryBreakdown(): Promise<any[]> {
+    return this.request<any[]>('/reporting/category-breakdown', {
       method: 'GET',
     });
   }
 
   // PUBLIC VIEWER METHODS
-  async getPublicRKAM(params: any): Promise<PaginatedResponse<RKAM>> {
+  async getPublicRKAM(params: any): Promise<{ data: PaginatedResponse<RKAM> | RKAM[]; summary: RKAMSummary | null }> {
     const url = new URL(`${this.baseURL}/public/rkam`);
     Object.keys(params).forEach(key => {
       if (params[key] !== undefined && params[key] !== null) {
@@ -1207,7 +1252,38 @@ class ApiService {
     }
 
     const result = await response.json();
-    return result.data; // Laravel wraps in { success, data: { ...paginate } }
+
+    if (Array.isArray(result)) {
+      return {
+        data: result,
+        summary: null,
+      };
+    }
+
+    const isPaginatedResponse = Boolean(
+      result
+      && typeof result === 'object'
+      && 'current_page' in result
+      && 'last_page' in result
+      && 'total' in result,
+    );
+
+    if (result && typeof result === 'object' && !isPaginatedResponse && 'data' in result) {
+      const wrappedResult = result as {
+        data?: PaginatedResponse<RKAM> | RKAM[];
+        summary?: RKAMSummary | null;
+      };
+
+      return {
+        data: wrappedResult.data ?? [],
+        summary: wrappedResult.summary ?? null,
+      };
+    }
+
+    return {
+      data: result as PaginatedResponse<RKAM>,
+      summary: null,
+    };
   }
 
   async getPublicRKAMOptions(): Promise<{ categories: Category[]; bidangs: Bidang[]; units: string[] }> {

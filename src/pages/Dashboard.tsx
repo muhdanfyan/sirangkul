@@ -275,9 +275,19 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="p-6">
             <div className="space-y-6">
-              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
-                <span className="text-sm text-gray-600 font-medium">Total Pagu (RKAM)</span>
-                <span className="font-bold text-gray-900">{formatCurrency(summary?.totalBudget || 0)}</span>
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 font-medium">Total Pagu (RKAM)</span>
+                  <span className="font-bold text-gray-900">{formatCurrency(summary?.totalBudget || 0)}</span>
+                </div>
+                <div className="mt-3 flex items-center justify-between text-[10px] gap-2">
+                   <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 text-green-700 rounded-md border border-green-100 font-bold whitespace-nowrap">
+                     BOS: {formatCurrency(summary?.totalDanaBos || 0)}
+                   </div>
+                   <div className="flex items-center gap-1.5 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-md border border-purple-100 font-bold whitespace-nowrap">
+                     KOMITE: {formatCurrency(summary?.totalDanaKomite || 0)}
+                   </div>
+                </div>
               </div>
               <div className="flex justify-between items-center p-4 bg-blue-50/30 rounded-xl border border-blue-100">
                 <span className="text-sm text-gray-600 font-medium">Realisasi (Terpakai)</span>
@@ -286,6 +296,21 @@ const Dashboard: React.FC = () => {
               <div className="flex justify-between items-center p-4 bg-green-50/30 rounded-xl border border-green-100">
                 <span className="text-sm text-gray-600 font-medium">Sisa Anggaran</span>
                 <span className="font-bold text-green-700">{formatCurrency(summary?.remainingBudget || 0)}</span>
+              </div>
+
+              {/* Sumber Dana Section */}
+              <div className="mt-6 pt-6 border-t border-gray-100">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Sumber Dana (Pagu)</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase">Dana BOS</p>
+                    <p className="text-sm font-bold text-gray-900 mt-1">{formatCurrency(summary?.totalDanaBos || 0)}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase">Dana Komite</p>
+                    <p className="text-sm font-bold text-gray-900 mt-1">{formatCurrency(summary?.totalDanaKomite || 0)}</p>
+                  </div>
+                </div>
               </div>
               
               <div className="mt-8 pt-4 border-t border-gray-100">

@@ -2,26 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { 
   Download, Calendar, Filter, FileText, 
   PieChart, BarChart3, TrendingUp, Loader2,
-  ChevronDown, Search, ArrowUpRight, ArrowDownRight,
+  ArrowUpRight,
   Database, Activity, Briefcase
 } from 'lucide-react';
 import { apiService } from '../services/api';
 
 const Reporting: React.FC = () => {
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [reportType, setReportType] = useState('all');
-  const [category, setCategory] = useState('all');
   const [isExporting, setIsExporting] = useState(false);
+  const [, setIsLoading] = useState(true);
 
-  // Mock Summary (Should ideally be fetched)
-  const reportSummary = {
-    totalProposals: 47,
-    approvedProposals: 32,
-    rejectedProposals: 8,
-    pendingProposals: 7,
-    totalBudget: 2400000000,
-    usedBudget: 1800000000,
-    remainingBudget: 600000000
+  // Real data state
+  const [summary, setSummary] = useState({
+    totalProposals: 0,
+    approvedProposals: 0,
+    rejectedProposals: 0,
+    pendingProposals: 0,
+    totalBudget: 0,
+    usedBudget: 0,
+    remainingBudget: 0,
+    totalDanaBos: 0,
+    totalDanaKomite: 0
+  });
+
+  const [monthlyTrends, setMonthlyTrends] = useState<any[]>([]);
+  const [categoryBreakdown, setCategoryBreakdown] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchReportingData();
+  }, []);
+
+  const fetchReportingData = async () => {
+    try {
+      setIsLoading(true);
+      const [summaryRes, trendsRes, breakdownRes] = await Promise.all([
+        apiService.getDashboardSummary(),
+        apiService.getMonthlyTrends(),
+        apiService.getCategoryBreakdown()
+      ]);
+
+      setSummary(summaryRes);
+      setMonthlyTrends(trendsRes);
+      setCategoryBreakdown(breakdownRes);
+    } catch (error) {
+      console.error('Error fetching reporting data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatCurrency = (number: number) => {
@@ -32,27 +58,18 @@ const Reporting: React.FC = () => {
     }).format(number);
   };
 
-  const monthlyData = [
-    { month: 'Januari', proposals: 12, budget: 450000000, percentage: 80 },
-    { month: 'Februari', proposals: 8, budget: 320000000, percentage: 65 },
-    { month: 'Maret', proposals: 15, budget: 580000000, percentage: 90 },
-    { month: 'April', proposals: 10, budget: 380000000, percentage: 70 },
-    { month: 'Mei', proposals: 2, budget: 70000000, percentage: 20 }
-  ];
-
-  const categoryData = [
-    { name: 'Infrastruktur', count: 15, percentage: 32, budget: 750000000 },
-    { name: 'Pendidikan', count: 12, percentage: 26, budget: 480000000 },
-    { name: 'Teknologi', count: 8, percentage: 17, budget: 320000000 },
-    { name: 'Pemeliharaan', count: 7, percentage: 15, budget: 280000000 },
-    { name: 'Kesehatan', count: 3, percentage: 6, budget: 120000000 },
-  ];
-
   const exportReport = async (format: string = 'pdf') => {
     try {
       setIsExporting(true);
-      // Implementation logic...
-      setTimeout(() => setIsExporting(false), 2000); // Simulate
+      const blob = await apiService.downloadReportExport(format === 'excel' ? 'csv' : 'pdf');
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `laporan_sirangkul_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'csv' : 'pdf'}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      setIsExporting(false);
     } catch (error) {
       console.error('Error exporting report:', error);
       setIsExporting(false);
@@ -126,9 +143,9 @@ const Reporting: React.FC = () => {
       </div>
 
       {/* Summary Matrix with Liquid Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        {/* Proposal Count */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-4 gap-6 mb-8">
+        {/* Total Submission */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group flex flex-col min-h-[160px]">
           <div className="relative z-10 flex flex-col h-full justify-between">
             <div className="flex items-center justify-between">
               <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform"><Database size={24} /></div>
@@ -138,9 +155,9 @@ const Reporting: React.FC = () => {
             </div>
             <div className="mt-6">
               <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-1">Total Submission</h4>
-              <p className="text-4xl font-black text-gray-900 tracking-tighter">{reportSummary.totalProposals}</p>
+              <p className="text-4xl font-black text-gray-900 tracking-tighter">{summary.totalProposals}</p>
               <div className="h-1.5 w-full bg-gray-100 rounded-full mt-3 overflow-hidden">
-                <div className="h-full bg-blue-600 rounded-full" style={{ width: '70%' }}></div>
+                <div className="h-full bg-blue-600 rounded-full" style={{ width: summary.totalProposals > 0 ? `${(summary.approvedProposals / summary.totalProposals) * 100}%` : '0%' }}></div>
               </div>
             </div>
           </div>
@@ -155,7 +172,9 @@ const Reporting: React.FC = () => {
             </div>
             <div className="mt-6">
               <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-1">Rate Persetujuan</h4>
-              <p className="text-4xl font-black text-green-600 tracking-tighter">68.1%</p>
+              <p className="text-4xl font-black text-green-600 tracking-tighter">
+                {summary.totalProposals > 0 ? ((summary.approvedProposals / summary.totalProposals) * 100).toFixed(1) : '0'}%
+              </p>
               <p className="text-[10px] text-gray-400 mt-2 font-medium italic">Target: 75% per Semester</p>
             </div>
           </div>
@@ -170,10 +189,18 @@ const Reporting: React.FC = () => {
           <div className="flex-grow flex flex-col justify-end">
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-1">Pagu Anggaran</h4>
             <div className="flex flex-wrap items-baseline gap-1">
-              <span className="text-sm font-black text-purple-600">Rp</span>
-              <p className="text-2xl sm:text-3xl lg:text-3xl font-black text-gray-900 tracking-tight break-all leading-none">2,400M</p>
+              <p className="text-xl sm:text-lg xl:text-2xl 2xl:text-3xl font-black text-gray-900 tracking-tight break-words leading-none">
+                {formatCurrency(summary.totalBudget)}
+              </p>
             </div>
-            <div className="mt-3 text-[10px] text-gray-400 font-medium truncate">75% dari Estimasi Tahunan</div>
+            <div className="mt-3 flex items-center justify-between text-[10px] gap-2">
+               <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 text-green-700 rounded-md border border-green-100 font-bold whitespace-nowrap">
+                 BOS: {formatCurrency(summary.totalDanaBos)}
+               </div>
+               <div className="flex items-center gap-1.5 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-md border border-purple-100 font-bold whitespace-nowrap">
+                 KMT: {formatCurrency(summary.totalDanaKomite)}
+               </div>
+            </div>
           </div>
         </div>
 
@@ -186,8 +213,9 @@ const Reporting: React.FC = () => {
           <div className="flex-grow flex flex-col justify-end">
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-1">Estimasi Sisa</h4>
             <div className="flex flex-wrap items-baseline gap-1">
-              <span className="text-sm font-black text-orange-600">Rp</span>
-              <p className="text-2xl sm:text-3xl lg:text-3xl font-black text-gray-900 tracking-tight break-all leading-none">600M</p>
+              <p className="text-xl sm:text-lg xl:text-2xl 2xl:text-3xl font-black text-gray-900 tracking-tight break-words leading-none">
+                {formatCurrency(summary.remainingBudget)}
+              </p>
             </div>
             <div className="mt-3 text-[10px] text-gray-400 font-medium truncate">Update Per Hari Ini</div>
           </div>
@@ -202,18 +230,20 @@ const Reporting: React.FC = () => {
             <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">View All</button>
           </div>
           <div className="space-y-6">
-            {monthlyData.map((d, i) => (
+            {monthlyTrends.length > 0 ? monthlyTrends.map((d, i) => (
               <div key={i} className="group">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{d.month}</span>
-                  <span className="text-xs font-black text-gray-900">{formatCurrency(d.budget)}</span>
+                  <span className="text-xs font-black text-gray-900">{formatCurrency(parseFloat(d.budget))}</span>
                 </div>
                 <div className="h-4 w-full bg-gray-50 rounded-lg p-1 relative overflow-hidden">
-                   <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-md transition-all duration-1000" style={{ width: `${d.percentage}%` }}></div>
+                   <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-md transition-all duration-1000" style={{ width: summary.totalBudget > 0 ? `${(parseFloat(d.budget) / summary.totalBudget) * 100}%` : '5%' }}></div>
                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-gray-400 italic">{d.proposals} Propos</span>
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-center py-4 text-gray-400 text-sm font-medium italic">Belum ada data tren bulanan.</p>
+            )}
           </div>
         </div>
 
@@ -224,7 +254,7 @@ const Reporting: React.FC = () => {
             <BarChart3 className="text-gray-300" />
           </div>
           <div className="space-y-6">
-            {categoryData.map((c, i) => (
+            {categoryBreakdown.length > 0 ? categoryBreakdown.map((c, i) => (
               <div key={i} className="flex items-center gap-4">
                 <div className="w-24 shrink-0 text-[10px] font-black text-gray-400 uppercase tracking-widest">{c.name}</div>
                 <div className="flex-1 h-2 bg-gray-50 rounded-full overflow-hidden">
@@ -235,7 +265,9 @@ const Reporting: React.FC = () => {
                    <p className="text-[9px] text-gray-400 uppercase font-bold">{c.count} Unit</p>
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-center py-4 text-gray-400 text-sm font-medium italic">Belum ada data alokasi kategori.</p>
+            )}
           </div>
           <div className="mt-8 p-4 bg-blue-50/50 rounded-xl border border-blue-50 flex items-center gap-3">
              <TrendingUp className="text-blue-600" size={20} />

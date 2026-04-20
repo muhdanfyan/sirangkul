@@ -7,15 +7,6 @@ interface RKAMPrintTemplateProps {
 }
 
 const RKAMPrintTemplate: React.FC<RKAMPrintTemplateProps> = ({ data, tahun }) => {
-  const formatIDR = (num: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(num);
-  };
-
   const formatRawIDR = (num: number) => {
     if (num === 0) return '-';
     // Match the format "Rp 63.900.000"

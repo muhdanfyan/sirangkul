@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Edit2, Plus, Save, Trash2, X } from 'lucide-react';
+import { Edit2, Save, Trash2, X } from 'lucide-react';
 import { apiService, Bidang } from '../services/api';
 import ConfirmModal from './ConfirmModal';
 import Toast from './Toast';

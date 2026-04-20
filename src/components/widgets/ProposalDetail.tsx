@@ -12,7 +12,6 @@ import {
   Paperclip,
   Send,
   Trash2,
-  User,
   XCircle,
 } from 'lucide-react';
 import { apiService, Proposal, ProposalAttachment } from '../../services/api';
