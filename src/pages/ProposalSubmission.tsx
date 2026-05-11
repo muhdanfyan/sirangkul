@@ -56,6 +56,7 @@ const ProposalSubmission: React.FC = () => {
   const [rkams, setRkams] = useState<RKAM[]>([]);
   const [selectedRkam, setSelectedRkam] = useState<RKAM | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingRkams, setLoadingRkams] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -83,6 +84,8 @@ const ProposalSubmission: React.FC = () => {
   }, []);
 
   const fetchRkams = async () => {
+    setLoadingRkams(true);
+
     try {
       const [rkamResult, paymentResult] = await Promise.allSettled([
         apiService.getAllRKAM({ no_paginate: true }),
@@ -111,6 +114,8 @@ const ProposalSubmission: React.FC = () => {
     } catch (err) {
       console.error('Error fetching RKAMs:', err);
       setToast({ message: 'Gagal memuat data RKAM', type: 'error' });
+    } finally {
+      setLoadingRkams(false);
     }
   };
 
@@ -317,6 +322,12 @@ const ProposalSubmission: React.FC = () => {
     }
   };
 
+  const filteredRkams = rkams.filter((rkam) =>
+    !searchTerm
+    || (rkam.item_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+    || (rkam.bidang || rkam.kategori || '').toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
   return (
     <div className="space-y-6">
       <div>
@@ -356,7 +367,7 @@ const ProposalSubmission: React.FC = () => {
                     <span className={`text-sm ${!selectedRkam ? 'text-gray-400' : 'text-gray-900'}`}>
                       {selectedRkam
                         ? `${selectedRkam.bidang || selectedRkam.kategori} - ${selectedRkam.item_name}`
-                        : '-- Pilih RKAM --'}
+                        : loadingRkams ? 'Memuat data RKAM...' : '-- Pilih RKAM --'}
                     </span>
                     <Search className={`h-4 w-4 transition-colors ${isDropdownOpen ? 'text-blue-500' : 'text-gray-400'}`} />
                   </div>
@@ -371,26 +382,35 @@ const ProposalSubmission: React.FC = () => {
                             placeholder="Cari kegiatan atau bidang..."
                             autoFocus
                             value={searchTerm}
+                            disabled={loadingRkams}
                             onClick={(event) => event.stopPropagation()}
                             onChange={(event) => setSearchTerm(event.target.value)}
-                            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
+                            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white disabled:bg-gray-100 disabled:text-gray-400"
                           />
                         </div>
                       </div>
 
                       <div className="max-h-[300px] overflow-y-auto">
-                        {rkams.filter((rkam) =>
-                          !searchTerm
-                          || (rkam.item_name || '').toLowerCase().includes(searchTerm.toLowerCase())
-                          || (rkam.bidang || rkam.kategori || '').toLowerCase().includes(searchTerm.toLowerCase()),
-                        ).length > 0 ? (
-                          rkams
-                            .filter((rkam) =>
-                              !searchTerm
-                              || (rkam.item_name || '').toLowerCase().includes(searchTerm.toLowerCase())
-                              || (rkam.bidang || rkam.kategori || '').toLowerCase().includes(searchTerm.toLowerCase()),
-                            )
-                            .map((rkam) => {
+                        {loadingRkams ? (
+                          <div className="p-4 space-y-3">
+                            {[0, 1, 2].map((index) => (
+                              <div key={index} className="animate-pulse rounded-lg border border-gray-100 bg-white px-4 py-3">
+                                <div className="flex justify-between gap-4">
+                                  <div className="flex-1 space-y-2">
+                                    <div className="h-3 w-24 rounded bg-gray-200" />
+                                    <div className="h-4 w-3/4 rounded bg-gray-200" />
+                                  </div>
+                                  <div className="w-24 space-y-2">
+                                    <div className="ml-auto h-2.5 w-14 rounded bg-gray-200" />
+                                    <div className="ml-auto h-3.5 w-20 rounded bg-gray-200" />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                            <p className="text-center text-sm text-gray-500">Memuat data RKAM...</p>
+                          </div>
+                        ) : filteredRkams.length > 0 ? (
+                          filteredRkams.map((rkam) => {
                               const sisaAmount = rkam.sisa !== undefined && rkam.sisa !== null ? String(rkam.sisa) : '0';
                               const isSelected = formData.rkam_id === rkam.id;
 
