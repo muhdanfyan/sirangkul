@@ -12,6 +12,7 @@ interface TransparencyDocument {
   path: string;
   type: 'pdf' | 'document';
   visible?: boolean;
+  is_visible?: boolean;
   description?: string;
 }
 
@@ -99,17 +100,36 @@ const RAKMViewer: React.FC = () => {
   useEffect(() => {
     const fetchTransparencyDocuments = async () => {
       try {
-        const response = await fetch('/rkam-viewer-documents.json');
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json() as { documents?: TransparencyDocument[] };
-        const documents = Array.isArray(result.documents) ? result.documents : [];
-        setTransparencyDocuments(documents.filter((document) => document.visible !== false));
+        const documents = await apiService.getPublicRkamViewerDocuments();
+        setTransparencyDocuments(
+          documents
+            .filter((document) => document.visible !== false && document.is_visible !== false)
+            .slice(0, 4)
+            .map((document) => ({
+              name: document.name,
+              path: document.path,
+              type: document.type === 'pdf' ? 'pdf' : 'document',
+              visible: document.visible,
+              is_visible: document.is_visible,
+              description: document.description || undefined,
+            })),
+        );
       } catch (err) {
         console.error('Failed to fetch transparency documents:', err);
-        setTransparencyDocuments([]);
+
+        try {
+          const response = await fetch('/rkam-viewer-documents.json');
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const result = await response.json() as { documents?: TransparencyDocument[] };
+          const documents = Array.isArray(result.documents) ? result.documents : [];
+          setTransparencyDocuments(documents.filter((document) => document.visible !== false).slice(0, 4));
+        } catch (fallbackError) {
+          console.error('Failed to fetch fallback transparency documents:', fallbackError);
+          setTransparencyDocuments([]);
+        }
       }
     };
 
@@ -360,7 +380,7 @@ const RAKMViewer: React.FC = () => {
           {transparencyDocuments.length === 0 ? (
             <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-8 text-center">
               <p className="text-sm font-medium text-gray-600">Belum ada dokumen transparansi yang ditampilkan.</p>
-              <p className="text-xs text-gray-400 mt-2">Atur daftar file melalui `public/rkam-viewer-documents.json`.</p>
+              <p className="text-xs text-gray-400 mt-2">Atur daftar file melalui menu Manajemen RAKM Viewer.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

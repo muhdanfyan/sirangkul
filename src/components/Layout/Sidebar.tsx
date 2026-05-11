@@ -16,6 +16,7 @@ import {
   ChevronRight,
   ListChecks,
   FilePlus,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiService } from '../../services/api';
@@ -110,6 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Users, label: 'User', path: '/users', roles: ['Administrator'] },
     { icon: PiggyBank, label: 'RKAM', path: '/rkam', roles: ['Administrator', 'Bendahara', 'Kepala Madrasah'] },
+    { icon: Settings, label: 'RAKM Viewer', path: '/rkam-viewer-management', roles: ['Administrator'], emails: ['superadmin@sirangkul.sch.id'] },
     { icon: CheckCircle, label: 'Persetujuan', path: '/approvals', roles: ['Verifikator', 'Kepala Madrasah', 'Komite Madrasah'] },
     { icon: CreditCard, label: 'Pembayaran', path: '/payments', roles: ['Bendahara', 'Administrator'] },
     { icon: FileBarChart, label: 'Laporan', path: '/reports' },
@@ -124,9 +126,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { icon: Search, label: 'Lacak Proposal', path: '/proposals/tracking' },
   ];
 
-  const filteredMenuItems = menuItems.filter(item => 
-    !item.roles || item.roles.includes(user?.role || '')
-  );
+  const filteredMenuItems = menuItems.filter(item => {
+    const roleAllowed = !item.roles || item.roles.includes(user?.role || '');
+    const emailAllowed = !item.emails || item.emails.includes((user?.email || '').toLowerCase());
+    return roleAllowed && emailAllowed;
+  });
 
   const filteredProposalSubMenuItems = proposalSubMenuItems.filter(item => 
     !item.roles || item.roles.some(r => (user?.role || '').toLowerCase() === r.toLowerCase())

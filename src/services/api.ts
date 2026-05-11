@@ -340,6 +340,24 @@ export interface ProposalAttachment {
   created_at: string;
 }
 
+export interface RkamViewerDocument {
+  id: string;
+  name: string;
+  file_name?: string;
+  path: string;
+  file_url?: string;
+  download_url?: string;
+  type: 'pdf' | 'document' | string;
+  description?: string | null;
+  mime_type?: string | null;
+  file_size?: number;
+  is_visible: boolean;
+  visible?: boolean;
+  display_order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface ProposalAttachmentUpload {
   file: File;
   attachmentType: 'proposal' | 'lpj';
@@ -425,6 +443,38 @@ class ApiService {
       }
       throw error;
     }
+  }
+
+  private async formRequest<T>(
+    endpoint: string,
+    formData: FormData,
+    method: 'POST' | 'PUT' = 'POST'
+  ): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`;
+    const token = localStorage.getItem('sirangkul_token');
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        Accept: 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    const contentType = response.headers.get('content-type') || '';
+    const payload = contentType.includes('application/json')
+      ? await response.json().catch(() => ({}))
+      : {};
+
+    if (!response.ok) {
+      const message = (payload as ApiError).message || `HTTP error! status: ${response.status}`;
+      const error = new Error(message) as Error & { response?: { data: unknown } };
+      error.response = { data: payload };
+      throw error;
+    }
+
+    return payload as T;
   }
 
   async login(credentials: LoginRequest): Promise<LoginResponse> {
@@ -1235,6 +1285,68 @@ class ApiService {
   }
 
   // PUBLIC VIEWER METHODS
+  async getPublicRkamViewerDocuments(): Promise<RkamViewerDocument[]> {
+    const response = await fetch(`${this.baseURL}/public/rkam-viewer-documents`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return Array.isArray(result.data) ? result.data : [];
+  }
+
+  async getRkamViewerDocuments(): Promise<{ data: RkamViewerDocument[]; meta: { total: number; visible: number; max_total: number; max_visible: number } }> {
+    const response = await this.request<{
+      success: boolean;
+      data: RkamViewerDocument[];
+      meta: { total: number; visible: number; max_total: number; max_visible: number };
+    }>('/rkam-viewer-documents', {
+      method: 'GET',
+    });
+
+    return {
+      data: response.data,
+      meta: response.meta,
+    };
+  }
+
+  async createRkamViewerDocument(formData: FormData): Promise<RkamViewerDocument> {
+    const response = await this.formRequest<{ success: boolean; message: string; data: RkamViewerDocument }>(
+      '/rkam-viewer-documents',
+      formData,
+    );
+
+    return response.data;
+  }
+
+  async updateRkamViewerDocument(documentId: string, formData: FormData): Promise<RkamViewerDocument> {
+    const response = await this.formRequest<{ success: boolean; message: string; data: RkamViewerDocument }>(
+      `/rkam-viewer-documents/${documentId}`,
+      formData,
+    );
+
+    return response.data;
+  }
+
+  async reorderRkamViewerDocuments(documentIds: string[]): Promise<void> {
+    await this.request<{ success: boolean; message: string }>('/rkam-viewer-documents/reorder', {
+      method: 'POST',
+      body: JSON.stringify({ document_ids: documentIds }),
+    });
+  }
+
+  async deleteRkamViewerDocument(documentId: string): Promise<void> {
+    await this.request<{ success: boolean; message: string }>(`/rkam-viewer-documents/${documentId}`, {
+      method: 'DELETE',
+    });
+  }
+
   async getPublicRKAM(params: any): Promise<{ data: PaginatedResponse<RKAM> | RKAM[]; summary: RKAMSummary | null }> {
     const url = new URL(`${this.baseURL}/public/rkam`);
     Object.keys(params).forEach(key => {

@@ -15,6 +15,7 @@ import AuditLog from './pages/AuditLog';
 import LoginPage from './pages/LoginPage';
 import LandingPage from './pages/LandingPage';
 import MyProposals from './pages/MyProposals';
+import RkamViewerManagement from './pages/RkamViewerManagement';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 import RAKMViewer from './pages/RAKMViewer';
@@ -67,6 +68,7 @@ function ProtectedRoute() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<UserManagement />} />
             <Route path="/rkam" element={<RKAMManagement />} />
+            <Route path="/rkam-viewer-management" element={<RkamViewerManagement />} />
             
             {/* Proposal Routes */}
             <Route path="/proposal-tracking" element={<ProposalList />} />
