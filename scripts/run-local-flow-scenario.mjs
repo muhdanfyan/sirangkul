@@ -8,6 +8,14 @@ const PASSWORD = process.env.SIRANGKUL_FLOW_PASSWORD || 'Password123!';
 const RUNTIME_FILE = process.env.SIRANGKUL_FLOW_RUNTIME
   || fileURLToPath(new URL('../scratch/local-flow-runtime.json', import.meta.url));
 
+let runtimeConfig = {};
+if (existsSync(RUNTIME_FILE)) {
+  runtimeConfig = JSON.parse(readFileSync(RUNTIME_FILE, 'utf8'));
+}
+const TITLE_PREFIX = process.env.SIRANGKUL_FLOW_TITLE_PREFIX
+  || runtimeConfig.title_prefix
+  || 'FLOW';
+
 const fields = [
   { slug: 'pendidikan', name: 'Pendidikan', rkam: 'Flow Test RKAM Pendidikan' },
   { slug: 'humas', name: 'HUMAS', rkam: 'Flow Test RKAM HUMAS' },
@@ -41,14 +49,16 @@ const results = {
 const tokens = new Map();
 const users = new Map();
 
-if (existsSync(RUNTIME_FILE)) {
-  const runtime = JSON.parse(readFileSync(RUNTIME_FILE, 'utf8'));
-  for (const [email, token] of Object.entries(runtime.tokens ?? {})) {
-    tokens.set(email, token);
-  }
+for (const [email, token] of Object.entries(runtimeConfig.tokens ?? {})) {
+  tokens.set(email, token);
 }
 
 function account(role, slug = null) {
+  const runtimeEmail = slug
+    ? runtimeConfig.accounts?.[role]?.[slug]
+    : runtimeConfig.accounts?.[role];
+  if (runtimeEmail) return runtimeEmail;
+
   if (role === 'kepala_madrasah') return 'kepala@madrasah.com';
   if (role === 'bendahara') return 'flowtest.bendahara@sirangkul.test';
   if (role === 'administrator') return 'flowtest.admin@sirangkul.test';
@@ -175,6 +185,9 @@ async function login(email) {
 }
 
 async function getRkamForField(field) {
+  const runtimeRkam = runtimeConfig.rkams?.[field.slug];
+  if (runtimeRkam?.id) return runtimeRkam;
+
   const token = await login(account('pengusul', field.slug));
   const { body } = await request('GET', `/rkam?no_paginate=1&search=${encodeURIComponent(field.rkam)}`, { token });
   const item = body.data.find((candidate) => candidate.item_name === field.rkam);
@@ -479,7 +492,7 @@ async function reviseAndResubmit(ownerToken, proposalId, field, flowCase, scope)
 
 async function createProposalForCase(field, flowCase, rkam) {
   const ownerToken = await login(account('pengusul', field.slug));
-  const title = `FLOW-${field.slug}-${flowCase.suffix}`;
+  const title = `${TITLE_PREFIX}-${field.slug}-${flowCase.suffix}`;
   const today = new Date().toISOString().slice(0, 10);
   const { body } = await request('POST', '/proposals', {
     token: ownerToken,
@@ -542,7 +555,7 @@ async function runMainMatrix() {
         case: flowCase.key,
         proposalId: null,
         statusAkhir: null,
-        title: `FLOW-${field.slug}-${flowCase.suffix}`,
+        title: `${TITLE_PREFIX}-${field.slug}-${flowCase.suffix}`,
       };
 
       try {
@@ -651,7 +664,7 @@ async function createNegativeProposal(field, titleSuffix, status = 'draft') {
     token: ownerToken,
     json: {
       rkam_id: rkam.id,
-      title: `FLOW-${field.slug}-NEGATIVE-${titleSuffix}`,
+      title: `${TITLE_PREFIX}-${field.slug}-NEGATIVE-${titleSuffix}`,
       description: `Negative upload scenario ${titleSuffix}`,
       jumlah_pengajuan: 100000,
       urgency: 'Normal',
