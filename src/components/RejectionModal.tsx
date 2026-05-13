@@ -6,7 +6,7 @@ interface RejectionModalProps {
   onConfirm: (reason: string, improvements: string) => void;
   proposalTitle: string;
   isLoading?: boolean;
-  userRole: 'verifikator' | 'kepala_madrasah' | 'komite_madrasah' | 'bendahara';
+  userRole: 'verifikator' | 'kepala_madrasah' | 'komite_madrasah';
 }
 
 const RejectionModal: React.FC<RejectionModalProps> = ({
@@ -59,8 +59,7 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
     const roleLabels = {
       'verifikator': 'Verifikator',
       'kepala_madrasah': 'Kepala Madrasah',
-      'komite_madrasah': 'Komite Madrasah',
-      'bendahara': 'Bendahara'
+      'komite_madrasah': 'Komite Madrasah'
     };
     return roleLabels[userRole];
   };
@@ -69,8 +68,7 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
     const placeholders = {
       'verifikator': 'Contoh: Dokumen pendukung tidak lengkap, data anggaran tidak sesuai format, dll.',
       'kepala_madrasah': 'Contoh: Proposal tidak sesuai dengan prioritas madrasah, anggaran melebihi alokasi, dll.',
-      'komite_madrasah': 'Contoh: Perlu konsultasi lebih lanjut dengan stakeholder, nilai terlalu besar untuk periode ini, dll.',
-      'bendahara': 'Contoh: Data rekening penerima tidak valid, dokumen kelengkapan pembayaran kurang, dll.'
+      'komite_madrasah': 'Contoh: Perlu konsultasi lebih lanjut dengan stakeholder, nilai terlalu besar untuk periode ini, dll.'
     };
     return placeholders[userRole];
   };
@@ -79,8 +77,7 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
     const placeholders = {
       'verifikator': 'Contoh: Harap lampirkan RAB detail, perjelas tujuan kegiatan, sesuaikan format proposal dengan template, dll.',
       'kepala_madrasah': 'Contoh: Harap sesuaikan dengan skala prioritas madrasah, kurangi jumlah anggaran atau pecah menjadi beberapa tahap, dll.',
-      'komite_madrasah': 'Contoh: Harap ajukan kembali semester depan dengan pertimbangan X, sertakan analisis dampak yang lebih detail, dll.',
-      'bendahara': 'Contoh: Harap perbaiki data rekening penerima, lengkapi dokumen pendukung pembayaran, dll.'
+      'komite_madrasah': 'Contoh: Harap ajukan kembali semester depan dengan pertimbangan X, sertakan analisis dampak yang lebih detail, dll.'
     };
     return placeholders[userRole];
   };

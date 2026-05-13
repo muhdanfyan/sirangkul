@@ -20,17 +20,25 @@ import ConfirmModal from '../components/ConfirmModal';
 import Toast from '../components/Toast';
 import { apiService, Bidang, PaginatedResponse, User } from '../services/api';
 
+const KEPALA_MADRASAH_ROLE = 'kepala_madrasah';
+
 const ROLE_OPTIONS = [
   { value: 'administrator', label: 'Administrator' },
   { value: 'pengusul', label: 'Pengusul' },
   { value: 'verifikator', label: 'Verifikator' },
   { value: 'komite_madrasah', label: 'Komite Madrasah' },
-  { value: 'kepala_madrasah', label: 'Kepala Madrasah' },
   { value: 'bendahara', label: 'Bendahara' },
 ];
 
+const createEmptyKepalaMadrasahForm = () => ({
+  full_name: '',
+  email: '',
+  status: 'Active',
+  password: '',
+});
+
 const requiresBidang = (role: string) => (
-  ['pengusul', 'verifikator', 'komite_madrasah', 'kepala_madrasah'].includes(role)
+  ['pengusul', 'verifikator', 'komite_madrasah'].includes(role)
 );
 
 const formatRole = (role: string) => (
@@ -60,6 +68,11 @@ const UserManagement: React.FC = () => {
   const [selectedBidangId, setSelectedBidangId] = useState('all');
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [kepalaMadrasah, setKepalaMadrasah] = useState<User | null>(null);
+  const [isKepalaMadrasahLoading, setIsKepalaMadrasahLoading] = useState(true);
+  const [isEditingKepalaMadrasah, setIsEditingKepalaMadrasah] = useState(false);
+  const [isSavingKepalaMadrasah, setIsSavingKepalaMadrasah] = useState(false);
+  const [kepalaMadrasahForm, setKepalaMadrasahForm] = useState(createEmptyKepalaMadrasahForm);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info' | 'warning'; message: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -103,6 +116,7 @@ const UserManagement: React.FC = () => {
         page: currentPage,
         per_page: perPage,
         role: selectedRole,
+        exclude_role: KEPALA_MADRASAH_ROLE,
         bidang_id: selectedBidangId,
         search: searchTerm,
         sort_by: sortConfig.key,
@@ -136,9 +150,42 @@ const UserManagement: React.FC = () => {
     }
   }, [currentPage, perPage, searchTerm, selectedRole, selectedBidangId, sortConfig.direction, sortConfig.key]);
 
+  const fetchKepalaMadrasah = useCallback(async () => {
+    try {
+      setIsKepalaMadrasahLoading(true);
+      const response = await apiService.getUsers({
+        role: KEPALA_MADRASAH_ROLE,
+        no_paginate: true,
+      });
+      const data = Array.isArray(response) ? response : response.data;
+      const kepalaUser = data.find((user) => user.role === KEPALA_MADRASAH_ROLE) || null;
+      setKepalaMadrasah(kepalaUser);
+
+      if (kepalaUser) {
+        setKepalaMadrasahForm({
+          full_name: kepalaUser.full_name || kepalaUser.name || '',
+          email: kepalaUser.email,
+          status: kepalaUser.status || 'Active',
+          password: '',
+        });
+      } else {
+        setKepalaMadrasahForm(createEmptyKepalaMadrasahForm());
+      }
+    } catch (error) {
+      console.error('Failed to fetch Kepala Madrasah:', error);
+      setToast({ type: 'error', message: 'Gagal memuat data Kepala Madrasah.' });
+    } finally {
+      setIsKepalaMadrasahLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  useEffect(() => {
+    fetchKepalaMadrasah();
+  }, [fetchKepalaMadrasah]);
 
   useEffect(() => {
     fetchBidangs();
@@ -178,7 +225,7 @@ const UserManagement: React.FC = () => {
         full_name: user.full_name || user.name || '',
         email: user.email,
         role: user.role,
-        bidang_id: user.bidang_id || user.bidang?.id || '',
+        bidang_id: user.role === KEPALA_MADRASAH_ROLE ? '' : user.bidang_id || user.bidang?.id || '',
         status: user.status || 'Active',
         password: '',
       });
@@ -225,6 +272,7 @@ const UserManagement: React.FC = () => {
 
       setShowFormModal(false);
       await fetchUsers();
+      await fetchKepalaMadrasah();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Gagal menyimpan user.';
       setToast({ type: 'error', message });
@@ -240,6 +288,7 @@ const UserManagement: React.FC = () => {
       await apiService.delUser(confirmDelete);
       setToast({ type: 'success', message: 'User berhasil dihapus.' });
       await fetchUsers();
+      await fetchKepalaMadrasah();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Gagal menghapus user.';
       setToast({ type: 'error', message });
@@ -252,6 +301,79 @@ const UserManagement: React.FC = () => {
     () => [...bidangs].sort((left, right) => left.name.localeCompare(right.name)),
     [bidangs],
   );
+
+  const formRoleOptions = useMemo(
+    () => ROLE_OPTIONS,
+    [],
+  );
+
+  const handleStartKepalaMadrasahEdit = () => {
+    if (!kepalaMadrasah) {
+      return;
+    }
+
+    setKepalaMadrasahForm({
+      full_name: kepalaMadrasah.full_name || kepalaMadrasah.name || '',
+      email: kepalaMadrasah.email,
+      status: kepalaMadrasah.status || 'Active',
+      password: '',
+    });
+    setIsEditingKepalaMadrasah(true);
+  };
+
+  const handleCancelKepalaMadrasahEdit = () => {
+    if (kepalaMadrasah) {
+      setKepalaMadrasahForm({
+        full_name: kepalaMadrasah.full_name || kepalaMadrasah.name || '',
+        email: kepalaMadrasah.email,
+        status: kepalaMadrasah.status || 'Active',
+        password: '',
+      });
+    }
+    setIsEditingKepalaMadrasah(false);
+  };
+
+  const handleSubmitKepalaMadrasah = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!kepalaMadrasah) {
+      setToast({ type: 'error', message: 'Data Kepala Madrasah belum tersedia.' });
+      return;
+    }
+
+    if (kepalaMadrasahForm.password && kepalaMadrasahForm.password.length < 8) {
+      setToast({ type: 'error', message: 'Password minimal 8 karakter.' });
+      return;
+    }
+
+    try {
+      setIsSavingKepalaMadrasah(true);
+      const payload = {
+        full_name: kepalaMadrasahForm.full_name,
+        email: kepalaMadrasahForm.email,
+        role: KEPALA_MADRASAH_ROLE,
+        status: kepalaMadrasahForm.status,
+        bidang_id: null,
+        ...(kepalaMadrasahForm.password ? { password: kepalaMadrasahForm.password } : {}),
+      };
+
+      const updatedUser = await apiService.updateUser(kepalaMadrasah.id, payload);
+      setKepalaMadrasah(updatedUser);
+      setKepalaMadrasahForm({
+        full_name: updatedUser.full_name || updatedUser.name || '',
+        email: updatedUser.email,
+        status: updatedUser.status || 'Active',
+        password: '',
+      });
+      setIsEditingKepalaMadrasah(false);
+      setToast({ type: 'success', message: 'Data Kepala Madrasah berhasil diperbarui.' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Gagal memperbarui Kepala Madrasah.';
+      setToast({ type: 'error', message });
+    } finally {
+      setIsSavingKepalaMadrasah(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -268,6 +390,156 @@ const UserManagement: React.FC = () => {
           Tambah User
         </button>
       </div>
+
+      <section className="overflow-hidden rounded-xl border border-indigo-100 bg-white shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-indigo-50 bg-indigo-50/60 p-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-100">
+              <CheckCircle size={24} />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-indigo-500">Kepala Madrasah</p>
+              <h2 className="mt-1 text-lg font-bold text-gray-900">
+                {isKepalaMadrasahLoading
+                  ? 'Memuat data...'
+                  : kepalaMadrasah?.full_name || kepalaMadrasah?.name || 'Belum ditentukan'}
+              </h2>
+            </div>
+          </div>
+
+          {!isKepalaMadrasahLoading && kepalaMadrasah && !isEditingKepalaMadrasah && (
+            <button
+              type="button"
+              onClick={handleStartKepalaMadrasahEdit}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white px-4 py-2 text-sm font-bold text-indigo-700 shadow-sm transition-all hover:bg-indigo-50"
+            >
+              <Edit2 size={16} />
+              Edit Data
+            </button>
+          )}
+        </div>
+
+        <div className="p-5">
+          {isKepalaMadrasahLoading ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={`kepala-loading-${index}`} className="animate-pulse">
+                  <div className="mb-2 h-3 w-20 rounded bg-gray-100" />
+                  <div className="h-10 rounded-lg bg-gray-100" />
+                </div>
+              ))}
+            </div>
+          ) : !kepalaMadrasah ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+              Data Kepala Madrasah belum ditemukan.
+            </div>
+          ) : isEditingKepalaMadrasah ? (
+            <form onSubmit={handleSubmitKepalaMadrasah} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-gray-400">Nama Lengkap</label>
+                  <input
+                    type="text"
+                    required
+                    value={kepalaMadrasahForm.full_name}
+                    onChange={(event) => setKepalaMadrasahForm((prev) => ({ ...prev, full_name: event.target.value }))}
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 font-semibold outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-gray-400">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={kepalaMadrasahForm.email}
+                    onChange={(event) => setKepalaMadrasahForm((prev) => ({ ...prev, email: event.target.value }))}
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-gray-400">Status</label>
+                  <select
+                    value={kepalaMadrasahForm.status}
+                    onChange={(event) => setKepalaMadrasahForm((prev) => ({ ...prev, status: event.target.value }))}
+                    className="w-full appearance-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                  >
+                    <option value="Active">Aktif</option>
+                    <option value="Inactive">Non-Aktif</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-gray-400">Password Baru</label>
+                  <input
+                    type="password"
+                    minLength={8}
+                    value={kepalaMadrasahForm.password}
+                    onChange={(event) => setKepalaMadrasahForm((prev) => ({ ...prev, password: event.target.value }))}
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                    placeholder="Kosongkan jika tetap"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={handleCancelKepalaMadrasahEdit}
+                  disabled={isSavingKepalaMadrasah}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-gray-700 shadow-sm transition-all hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <XIcon size={16} />
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingKepalaMadrasah}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-bold text-white shadow-lg shadow-indigo-100 transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <CheckCircle size={16} />
+                  {isSavingKepalaMadrasah ? 'Menyimpan...' : 'Simpan'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Nama Lengkap</p>
+                <p className="mt-1 font-bold text-gray-900">{kepalaMadrasah.full_name || kepalaMadrasah.name || '-'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Email</p>
+                <div className="mt-1 flex items-center gap-2 text-gray-700">
+                  <Mail size={14} className="text-gray-400" />
+                  <span className="font-medium">{kepalaMadrasah.email}</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Role</p>
+                <span className={`mt-1 inline-flex rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getRoleTone(KEPALA_MADRASAH_ROLE)}`}>
+                  Kepala Madrasah
+                </span>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Status</p>
+                {kepalaMadrasah.status === 'Active' ? (
+                  <div className="mt-1 flex items-center gap-1.5 text-green-600">
+                    <CheckCircle size={14} />
+                    <span className="text-xs font-bold">Aktif</span>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex items-center gap-1.5 text-red-600">
+                    <XCircle size={14} />
+                    <span className="text-xs font-bold">Non-Aktif</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
 
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
@@ -372,7 +644,9 @@ const UserManagement: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      {user.bidang?.name || (requiresBidang(user.role) ? '-' : 'Semua Bidang')}
+                      {user.role === KEPALA_MADRASAH_ROLE
+                        ? 'Semua Bidang'
+                        : user.bidang?.name || (requiresBidang(user.role) ? '-' : 'Semua Bidang')}
                     </td>
                     <td className="px-6 py-4">
                       {user.status === 'Active' ? (
@@ -402,7 +676,11 @@ const UserManagement: React.FC = () => {
                         </button>
                         <button
                           onClick={() => setConfirmDelete(user.id)}
-                          disabled={user.email === 'superadmin@sirangkul.sch.id' || user.email === 'admin@sirangkul.com'}
+                          disabled={
+                            user.role === KEPALA_MADRASAH_ROLE
+                            || user.email === 'superadmin@sirangkul.sch.id'
+                            || user.email === 'admin@sirangkul.com'
+                          }
                           className="rounded-lg border border-gray-100 bg-white p-1.5 text-red-600 shadow-sm transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <Trash2 size={16} />
@@ -531,7 +809,7 @@ const UserManagement: React.FC = () => {
                     className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
                   >
                     <option value="">Pilih Role</option>
-                    {ROLE_OPTIONS.map((role) => (
+                    {formRoleOptions.map((role) => (
                       <option key={role.value} value={role.value}>{role.label}</option>
                     ))}
                   </select>
@@ -555,7 +833,11 @@ const UserManagement: React.FC = () => {
                     <option value="">Pilih role terlebih dahulu</option>
                   )}
                   {formData.role && !requiresBidang(formData.role) && (
-                    <option value="">Role ini mengakses semua bidang</option>
+                    <option value="">
+                      {formData.role === KEPALA_MADRASAH_ROLE
+                        ? 'Kepala Madrasah mengakses semua bidang'
+                        : 'Role ini mengakses semua bidang'}
+                    </option>
                   )}
                   {requiresBidang(formData.role) && (
                     <>
@@ -577,7 +859,9 @@ const UserManagement: React.FC = () => {
                     ? 'Pilih role terlebih dahulu agar aturan akses bidang bisa ditentukan.'
                     : requiresBidang(formData.role)
                       ? 'Pengguna hanya akan melihat RKAM dan proposal pada bidang ini.'
-                      : 'Administrator dan Bendahara tidak dibatasi ke satu bidang.'}
+                      : formData.role === KEPALA_MADRASAH_ROLE
+                        ? 'Kepala Madrasah bersifat global dan tidak dapat diberi bidang khusus.'
+                        : 'Administrator dan Bendahara tidak dibatasi ke satu bidang.'}
                 </p>
               </div>
 

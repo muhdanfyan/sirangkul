@@ -17,7 +17,6 @@ const isBidangScopedRole = (role?: string | null) => (
   role === 'Pengusul'
   || role === 'Verifikator'
   || role === 'Komite Madrasah'
-  || role === 'Kepala Madrasah'
 );
 
 export const matchesProposalBidang = (user: User | null | undefined, proposal: Proposal) => {
@@ -59,10 +58,6 @@ export const canApproveProposalForUser = (user: User | null | undefined, proposa
 export const canRejectProposalForUser = (user: User | null | undefined, proposal: Proposal | null | undefined) => {
   if (!user || !proposal) {
     return false;
-  }
-
-  if (user.role === 'Bendahara') {
-    return proposal.status === 'final_approved' || proposal.status === 'payment_processing';
   }
 
   return isProposalAwaitingApproval(user, proposal);

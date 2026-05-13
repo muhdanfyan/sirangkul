@@ -982,7 +982,7 @@ const ProposalDetail: React.FC = () => {
             ? 'komite_madrasah'
             : user?.role === 'Kepala Madrasah'
               ? 'kepala_madrasah'
-              : 'bendahara') as 'verifikator' | 'kepala_madrasah' | 'komite_madrasah' | 'bendahara'}
+              : 'verifikator') as 'verifikator' | 'kepala_madrasah' | 'komite_madrasah'}
       />
 
       {previewAttachment && (

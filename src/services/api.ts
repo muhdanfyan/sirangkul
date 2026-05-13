@@ -495,6 +495,7 @@ class ApiService {
     per_page?: number;
     search?: string;
     role?: string;
+    exclude_role?: string;
     bidang_id?: string;
     sort_by?: string;
     order?: string;
