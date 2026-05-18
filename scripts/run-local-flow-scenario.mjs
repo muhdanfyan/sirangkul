@@ -329,7 +329,7 @@ async function verifyProposal(token, proposalId, field, scope) {
 }
 
 async function approveKomite(token, proposalId, field, scope) {
-  const visible = await proposalListContains(token, proposalId, 'verified');
+  const visible = await proposalListContains(token, proposalId, 'approved');
   expect(visible, scope, 'Proposal tidak terlihat di antrian Komite bidang yang sama', { proposalId });
   await downloadAllAttachments(token, proposalId, `${scope}.download.komite`);
   const { body } = await request('POST', `/proposals/${proposalId}/approve`, {
@@ -337,14 +337,14 @@ async function approveKomite(token, proposalId, field, scope) {
     json: { notes: `Komite menyetujui proposal ${field.name}` },
   });
   const proposal = getProposalFromApprovalBody(body);
-  expect(proposal.status === 'approved', scope, 'Approve Komite tidak menghasilkan status approved', {
+  expect(proposal.status === 'final_approved', scope, 'Approve Komite tidak menghasilkan status final_approved', {
     status: proposal.status,
   });
   return proposal;
 }
 
 async function finalApprove(token, proposalId, scope) {
-  const visible = await proposalListContains(token, proposalId, 'approved');
+  const visible = await proposalListContains(token, proposalId, 'verified');
   expect(visible, scope, 'Proposal tidak terlihat untuk Kepala Madrasah', { proposalId });
   await downloadAllAttachments(token, proposalId, `${scope}.download.kepala`);
   const { body } = await request('POST', `/proposals/${proposalId}/final-approve`, {
@@ -352,7 +352,7 @@ async function finalApprove(token, proposalId, scope) {
     json: { notes: 'Disetujui Kepala Madrasah' },
   });
   const proposal = body.data;
-  expect(proposal.status === 'final_approved', scope, 'Final approve tidak menghasilkan status final_approved', {
+  expect(proposal.status === 'approved', scope, 'Approve Kepala tidak menghasilkan status approved', {
     status: proposal.status,
   });
   return proposal;
@@ -530,11 +530,11 @@ async function runApprovalToCompletion(field, proposalId, scope, options = {}) {
   if (!options.skipVerify) {
     await verifyProposal(verifikatorToken, proposalId, field, scope);
   }
-  if (!options.skipKomite) {
-    await approveKomite(komiteToken, proposalId, field, scope);
-  }
   if (!options.skipKepala) {
     await finalApprove(kepalaToken, proposalId, scope);
+  }
+  if (!options.skipKomite) {
+    await approveKomite(komiteToken, proposalId, field, scope);
   }
   return processPayment(bendaharaToken, proposalId, field, scope);
 }
@@ -573,12 +573,12 @@ async function runMainMatrix() {
           await runApprovalToCompletion(field, createdProposal.proposalId, scope);
         } else if (flowCase.rejectAt === 'komite_madrasah') {
           await verifyProposal(verifikatorToken, createdProposal.proposalId, field, scope);
+          await finalApprove(kepalaToken, createdProposal.proposalId, scope);
           await rejectProposal(komiteToken, createdProposal.proposalId, 'komite_madrasah', field, scope);
           await reviseAndResubmit(createdProposal.ownerToken, createdProposal.proposalId, field, flowCase, scope);
           await runApprovalToCompletion(field, createdProposal.proposalId, scope);
         } else if (flowCase.rejectAt === 'kepala_madrasah') {
           await verifyProposal(verifikatorToken, createdProposal.proposalId, field, scope);
-          await approveKomite(komiteToken, createdProposal.proposalId, field, scope);
           await rejectProposal(kepalaToken, createdProposal.proposalId, 'kepala_madrasah', field, scope);
           await reviseAndResubmit(createdProposal.ownerToken, createdProposal.proposalId, field, flowCase, scope);
           await runApprovalToCompletion(field, createdProposal.proposalId, scope);

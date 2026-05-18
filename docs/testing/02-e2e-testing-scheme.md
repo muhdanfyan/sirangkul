@@ -32,16 +32,16 @@ Pengujian E2E harus mensimulasikan login dan aksi dari kelima peran fungsional u
 - Melihat daftar proposal *Submitted*.
 - Menyetujui proposal (`status` berubah menjadi `Verified`). Action log tercatat.
 
-### Fase 4: Persetujuan Komite
-- Komite Madrasah login.
+### Fase 4: Persetujuan Kepala Madrasah
+- Kepala Madrasah login.
 - Melihat daftar proposal *Verified*.
 - Menyetujui proposal (`status` berubah menjadi `Approved`). Action log tercatat.
 
-### Fase 5: Persetujuan Akhir (Kepala Madrasah)
-- Kepala Madrasah login.
+### Fase 5: Persetujuan Akhir Komite
+- Komite Madrasah login.
 - Melihat daftar proposal *Approved*.
-- Memeriksa detail dan menyetujui mutlak (`status` berubah menjadi `Final_Approved`). Action log tercatat.
-- Memastikan `realisasi` pada RKAM terkait bertambah dan `sisa_anggaran` berkurang secara sinkron.
+- Memeriksa detail dan menyetujui final (`status` berubah menjadi `Final_Approved`). Action log tercatat.
+- Memastikan proposal masuk daftar Bendahara; `realisasi` RKAM baru berubah setelah pembayaran diselesaikan.
 
 ### Fase 6: Pencairan Dana (Bendahara)
 - Bendahara login.

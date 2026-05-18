@@ -5,6 +5,7 @@ import {
   CheckCircle,
   Clock,
   Eye,
+  Filter,
   FileText,
   RefreshCw,
   Search,
@@ -12,6 +13,7 @@ import {
 import { apiService, Proposal } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { isProposalAwaitingApproval } from '../utils/proposalWorkflow';
+import { getProposalBidangName } from '../utils/proposalDisplay';
 
 type ApprovalRole = 'Verifikator' | 'Kepala Madrasah' | 'Komite Madrasah';
 
@@ -34,17 +36,17 @@ const ROLE_CONFIG: Record<
   },
   'Kepala Madrasah': {
     title: 'Antrian Persetujuan Kepala',
-    description: 'Proposal yang sudah disetujui komite dan menunggu persetujuan Kepala Madrasah.',
-    status: 'approved',
+    description: 'Proposal yang sudah diverifikasi dan menunggu persetujuan Kepala Madrasah.',
+    status: 'verified',
     emptyTitle: 'Tidak ada proposal menunggu persetujuan kepala',
-    emptyDescription: 'Proposal yang sudah disetujui komite akan muncul di sini.',
+    emptyDescription: 'Proposal yang sudah diverifikasi akan muncul di sini.',
   },
   'Komite Madrasah': {
     title: 'Antrian Persetujuan Komite',
-    description: 'Proposal yang sudah diverifikasi dan menunggu persetujuan Komite Madrasah.',
-    status: 'verified',
+    description: 'Proposal yang sudah disetujui Kepala Madrasah dan menunggu persetujuan akhir Komite Madrasah.',
+    status: 'approved',
     emptyTitle: 'Tidak ada proposal menunggu persetujuan komite',
-    emptyDescription: 'Proposal yang lolos verifikasi akan muncul di sini.',
+    emptyDescription: 'Proposal yang sudah disetujui Kepala Madrasah akan muncul di sini.',
   },
 };
 
@@ -56,6 +58,7 @@ const ApprovalWorkflow: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [bidangFilter, setBidangFilter] = useState('All');
 
   const role = user?.role as ApprovalRole | undefined;
   const roleConfig = role ? ROLE_CONFIG[role] : undefined;
@@ -113,6 +116,10 @@ const ApprovalWorkflow: React.FC = () => {
         return false;
       }
 
+      if (bidangFilter !== 'All' && getProposalBidangName(proposal) !== bidangFilter) {
+        return false;
+      }
+
       if (!searchTerm.trim()) {
         return true;
       }
@@ -128,6 +135,14 @@ const ApprovalWorkflow: React.FC = () => {
       );
     });
   };
+
+  const bidangOptions = Array.from(
+    new Set(
+      proposals
+        .filter((proposal) => isProposalAwaitingApproval(user, proposal))
+        .map((proposal) => getProposalBidangName(proposal)),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
 
   const queuedProposals = getCurrentQueue();
   const totalNominal = queuedProposals.reduce((sum, proposal) => {
@@ -242,15 +257,31 @@ const ApprovalWorkflow: React.FC = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Cari judul proposal, pengusul, atau RKAM..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+        <div className="flex flex-col gap-3 md:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Cari judul proposal, pengusul, atau RKAM..."
+              className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="relative md:w-72">
+            <Filter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <select
+              value={bidangFilter}
+              onChange={(event) => setBidangFilter(event.target.value)}
+              className="w-full appearance-none rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="All">Semua Bidang</option>
+              {bidangOptions.map((bidangName) => (
+                <option key={bidangName} value={bidangName}>{bidangName}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -272,6 +303,7 @@ const ApprovalWorkflow: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proposal</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bidang</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pengusul</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RKAM</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Nominal</th>
@@ -286,8 +318,11 @@ const ApprovalWorkflow: React.FC = () => {
                     <td className="px-6 py-4">
                       <div className="font-medium text-gray-900">{proposal.title}</div>
                       <div className="text-xs text-gray-500 mt-1">
-                        {proposal.bidang || proposal.rkam?.bidang || proposal.rkam?.kategori || 'Tanpa bidang'}
+                        ID: {proposal.id.slice(0, 8)}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      {getProposalBidangName(proposal)}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
                       {proposal.user?.full_name || proposal.user?.name || '-'}

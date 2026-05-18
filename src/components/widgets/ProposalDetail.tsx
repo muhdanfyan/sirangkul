@@ -162,11 +162,11 @@ const ProposalDetail: React.FC = () => {
       if (user.role === 'Verifikator' && proposal.status === 'submitted') {
         const result = await apiService.verifyProposal(proposal.id, { notes });
         message = result.message || message;
-      } else if (user.role === 'Komite Madrasah' && proposal.status === 'verified') {
-        const result = await apiService.approveProposal(proposal.id, { notes });
-        message = result.message || message;
-      } else if (user.role === 'Kepala Madrasah' && proposal.status === 'approved') {
+      } else if (user.role === 'Kepala Madrasah' && proposal.status === 'verified') {
         const result = await apiService.finalApproveProposal(proposal.id, { notes });
+        message = result.message || message;
+      } else if (user.role === 'Komite Madrasah' && proposal.status === 'approved') {
+        const result = await apiService.approveProposal(proposal.id, { notes });
         message = result.message || message;
       } else {
         throw new Error('Aksi persetujuan tidak tersedia untuk status proposal ini.');
@@ -227,8 +227,8 @@ const ProposalDetail: React.FC = () => {
     const statusLabels: Record<string, string> = {
       draft: 'Draft',
       submitted: 'Menunggu Verifikator',
-      verified: 'Menunggu Komite Madrasah',
-      approved: 'Menunggu Kepala Madrasah',
+      verified: 'Menunggu Kepala Madrasah',
+      approved: 'Menunggu Komite Madrasah',
       rejected: 'Ditolak',
       final_approved: 'Siap Dibayar',
       payment_processing: 'Proses Pembayaran',
@@ -416,8 +416,8 @@ const ProposalDetail: React.FC = () => {
     { label: 'Terakhir Diubah', value: proposal.updated_at, tone: 'text-gray-900' },
     { label: 'Diajukan', value: proposal.submitted_at, tone: 'text-blue-700' },
     { label: 'Diverifikasi', value: proposal.verified_at, tone: 'text-cyan-700' },
-    { label: 'Disetujui Komite Madrasah', value: proposal.approved_at, tone: 'text-purple-700' },
-    { label: 'Disetujui Kepala Madrasah', value: proposal.final_approved_at, tone: 'text-green-700' },
+    { label: 'Disetujui Kepala Madrasah', value: proposal.approved_at, tone: 'text-purple-700' },
+    { label: 'Disetujui Komite Madrasah', value: proposal.final_approved_at, tone: 'text-green-700' },
     { label: 'Pembayaran Selesai', value: proposal.completed_at, tone: 'text-emerald-700' },
     { label: 'Ditolak', value: proposal.rejected_at, tone: 'text-red-700' },
   ].filter((item) => item.value);
@@ -863,7 +863,7 @@ const ProposalDetail: React.FC = () => {
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
                 <p className="text-sm font-semibold text-amber-800">Tahap Komite Aktif</p>
                 <p className="mt-1 text-sm text-amber-700">
-                  Proposal pada alur baru akan diproses oleh verifikator, komite, lalu kepala madrasah dalam bidang yang sama.
+                  Proposal pada alur baru akan diproses oleh verifikator bidang, Kepala Madrasah, komite bidang, lalu bendahara.
                 </p>
               </div>
             )}

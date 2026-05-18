@@ -10,7 +10,7 @@ Tanggal mulai eksekusi: 2026-04-19
 - [x] Buat dokumen rencana refactor
 - [x] Tambahkan aturan bahwa perubahan field database wajib diikuti penyesuaian seed
 - [x] Implementasi schema dan seed `bidang`
-- [x] Implementasi workflow approval baru `Verifikator -> Komite -> Kepala`
+- [x] Implementasi workflow approval baru `Verifikator -> Kepala -> Komite`
 - [x] Implementasi filter data berbasis bidang pada user, RKAM, proposal, approval, dan dashboard
 - [x] Rapikan istilah UI dari `kategori` ke `bidang`
 - [x] Verifikasi build frontend

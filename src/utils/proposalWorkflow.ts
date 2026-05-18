@@ -39,9 +39,9 @@ export const isProposalAwaitingApproval = (user: User | null | undefined, propos
     case 'Verifikator':
       return proposal.status === 'submitted';
     case 'Komite Madrasah':
-      return proposal.status === 'verified';
-    case 'Kepala Madrasah':
       return proposal.status === 'approved';
+    case 'Kepala Madrasah':
+      return proposal.status === 'verified';
     default:
       return false;
   }

@@ -6,7 +6,7 @@ Dokumen ini adalah skenario uji lokal untuk memastikan alur proposal per bidang 
 
 1. Memastikan setiap bidang punya pasangan user `pengusul`, `verifikator`, dan `komite_madrasah`.
 2. Memastikan Kepala Madrasah bersifat global dan dapat melihat proposal semua bidang.
-3. Memastikan proposal hanya masuk ke antrian role dan bidang yang benar.
+3. Memastikan proposal hanya masuk ke antrian role dan bidang yang benar: Verifikator per bidang, Kepala Madrasah global, Komite Madrasah per bidang, lalu Bendahara global.
 4. Memastikan reject dari Verifikator, Komite, dan Kepala Madrasah mengembalikan proposal ke pengusul dengan alasan dan saran perbaikan.
 5. Memastikan pengusul dapat mengganti dokumen setelah proposal ditolak.
 6. Memastikan file `proposal` dan `lpj` dapat di-download oleh role yang sedang memproses proposal.
@@ -175,15 +175,15 @@ Jalankan untuk semua bidang.
 5. Download `File Proposal` dan `File LPJ`.
 6. Approve dengan catatan `Verifikasi dokumen lengkap untuk {Bidang}`.
 7. Pastikan status menjadi `verified`.
-8. Login Komite bidang yang sama.
-9. Pastikan proposal terlihat.
+8. Login Kepala Madrasah.
+9. Pastikan proposal semua bidang terlihat, termasuk proposal ini.
 10. Download `File Proposal` dan `File LPJ`.
-11. Approve dengan catatan `Komite menyetujui proposal {Bidang}`.
+11. Approve dengan catatan `Disetujui Kepala Madrasah`.
 12. Pastikan status menjadi `approved`.
-13. Login Kepala Madrasah.
-14. Pastikan proposal semua bidang terlihat, termasuk proposal ini.
+13. Login Komite bidang yang sama.
+14. Pastikan proposal terlihat.
 15. Download `File Proposal` dan `File LPJ`.
-16. Final approve dengan catatan `Disetujui Kepala Madrasah`.
+16. Approve final dengan catatan `Komite menyetujui proposal {Bidang}`.
 17. Pastikan status menjadi `final_approved`.
 18. Login Bendahara.
 19. Buka daftar pembayaran pending.
@@ -198,7 +198,7 @@ Jalankan untuk semua bidang.
 
 Expected:
 
-- Semua approval menghasilkan status berurutan: `submitted -> verified -> approved -> final_approved -> payment_processing -> completed`.
+- Semua approval menghasilkan status berurutan: `submitted -> verified -> approved -> final_approved -> payment_processing -> completed`, dengan makna `verified` menunggu Kepala Madrasah dan `approved` menunggu Komite Madrasah.
 - Download dua dokumen berhasil di Verifikator, Komite, Kepala Madrasah, Bendahara, dan Pengusul.
 - Download bukti pembayaran berhasil.
 - Tidak ada 403 untuk role yang berhak.
@@ -228,7 +228,7 @@ Jalankan untuk semua bidang.
 14. Login Verifikator bidang yang sama.
 15. Pastikan dokumen yang tampil adalah dokumen revisi, bukan dokumen lama.
 16. Approve.
-17. Lanjutkan ke Komite, Kepala Madrasah, dan Bendahara seperti Case A.
+17. Lanjutkan ke Kepala Madrasah, Komite, dan Bendahara seperti Case A.
 
 Expected:
 
@@ -246,30 +246,35 @@ Jalankan untuk semua bidang.
 1. Login Verifikator bidang yang sama.
 2. Approve proposal `FLOW-{slug}-REJECT-KOMITE`.
 3. Pastikan status menjadi `verified`.
-4. Login Komite bidang yang sama.
-5. Buka proposal.
-6. Download `File Proposal` dan `File LPJ`.
-7. Reject dengan:
+4. Login Kepala Madrasah.
+5. Approve proposal.
+6. Pastikan status menjadi `approved`.
+7. Login Komite bidang yang sama.
+8. Buka proposal.
+9. Download `File Proposal` dan `File LPJ`.
+10. Reject dengan:
    - Alasan: `Anggaran belum sesuai prioritas komite untuk bidang {Bidang}.`
    - Saran: `Sesuaikan nominal, tambahkan dasar kebutuhan, dan ajukan ulang setelah revisi.`
-8. Pastikan status menjadi `rejected`.
-9. Login Pengusul bidang yang sama.
-10. Pastikan alasan dan saran tampil.
-11. Edit proposal dan upload ulang dua dokumen revisi.
-12. Submit ulang.
-13. Login Verifikator bidang yang sama.
-14. Approve ulang.
-15. Login Komite bidang yang sama.
-16. Pastikan dokumen revisi dapat di-download.
-17. Approve.
-18. Lanjutkan ke Kepala Madrasah dan Bendahara seperti Case A.
+11. Pastikan status menjadi `rejected`.
+12. Login Pengusul bidang yang sama.
+13. Pastikan alasan dan saran tampil.
+14. Edit proposal dan upload ulang dua dokumen revisi.
+15. Submit ulang.
+16. Login Verifikator bidang yang sama.
+17. Approve ulang.
+18. Login Kepala Madrasah.
+19. Approve ulang.
+20. Login Komite bidang yang sama.
+21. Pastikan dokumen revisi dapat di-download.
+22. Approve.
+23. Lanjutkan ke Bendahara seperti Case A.
 
 Expected:
 
-- Reject Komite hanya valid saat status `verified`.
+- Reject Komite hanya valid saat status `approved`.
 - Status berubah ke `rejected`.
 - Field `rejected_by_role` bernilai `komite_madrasah`.
-- Proposal yang sudah direvisi kembali melewati Verifikator sebelum Komite.
+- Proposal yang sudah direvisi kembali melewati Verifikator dan Kepala Madrasah sebelum Komite.
 
 ## 11. Case D: Reject Di Kepala Madrasah Lalu Resubmit
 
@@ -277,29 +282,27 @@ Jalankan untuk semua bidang.
 
 1. Login Verifikator bidang yang sama.
 2. Approve proposal `FLOW-{slug}-REJECT-KEPALA`.
-3. Login Komite bidang yang sama.
-4. Approve proposal.
-5. Pastikan status menjadi `approved`.
-6. Login Kepala Madrasah.
-7. Buka proposal.
-8. Download `File Proposal` dan `File LPJ`.
-9. Reject dengan:
+3. Pastikan status menjadi `verified`.
+4. Login Kepala Madrasah.
+5. Buka proposal.
+6. Download `File Proposal` dan `File LPJ`.
+7. Reject dengan:
    - Alasan: `Proposal belum selaras dengan prioritas madrasah untuk bidang {Bidang}.`
    - Saran: `Perjelas urgensi, indikator manfaat, dan dampak kegiatan sebelum diajukan ulang.`
-10. Pastikan status menjadi `rejected`.
-11. Login Pengusul bidang yang sama.
-12. Pastikan alasan dan saran tampil.
-13. Edit proposal dan upload ulang dua dokumen revisi.
-14. Submit ulang.
-15. Login Verifikator bidang yang sama, approve ulang.
+8. Pastikan status menjadi `rejected`.
+9. Login Pengusul bidang yang sama.
+10. Pastikan alasan dan saran tampil.
+11. Edit proposal dan upload ulang dua dokumen revisi.
+12. Submit ulang.
+13. Login Verifikator bidang yang sama, approve ulang.
+14. Login Kepala Madrasah, pastikan dokumen revisi dapat di-download.
+15. Approve ulang.
 16. Login Komite bidang yang sama, approve ulang.
-17. Login Kepala Madrasah, pastikan dokumen revisi dapat di-download.
-18. Final approve.
-19. Lanjutkan ke Bendahara seperti Case A.
+17. Lanjutkan ke Bendahara seperti Case A.
 
 Expected:
 
-- Reject Kepala Madrasah hanya valid saat status `approved`.
+- Reject Kepala Madrasah hanya valid saat status `verified`.
 - Status berubah ke `rejected`.
 - Field `rejected_by_role` bernilai `kepala_madrasah`.
 - Kepala Madrasah tetap dapat melihat proposal semua bidang.
@@ -357,9 +360,9 @@ Untuk setiap proposal, catat hasil download dua file attachment pada checkpoint 
 | `draft` | Pengusul pemilik | Detail proposal | Bisa list dan download |
 | `submitted` | Verifikator bidang sama | Antrian persetujuan/detail | Bisa list dan download |
 | `submitted` | Verifikator bidang lain | Direct URL/API | `403` |
-| `verified` | Komite bidang sama | Antrian persetujuan/detail | Bisa list dan download |
-| `verified` | Komite bidang lain | Direct URL/API | `403` |
-| `approved` | Kepala Madrasah | Antrian persetujuan/detail | Bisa list dan download |
+| `verified` | Kepala Madrasah | Antrian persetujuan/detail | Bisa list dan download |
+| `approved` | Komite bidang sama | Antrian persetujuan/detail | Bisa list dan download |
+| `approved` | Komite bidang lain | Direct URL/API | `403` |
 | `final_approved` | Bendahara | Pembayaran/detail proposal | Bisa list dan download |
 | `payment_processing` | Bendahara | Pembayaran/detail payment | Bisa download bukti pembayaran |
 | `completed` | Pengusul/Bendahara/Admin | Detail proposal/payment | Bisa melihat ringkasan dan download dokumen relevan |
@@ -390,9 +393,9 @@ Jika ingin memverifikasi lewat API selain UI, gunakan endpoint berikut dengan to
 | Upload attachment | POST multipart | `/proposals/{proposalId}/attachments` |
 | Submit proposal | POST | `/proposals/{proposalId}/submit` |
 | Verifikasi | POST | `/proposals/{proposalId}/verify` |
-| Approve Komite | POST | `/proposals/{proposalId}/approve` |
+| Approve Komite final | POST | `/proposals/{proposalId}/approve` |
 | Reject | POST | `/proposals/{proposalId}/reject` |
-| Final approve | POST | `/proposals/{proposalId}/final-approve` |
+| Approve Kepala Madrasah | POST | `/proposals/{proposalId}/final-approve` |
 | Pending payment | GET | `/payments/pending` |
 | Process payment | POST multipart | `/payments/{proposalId}/process` |
 | Complete payment | POST | `/payments/{paymentId}/complete` |
@@ -416,8 +419,8 @@ Skenario dianggap lulus jika semua kondisi berikut terpenuhi:
 2. Setiap proposal memiliki dua attachment: `proposal` dan `lpj`.
 3. Setiap attachment bisa di-download oleh pengusul pemilik.
 4. Verifikator hanya melihat proposal bidangnya saat `submitted`.
-5. Komite hanya melihat proposal bidangnya saat `verified`.
-6. Kepala Madrasah melihat proposal semua bidang saat `approved`.
+5. Kepala Madrasah melihat proposal semua bidang saat `verified`.
+6. Komite hanya melihat proposal bidangnya saat `approved`.
 7. Bendahara melihat proposal `final_approved` pada pembayaran pending.
 8. Reject di Verifikator, Komite, dan Kepala Madrasah menghasilkan status `rejected` dan menyimpan alasan/saran.
 9. Pengusul dapat edit dan upload ulang dokumen setelah reject.

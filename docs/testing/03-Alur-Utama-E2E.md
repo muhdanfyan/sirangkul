@@ -26,18 +26,18 @@ Dokumen ini berisi langkah-langkah *Playbook* bagi Tim Tester UI/QA. Ikuti prose
 4. Klik **Approve**. (Status menjadi **Verified**).
 5. Logout.
 
-## Tahap 4: Verifikasi Tahap 2 (Role: Komite Madrasah)
-1. Login sebagai `budi@madrasah.com`.
+## Tahap 4: Persetujuan Kepala Madrasah
+1. Login sebagai `kepala@madrasah.com`.
 2. Pergi ke `Daftar Proposal Menunggu`.
 3. Buka Detail proposal.
 4. Klik **Approve** (Status menjadi **Approved**).
 5. Logout.
 
-## Tahap 5: Eksekusi Final (Role: Kepala Madrasah)
-1. Login sebagai `kepala@madrasah.com`.
+## Tahap 5: Persetujuan Final Komite Madrasah
+1. Login sebagai `budi@madrasah.com`.
 2. Buka `Daftar Proposal Menunggu Final ACC`.
-3. Klik **Setujui Final ACC**. Tulis catatan di pop-up: *"Silahkan cairkan dana ini segera. - Kepsek"*. (Status menjadi **Final_Approved**).
-4. **Validasi Kritis**: Kembali ke halaman `Daftar RKAM` -> Nilai `Sisa Anggaran` otomatis harus telah berkurang Rp 15.000.000.
+3. Klik **Setujui Final ACC**. Tulis catatan di pop-up: *"Proposal sudah sesuai prioritas bidang."*. (Status menjadi **Final_Approved**).
+4. **Validasi Kritis**: Proposal masuk ke daftar Bendahara. Nilai `Sisa Anggaran` RKAM baru berkurang setelah Bendahara menyelesaikan pembayaran.
 5. Logout.
 
 ## Tahap 6: Kas Keluar (Role: Bendahara)

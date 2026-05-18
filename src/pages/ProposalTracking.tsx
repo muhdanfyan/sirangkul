@@ -54,8 +54,8 @@ const ProposalTracking: React.FC = () => {
     const stageMap: Record<string, string> = {
       'draft': 'Draft',
       'submitted': 'Verifikator',
-      'verified': 'Komite Madrasah',
-      'approved': 'Kepala Madrasah',
+      'verified': 'Kepala Madrasah',
+      'approved': 'Komite Madrasah',
       'final_approved': 'Bendahara',
       'payment_processing': 'Bendahara',
       'completed': 'Terbayar',
@@ -122,8 +122,8 @@ const ProposalTracking: React.FC = () => {
     const labelMap: Record<string, string> = {
       'draft': 'Draft',
       'submitted': 'Menunggu Verifikator',
-      'verified': 'Menunggu Komite Madrasah',
-      'approved': 'Menunggu Kepala Madrasah',
+      'verified': 'Menunggu Kepala Madrasah',
+      'approved': 'Menunggu Komite Madrasah',
       'rejected': 'Ditolak',
       'final_approved': 'Siap Dibayar',
       'payment_processing': 'Proses Pembayaran',
@@ -198,8 +198,8 @@ const ProposalTracking: React.FC = () => {
             <option value="">Semua Status</option>
             <option value="draft">Draft</option>
             <option value="submitted">Menunggu Verifikator</option>
-            <option value="verified">Menunggu Komite Madrasah</option>
-            <option value="approved">Menunggu Kepala Madrasah</option>
+            <option value="verified">Menunggu Kepala Madrasah</option>
+            <option value="approved">Menunggu Komite Madrasah</option>
             <option value="rejected">Ditolak</option>
             <option value="final_approved">Siap Dibayar</option>
             <option value="payment_processing">Proses Pembayaran</option>
@@ -419,7 +419,7 @@ const ProposalTracking: React.FC = () => {
                     <div className="flex items-start">
                       <div className="w-3 h-3 rounded-full bg-purple-600 mt-0.5 mr-3"></div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">Disetujui Komite Madrasah</p>
+                        <p className="text-sm font-medium text-gray-900">Disetujui Kepala Madrasah</p>
                         <p className="text-xs text-gray-600">
                           {formatDate(selectedProposal.approved_at)}
                           {selectedProposal.approver && ` • ${selectedProposal.approver.full_name}`}
@@ -433,7 +433,7 @@ const ProposalTracking: React.FC = () => {
                     <div className="flex items-start">
                       <div className="w-3 h-3 rounded-full bg-green-600 mt-0.5 mr-3"></div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">Disetujui Kepala Madrasah</p>
+                        <p className="text-sm font-medium text-gray-900">Disetujui Komite Madrasah</p>
                         <p className="text-xs text-gray-600">
                           {formatDate(selectedProposal.final_approved_at)}
                           {selectedProposal.final_approver && ` • ${selectedProposal.final_approver.full_name}`}

@@ -30,8 +30,8 @@ Pastikan saat deploy VPS, CORS React tidak ditolak by Nginx dan login statelses 
 2. **Pengusul** (Guru) login, mengisi *form* dan upload PDF proposal.
 3. **Verifikator** login, reject draf -> **Pengusul** merevisi draf ulang -> Resubmit.
 4. **Verifikator** menyetujui.
-5. **Komite** menyetujui.
-6. **Kepala Madrasah** mem-final-approve.
+5. **Kepala Madrasah** menyetujui semua proposal lintas bidang.
+6. **Komite** bidang terkait mem-final-approve.
 7. **Bendahara** meng-input bukti bayar lunas.
 - Seluruh 7 poin di atas wajib masuk logika hijau di automated script.
 

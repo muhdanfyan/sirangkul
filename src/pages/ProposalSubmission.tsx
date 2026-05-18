@@ -738,8 +738,8 @@ const ProposalSubmission: React.FC = () => {
             <h3 className="text-lg font-semibold text-blue-900 mb-2">Alur Persetujuan</h3>
             <div className="space-y-2 text-sm text-blue-800">
               <div>1. Verifikator</div>
-              <div>2. Komite Madrasah</div>
-              <div>3. Kepala Madrasah</div>
+              <div>2. Kepala Madrasah</div>
+              <div>3. Komite Madrasah</div>
               <div>4. Bendahara</div>
             </div>
             <div className="mt-4 text-xs text-blue-700">

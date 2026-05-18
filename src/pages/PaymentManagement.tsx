@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, DollarSign, Receipt, CheckCircle, Clock, Search, AlertCircle, XCircle, FileText, Eye, Download } from 'lucide-react';
+import { CreditCard, DollarSign, Receipt, CheckCircle, Clock, Search, AlertCircle, XCircle, FileText, Eye, Download, Filter } from 'lucide-react';
 import { apiService, Payment, Proposal, PaymentProcessRequest, PaymentCompleteRequest } from '../services/api';
 import Toast, { ToastType } from '../components/Toast';
 import InfoModal from '../components/InfoModal';
+import { getPaymentBidangName, getProposalBidangName } from '../utils/proposalDisplay';
 
 const PaymentManagement: React.FC = () => {
   // State management
@@ -14,6 +15,7 @@ const PaymentManagement: React.FC = () => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | 'pending' | 'processing' | 'completed' | 'failed' | 'rejected'>('All');
+  const [bidangFilter, setBidangFilter] = useState('All');
   
   // Modal states
   const [showProcessModal, setShowProcessModal] = useState(false);
@@ -299,24 +301,41 @@ const PaymentManagement: React.FC = () => {
 
   // Filter payments
   const filteredPayments = payments.filter(payment => {
+    const bidangName = getPaymentBidangName(payment);
     const matchesSearch = 
       payment.proposal?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       payment.recipient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.payment_reference?.toLowerCase().includes(searchTerm.toLowerCase());
+      payment.payment_reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bidangName.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'All' || payment.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesBidang = bidangFilter === 'All' || bidangName === bidangFilter;
+    return matchesSearch && matchesStatus && matchesBidang;
   });
 
   // Filter pending proposals
-  const filteredPendingProposals = pendingProposals.filter(proposal =>
-    // Only show proposals that are final_approved (ready for payment)
-    (proposal.status === 'final_approved') &&
-    (
-      proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proposal.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const filteredPendingProposals = pendingProposals.filter(proposal => {
+    const bidangName = getProposalBidangName(proposal);
+
+    return (
+      proposal.status === 'final_approved'
+      && (bidangFilter === 'All' || bidangName === bidangFilter)
+      && (
+        proposal.title.toLowerCase().includes(searchTerm.toLowerCase())
+        || proposal.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+        || bidangName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  });
+
+  const bidangOptions = Array.from(
+    new Set([
+      ...pendingProposals.map((proposal) => getProposalBidangName(proposal)),
+      ...payments.map((payment) => getPaymentBidangName(payment)),
+    ]),
+  )
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
 
   if (loading) {
     return (
@@ -407,6 +426,19 @@ const PaymentManagement: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
+          <div className="relative w-full md:w-64">
+            <Filter className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+            <select
+              value={bidangFilter}
+              onChange={(e) => setBidangFilter(e.target.value)}
+              className="w-full appearance-none rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="All">Semua Bidang</option>
+              {bidangOptions.map((bidangName) => (
+                <option key={bidangName} value={bidangName}>{bidangName}</option>
+              ))}
+            </select>
+          </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'All' | 'pending' | 'processing' | 'completed' | 'failed' | 'rejected')}
@@ -433,7 +465,7 @@ const PaymentManagement: React.FC = () => {
           <div className="px-6 py-12 text-center text-gray-500">
             <Clock className="h-12 w-12 mx-auto mb-3 text-gray-400" />
             <p className="font-medium">Tidak ada proposal yang perlu dibayar</p>
-            <p className="text-sm mt-1">Proposal yang sudah disetujui kepala madrasah dan siap dibayar akan muncul di sini</p>
+            <p className="text-sm mt-1">Proposal yang sudah disetujui komite madrasah dan siap dibayar akan muncul di sini</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -441,6 +473,7 @@ const PaymentManagement: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proposal</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bidang</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pengusul</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Disetujui</th>
@@ -458,9 +491,12 @@ const PaymentManagement: React.FC = () => {
                       </span>
                       {proposal.requires_committee_approval && (
                         <span className="inline-block ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-                          Komite Approved
+                          Disetujui Komite
                         </span>
                       )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">{getProposalBidangName(proposal)}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">{proposal.user?.full_name || proposal.user?.name || '-'}</div>
@@ -519,6 +555,7 @@ const PaymentManagement: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proposal</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bidang</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penerima</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode</th>
@@ -537,6 +574,9 @@ const PaymentManagement: React.FC = () => {
                       <div className="text-sm text-gray-500">
                         {payment.payment_reference || `ID: ${payment.id.substring(0, 8)}`}
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">{getPaymentBidangName(payment)}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">{payment.recipient_name}</div>
@@ -639,6 +679,7 @@ const PaymentManagement: React.FC = () => {
                 <h4 className="font-medium text-gray-900 mb-2">Informasi Proposal</h4>
                 <div className="space-y-1 text-sm">
                   <p><span className="text-gray-600">Judul:</span> <span className="font-medium">{selectedProposal.title}</span></p>
+                  <p><span className="text-gray-600">Bidang:</span> <span className="font-medium">{getProposalBidangName(selectedProposal)}</span></p>
                   <p><span className="text-gray-600">Pengusul:</span> <span className="font-medium">{selectedProposal.user?.full_name || selectedProposal.user?.name}</span></p>
                   <p><span className="text-gray-600">Jumlah:</span> <span className="font-medium text-green-600">{formatRupiah(selectedProposal.jumlah_pengajuan)}</span></p>
                 </div>
@@ -802,6 +843,7 @@ const PaymentManagement: React.FC = () => {
                 <h4 className="font-medium text-gray-900 mb-2">Informasi Pembayaran</h4>
                 <div className="space-y-1 text-sm">
                   <p><span className="text-gray-600">Proposal:</span> <span className="font-medium">{selectedPayment.proposal?.title}</span></p>
+                  <p><span className="text-gray-600">Bidang:</span> <span className="font-medium">{getPaymentBidangName(selectedPayment)}</span></p>
                   <p><span className="text-gray-600">Penerima:</span> <span className="font-medium">{selectedPayment.recipient_name}</span></p>
                   <p><span className="text-gray-600">Jumlah:</span> <span className="font-medium text-green-600">{formatRupiah(selectedPayment.amount)}</span></p>
                 </div>
@@ -901,6 +943,10 @@ const PaymentManagement: React.FC = () => {
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="font-medium text-gray-900 mb-3">Informasi Pembayaran</h4>
                 <div className="space-y-2 text-sm">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-gray-600">Bidang:</span>
+                    <span className="font-medium text-right">{getPaymentBidangName(selectedPayment)}</span>
+                  </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Jumlah:</span>
                     <span className="font-bold text-green-600 text-lg">{formatRupiah(selectedPayment.amount)}</span>

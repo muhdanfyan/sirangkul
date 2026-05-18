@@ -268,6 +268,9 @@ foreach ($bidang in $bidangs) {
     Invoke-Api -Method "POST" -Path "/proposals/$proposalId/verify" -Token $verifikatorToken -Body @{
         notes = "Verifikasi HTTP"
     } | Out-Null
+    Invoke-Api -Method "POST" -Path "/proposals/$proposalId/final-approve" -Token $kepalaToken -Body @{
+        notes = "Approve kepala HTTP sebelum komite"
+    } | Out-Null
 
     Assert-DownloadOk -Token $komiteToken -AttachmentId $attachmentId -Label "$slug-komite"
     Assert-Forbidden -Token $otherKomiteToken -Path "/attachments/$attachmentId/download" -Label "$slug other komite attachment"
@@ -285,9 +288,6 @@ foreach ($bidang in $bidangs) {
     Invoke-Api -Method "POST" -Path "/proposals/$proposalId/submit" -Token $pengusulToken | Out-Null
     Invoke-Api -Method "POST" -Path "/proposals/$proposalId/verify" -Token $verifikatorToken -Body @{
         notes = "Verifikasi HTTP ulang"
-    } | Out-Null
-    Invoke-Api -Method "POST" -Path "/proposals/$proposalId/approve" -Token $komiteToken -Body @{
-        notes = "Approve komite HTTP"
     } | Out-Null
 
     Assert-DownloadOk -Token $kepalaToken -AttachmentId $attachmentId -Label "$slug-kepala"
@@ -312,14 +312,14 @@ foreach ($bidang in $bidangs) {
     Invoke-Api -Method "POST" -Path "/proposals/$proposalId/verify" -Token $verifikatorToken -Body @{
         notes = "Verifikasi final HTTP"
     } | Out-Null
-    Invoke-Api -Method "POST" -Path "/proposals/$proposalId/approve" -Token $komiteToken -Body @{
-        notes = "Approve final komite HTTP"
+    Invoke-Api -Method "POST" -Path "/proposals/$proposalId/final-approve" -Token $kepalaToken -Body @{
+        notes = "Approve kepala final HTTP"
     } | Out-Null
-    $final = Invoke-Api -Method "POST" -Path "/proposals/$proposalId/final-approve" -Token $kepalaToken -Body @{
-        notes = "Final approve HTTP"
+    $final = Invoke-Api -Method "POST" -Path "/proposals/$proposalId/approve" -Token $komiteToken -Body @{
+        notes = "Approve final komite HTTP"
     }
-    if ($final.data.status -ne "final_approved") {
-        throw "Final approve failed for $name"
+    if ($final.data.proposal.status -ne "final_approved") {
+        throw "Komite final approve failed for $name"
     }
 
     $pending = Invoke-Api -Method "GET" -Path "/payments/pending" -Token $bendaharaToken

@@ -454,8 +454,8 @@ const RKAMManagement: React.FC = () => {
     const config: Record<string, { label: string; className: string }> = {
       draft: { label: 'Draft', className: 'bg-gray-100 text-gray-700' },
       submitted: { label: 'Menunggu Verifikator', className: 'bg-blue-100 text-blue-700' },
-      verified: { label: 'Menunggu Komite Madrasah', className: 'bg-cyan-100 text-cyan-700' },
-      approved: { label: 'Menunggu Kepala Madrasah', className: 'bg-purple-100 text-purple-700' },
+      verified: { label: 'Menunggu Kepala Madrasah', className: 'bg-cyan-100 text-cyan-700' },
+      approved: { label: 'Menunggu Komite Madrasah', className: 'bg-purple-100 text-purple-700' },
       rejected: { label: 'Ditolak', className: 'bg-red-100 text-red-700' },
       final_approved: { label: 'Siap Dibayar', className: 'bg-green-100 text-green-700' },
       payment_processing: { label: 'Proses Pembayaran', className: 'bg-yellow-100 text-yellow-700' },
