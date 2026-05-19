@@ -1,4 +1,4 @@
-import type { User } from '../contexts/AuthContext';
+﻿import type { User } from '../contexts/AuthContext';
 import type { Proposal } from '../services/api';
 
 const getUserBidangId = (user?: User | null) => user?.bidang?.id || user?.bidang_id || null;
@@ -16,7 +16,6 @@ const getProposalBidangId = (proposal: Proposal) => (
 const isBidangScopedRole = (role?: string | null) => (
   role === 'Pengusul'
   || role === 'Verifikator'
-  || role === 'Komite Madrasah'
 );
 
 export const matchesProposalBidang = (user: User | null | undefined, proposal: Proposal) => {
@@ -38,7 +37,7 @@ export const isProposalAwaitingApproval = (user: User | null | undefined, propos
   switch (user.role) {
     case 'Verifikator':
       return proposal.status === 'submitted';
-    case 'Komite Madrasah':
+    case 'Ketua Komite':
       return proposal.status === 'approved';
     case 'Kepala Madrasah':
       return proposal.status === 'verified';
@@ -84,7 +83,7 @@ export const getProposalAttentionCount = (user: User | null | undefined, proposa
         proposal.status === 'final_approved' || proposal.status === 'payment_processing',
       ).length;
     case 'Verifikator':
-    case 'Komite Madrasah':
+    case 'Ketua Komite':
     case 'Kepala Madrasah':
       return getApprovalAttentionCount(user, proposals);
     default:

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Search, Calendar, User, Activity, Download } from 'lucide-react';
 
 interface AuditLog {
@@ -104,7 +104,7 @@ const AuditLog: React.FC = () => {
       id: 'LOG008',
       userId: '6',
       userName: 'H. Abdullah',
-      userRole: 'Komite Madrasah',
+      userRole: 'Ketua Komite',
       action: 'UPDATE',
       module: 'Approval',
       details: 'Menolak proposal PR004 - Pengadaan Buku Perpustakaan',

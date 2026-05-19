@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -165,7 +165,7 @@ const ProposalDetail: React.FC = () => {
       } else if (user.role === 'Kepala Madrasah' && proposal.status === 'verified') {
         const result = await apiService.finalApproveProposal(proposal.id, { notes });
         message = result.message || message;
-      } else if (user.role === 'Komite Madrasah' && proposal.status === 'approved') {
+      } else if (user.role === 'Ketua Komite' && proposal.status === 'approved') {
         const result = await apiService.approveProposal(proposal.id, { notes });
         message = result.message || message;
       } else {
@@ -228,7 +228,7 @@ const ProposalDetail: React.FC = () => {
       draft: 'Draft',
       submitted: 'Menunggu Verifikator',
       verified: 'Menunggu Kepala Madrasah',
-      approved: 'Menunggu Komite Madrasah',
+      approved: 'Menunggu Ketua Komite',
       rejected: 'Ditolak',
       final_approved: 'Siap Dibayar',
       payment_processing: 'Proses Pembayaran',
@@ -310,10 +310,10 @@ const ProposalDetail: React.FC = () => {
       case 'kepala_madrasah':
       case 'Kepala Madrasah':
         return 'Kepala Madrasah';
-      case 'komite_madrasah':
+      case 'ketua_komite':
       case 'komite':
-      case 'Komite Madrasah':
-        return 'Komite Madrasah';
+      case 'Ketua Komite':
+        return 'Ketua Komite';
       case 'bendahara':
       case 'Bendahara':
         return 'Bendahara';
@@ -417,7 +417,7 @@ const ProposalDetail: React.FC = () => {
     { label: 'Diajukan', value: proposal.submitted_at, tone: 'text-blue-700' },
     { label: 'Diverifikasi', value: proposal.verified_at, tone: 'text-cyan-700' },
     { label: 'Disetujui Kepala Madrasah', value: proposal.approved_at, tone: 'text-purple-700' },
-    { label: 'Disetujui Komite Madrasah', value: proposal.final_approved_at, tone: 'text-green-700' },
+    { label: 'Disetujui Ketua Komite', value: proposal.final_approved_at, tone: 'text-green-700' },
     { label: 'Pembayaran Selesai', value: proposal.completed_at, tone: 'text-emerald-700' },
     { label: 'Ditolak', value: proposal.rejected_at, tone: 'text-red-700' },
   ].filter((item) => item.value);
@@ -546,7 +546,7 @@ const ProposalDetail: React.FC = () => {
               </p>
               {proposal.requires_committee_approval && (
                 <p className="mt-3 text-sm text-amber-700">
-                  Proposal ini akan melewati tahap persetujuan komite sesuai alur bidang.
+                  Proposal ini akan melewati tahap persetujuan Ketua Komite sesuai alur baru.
                 </p>
               )}
             </div>
@@ -861,9 +861,9 @@ const ProposalDetail: React.FC = () => {
 
             {proposal.requires_committee_approval && (
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                <p className="text-sm font-semibold text-amber-800">Tahap Komite Aktif</p>
+                <p className="text-sm font-semibold text-amber-800">Tahap Ketua Komite Aktif</p>
                 <p className="mt-1 text-sm text-amber-700">
-                  Proposal pada alur baru akan diproses oleh verifikator bidang, Kepala Madrasah, komite bidang, lalu bendahara.
+                  Proposal pada alur baru akan diproses oleh verifikator bidang, Kepala Madrasah, Ketua Komite, lalu bendahara.
                 </p>
               </div>
             )}
@@ -978,11 +978,11 @@ const ProposalDetail: React.FC = () => {
         proposalTitle={proposal.title}
         userRole={(user?.role === 'Verifikator'
           ? 'verifikator'
-          : user?.role === 'Komite Madrasah'
-            ? 'komite_madrasah'
+          : user?.role === 'Ketua Komite'
+            ? 'ketua_komite'
             : user?.role === 'Kepala Madrasah'
               ? 'kepala_madrasah'
-              : 'verifikator') as 'verifikator' | 'kepala_madrasah' | 'komite_madrasah'}
+              : 'verifikator') as 'verifikator' | 'kepala_madrasah' | 'ketua_komite'}
       />
 
       {previewAttachment && (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Search, Eye, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { apiService, Proposal } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -55,7 +55,7 @@ const ProposalTracking: React.FC = () => {
       'draft': 'Draft',
       'submitted': 'Verifikator',
       'verified': 'Kepala Madrasah',
-      'approved': 'Komite Madrasah',
+      'approved': 'Ketua Komite',
       'final_approved': 'Bendahara',
       'payment_processing': 'Bendahara',
       'completed': 'Terbayar',
@@ -123,7 +123,7 @@ const ProposalTracking: React.FC = () => {
       'draft': 'Draft',
       'submitted': 'Menunggu Verifikator',
       'verified': 'Menunggu Kepala Madrasah',
-      'approved': 'Menunggu Komite Madrasah',
+      'approved': 'Menunggu Ketua Komite',
       'rejected': 'Ditolak',
       'final_approved': 'Siap Dibayar',
       'payment_processing': 'Proses Pembayaran',
@@ -199,7 +199,7 @@ const ProposalTracking: React.FC = () => {
             <option value="draft">Draft</option>
             <option value="submitted">Menunggu Verifikator</option>
             <option value="verified">Menunggu Kepala Madrasah</option>
-            <option value="approved">Menunggu Komite Madrasah</option>
+            <option value="approved">Menunggu Ketua Komite</option>
             <option value="rejected">Ditolak</option>
             <option value="final_approved">Siap Dibayar</option>
             <option value="payment_processing">Proses Pembayaran</option>
@@ -249,7 +249,7 @@ const ProposalTracking: React.FC = () => {
                             {proposal.description || '-'}
                           </div>
                           <div className="text-xs text-gray-500">
-                            Diajukan: {formatDate(proposal.submitted_at)} • Update: {formatDate(proposal.updated_at)}
+                            Diajukan: {formatDate(proposal.submitted_at)} â€¢ Update: {formatDate(proposal.updated_at)}
                           </div>
                         </div>
                       </td>
@@ -316,7 +316,7 @@ const ProposalTracking: React.FC = () => {
                 onClick={() => setSelectedProposal(null)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                ✕
+                âœ•
               </button>
             </div>
 
@@ -361,7 +361,7 @@ const ProposalTracking: React.FC = () => {
                   {selectedProposal.requires_committee_approval && (
                     <div className="col-span-2">
                       <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
-                        Proposal ini mengikuti alur verifikator → komite → kepala madrasah pada bidang yang sama.
+                        Proposal ini mengikuti alur verifikator bidang, kepala madrasah, Ketua Komite, lalu bendahara.
                       </div>
                     </div>
                   )}
@@ -408,7 +408,7 @@ const ProposalTracking: React.FC = () => {
                         <p className="text-sm font-medium text-gray-900">Diverifikasi</p>
                         <p className="text-xs text-gray-600">
                           {formatDate(selectedProposal.verified_at)}
-                          {selectedProposal.verifier && ` • ${selectedProposal.verifier.full_name}`}
+                          {selectedProposal.verifier && ` â€¢ ${selectedProposal.verifier.full_name}`}
                         </p>
                       </div>
                     </div>
@@ -422,7 +422,7 @@ const ProposalTracking: React.FC = () => {
                         <p className="text-sm font-medium text-gray-900">Disetujui Kepala Madrasah</p>
                         <p className="text-xs text-gray-600">
                           {formatDate(selectedProposal.approved_at)}
-                          {selectedProposal.approver && ` • ${selectedProposal.approver.full_name}`}
+                          {selectedProposal.approver && ` â€¢ ${selectedProposal.approver.full_name}`}
                         </p>
                       </div>
                     </div>
@@ -433,10 +433,10 @@ const ProposalTracking: React.FC = () => {
                     <div className="flex items-start">
                       <div className="w-3 h-3 rounded-full bg-green-600 mt-0.5 mr-3"></div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">Disetujui Komite Madrasah</p>
+                        <p className="text-sm font-medium text-gray-900">Disetujui Ketua Komite</p>
                         <p className="text-xs text-gray-600">
                           {formatDate(selectedProposal.final_approved_at)}
-                          {selectedProposal.final_approver && ` • ${selectedProposal.final_approver.full_name}`}
+                          {selectedProposal.final_approver && ` â€¢ ${selectedProposal.final_approver.full_name}`}
                         </p>
                       </div>
                     </div>
@@ -461,7 +461,7 @@ const ProposalTracking: React.FC = () => {
                         <p className="text-sm font-medium text-red-900">Ditolak</p>
                         <p className="text-xs text-red-700">
                           {formatDate(selectedProposal.rejected_at)}
-                          {selectedProposal.rejector && ` • ${selectedProposal.rejector.full_name}`}
+                          {selectedProposal.rejector && ` â€¢ ${selectedProposal.rejector.full_name}`}
                         </p>
                       </div>
                     </div>

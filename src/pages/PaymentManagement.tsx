@@ -465,7 +465,7 @@ const PaymentManagement: React.FC = () => {
           <div className="px-6 py-12 text-center text-gray-500">
             <Clock className="h-12 w-12 mx-auto mb-3 text-gray-400" />
             <p className="font-medium">Tidak ada proposal yang perlu dibayar</p>
-            <p className="text-sm mt-1">Proposal yang sudah disetujui komite madrasah dan siap dibayar akan muncul di sini</p>
+            <p className="text-sm mt-1">Proposal yang sudah disetujui Ketua Komite dan siap dibayar akan muncul di sini</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -491,7 +491,7 @@ const PaymentManagement: React.FC = () => {
                       </span>
                       {proposal.requires_committee_approval && (
                         <span className="inline-block ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-                          Disetujui Komite
+                          Disetujui Ketua Komite
                         </span>
                       )}
                     </td>

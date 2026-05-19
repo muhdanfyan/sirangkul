@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Calendar, CheckCircle, Clock, FileText, Send, User, XCircle } from 'lucide-react';
 import { apiService, Proposal } from '../services/api';
@@ -198,7 +198,7 @@ const ProposalApproval: React.FC = () => {
       draft: { color: 'bg-gray-100 text-gray-800', label: 'Draft' },
       submitted: { color: 'bg-blue-100 text-blue-800', label: 'Menunggu Verifikator' },
       verified: { color: 'bg-cyan-100 text-cyan-800', label: 'Menunggu Kepala Madrasah' },
-      approved: { color: 'bg-purple-100 text-purple-800', label: 'Menunggu Komite Madrasah' },
+      approved: { color: 'bg-purple-100 text-purple-800', label: 'Menunggu Ketua Komite' },
       rejected: { color: 'bg-red-100 text-red-800', label: 'Ditolak' },
       final_approved: { color: 'bg-green-100 text-green-800', label: 'Siap Dibayar' },
       payment_processing: { color: 'bg-yellow-100 text-yellow-800', label: 'Proses Pembayaran' },
@@ -241,9 +241,9 @@ const ProposalApproval: React.FC = () => {
         return 'Verifikator';
       case 'kepala_madrasah':
         return 'Kepala Madrasah';
-      case 'komite_madrasah':
+      case 'ketua_komite':
       case 'komite':
-        return 'Komite Madrasah';
+        return 'Ketua Komite';
       default:
         return role || 'Approver';
     }
@@ -251,7 +251,7 @@ const ProposalApproval: React.FC = () => {
 
   const canSubmit = user?.role === 'Pengusul' && proposal?.status === 'draft';
   const canVerify = user?.role === 'Verifikator' && proposal?.status === 'submitted';
-  const canApprove = user?.role === 'Komite Madrasah' && proposal?.status === 'approved';
+  const canApprove = user?.role === 'Ketua Komite' && proposal?.status === 'approved';
   const canFinalApprove =
     user?.role === 'Kepala Madrasah' &&
     proposal?.status === 'verified';
@@ -304,7 +304,7 @@ const ProposalApproval: React.FC = () => {
                 {canSubmit && 'Anda dapat mengajukan proposal ini'}
                 {canVerify && 'Proposal menunggu verifikasi Anda'}
                 {canFinalApprove && 'Proposal menunggu persetujuan Kepala Madrasah'}
-                {canApprove && 'Proposal menunggu persetujuan akhir komite pada bidang Anda'}
+                {canApprove && 'Proposal menunggu persetujuan akhir Ketua Komite'}
               </p>
             </div>
             <div className="flex gap-2">
@@ -361,7 +361,7 @@ const ProposalApproval: React.FC = () => {
           <p className="text-sm text-blue-600 font-medium mb-1">Jumlah Pengajuan</p>
           <p className="text-3xl font-bold text-blue-900">{formatRupiah(proposal.jumlah_pengajuan)}</p>
           {proposal.requires_committee_approval && (
-            <p className="text-xs text-blue-600 mt-2">Proposal ini akan mengikuti alur persetujuan sesuai bidang: verifikator, kepala madrasah, komite, lalu bendahara.</p>
+            <p className="text-xs text-blue-600 mt-2">Proposal ini akan mengikuti alur persetujuan: verifikator bidang, kepala madrasah, Ketua Komite, lalu bendahara.</p>
           )}
         </div>
 
@@ -460,7 +460,7 @@ const ProposalApproval: React.FC = () => {
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full bg-green-600"></div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Disetujui Komite Madrasah</p>
+                  <p className="text-sm font-medium text-gray-900">Disetujui Ketua Komite</p>
                   <p className="text-xs text-gray-600">{formatDate(proposal.final_approved_at)}</p>
                   {proposal.final_approver && (
                     <p className="text-xs text-gray-500">oleh {proposal.final_approver.full_name}</p>
@@ -599,7 +599,7 @@ const ProposalApproval: React.FC = () => {
           canVerify
             ? 'verifikator'
             : canApprove
-              ? 'komite_madrasah'
+              ? 'ketua_komite'
               : canFinalApprove
                 ? 'kepala_madrasah'
                 : 'verifikator'

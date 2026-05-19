@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+﻿import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiService as api } from '../services/api';
 
 export interface BidangInfo {
@@ -41,7 +41,7 @@ const mapRole = (apiRole: string): string => {
     'verifikator': 'Verifikator',
     'kepala_madrasah': 'Kepala Madrasah',
     'bendahara': 'Bendahara',
-    'komite_madrasah': 'Komite Madrasah',
+    'ketua_komite': 'Ketua Komite',
   };
   return roleMap[apiRole.toLowerCase()] || apiRole;
 };

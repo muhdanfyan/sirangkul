@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   Search, Plus, Edit2, Trash2, Printer, Settings, ChevronLeft, 
@@ -455,7 +455,7 @@ const RKAMManagement: React.FC = () => {
       draft: { label: 'Draft', className: 'bg-gray-100 text-gray-700' },
       submitted: { label: 'Menunggu Verifikator', className: 'bg-blue-100 text-blue-700' },
       verified: { label: 'Menunggu Kepala Madrasah', className: 'bg-cyan-100 text-cyan-700' },
-      approved: { label: 'Menunggu Komite Madrasah', className: 'bg-purple-100 text-purple-700' },
+      approved: { label: 'Menunggu Ketua Komite', className: 'bg-purple-100 text-purple-700' },
       rejected: { label: 'Ditolak', className: 'bg-red-100 text-red-700' },
       final_approved: { label: 'Siap Dibayar', className: 'bg-green-100 text-green-700' },
       payment_processing: { label: 'Proses Pembayaran', className: 'bg-yellow-100 text-yellow-700' },
@@ -932,7 +932,7 @@ const RKAMManagement: React.FC = () => {
                 <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Detail RKAM</p>
                 <h2 className="mt-1 text-2xl font-bold text-gray-900">{detailRkam.item_name}</h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  {detailRkam.bidangRef?.name || detailRkam.bidang || detailRkam.category?.name || detailRkam.kategori} • Tahun Anggaran {detailRkam.tahun_anggaran}
+                  {detailRkam.bidangRef?.name || detailRkam.bidang || detailRkam.category?.name || detailRkam.kategori} â€¢ Tahun Anggaran {detailRkam.tahun_anggaran}
                 </p>
               </div>
               <button

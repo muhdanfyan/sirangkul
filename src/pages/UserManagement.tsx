@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ArrowUpDown,
@@ -21,12 +21,13 @@ import Toast from '../components/Toast';
 import { apiService, Bidang, PaginatedResponse, User } from '../services/api';
 
 const KEPALA_MADRASAH_ROLE = 'kepala_madrasah';
+const KETUA_KOMITE_ROLE = 'ketua_komite';
 
 const ROLE_OPTIONS = [
   { value: 'administrator', label: 'Administrator' },
   { value: 'pengusul', label: 'Pengusul' },
   { value: 'verifikator', label: 'Verifikator' },
-  { value: 'komite_madrasah', label: 'Komite Madrasah' },
+  { value: 'ketua_komite', label: 'Ketua Komite' },
   { value: 'bendahara', label: 'Bendahara' },
 ];
 
@@ -38,7 +39,7 @@ const createEmptyKepalaMadrasahForm = () => ({
 });
 
 const requiresBidang = (role: string) => (
-  ['pengusul', 'verifikator', 'komite_madrasah'].includes(role)
+  ['pengusul', 'verifikator'].includes(role)
 );
 
 const formatRole = (role: string) => (
@@ -50,7 +51,7 @@ const getRoleTone = (role: string) => {
     administrator: 'border-red-200 bg-red-50 text-red-700',
     pengusul: 'border-blue-200 bg-blue-50 text-blue-700',
     verifikator: 'border-green-200 bg-green-50 text-green-700',
-    komite_madrasah: 'border-amber-200 bg-amber-50 text-amber-700',
+    ketua_komite: 'border-amber-200 bg-amber-50 text-amber-700',
     kepala_madrasah: 'border-purple-200 bg-purple-50 text-purple-700',
     bendahara: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   };
@@ -836,6 +837,8 @@ const UserManagement: React.FC = () => {
                     <option value="">
                       {formData.role === KEPALA_MADRASAH_ROLE
                         ? 'Kepala Madrasah mengakses semua bidang'
+                        : formData.role === KETUA_KOMITE_ROLE
+                          ? 'Ketua Komite mengakses semua bidang'
                         : 'Role ini mengakses semua bidang'}
                     </option>
                   )}
@@ -861,7 +864,9 @@ const UserManagement: React.FC = () => {
                       ? 'Pengguna hanya akan melihat RKAM dan proposal pada bidang ini.'
                       : formData.role === KEPALA_MADRASAH_ROLE
                         ? 'Kepala Madrasah bersifat global dan tidak dapat diberi bidang khusus.'
-                        : 'Administrator dan Bendahara tidak dibatasi ke satu bidang.'}
+                        : formData.role === KETUA_KOMITE_ROLE
+                          ? 'Ketua Komite bersifat global dan tidak dapat diberi bidang khusus.'
+                          : 'Administrator dan Bendahara tidak dibatasi ke satu bidang.'}
                 </p>
               </div>
 

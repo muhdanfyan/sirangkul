@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
@@ -15,7 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { isProposalAwaitingApproval } from '../utils/proposalWorkflow';
 import { getProposalBidangName } from '../utils/proposalDisplay';
 
-type ApprovalRole = 'Verifikator' | 'Kepala Madrasah' | 'Komite Madrasah';
+type ApprovalRole = 'Verifikator' | 'Kepala Madrasah' | 'Ketua Komite';
 
 const ROLE_CONFIG: Record<
   ApprovalRole,
@@ -41,11 +41,11 @@ const ROLE_CONFIG: Record<
     emptyTitle: 'Tidak ada proposal menunggu persetujuan kepala',
     emptyDescription: 'Proposal yang sudah diverifikasi akan muncul di sini.',
   },
-  'Komite Madrasah': {
+  'Ketua Komite': {
     title: 'Antrian Persetujuan Komite',
-    description: 'Proposal yang sudah disetujui Kepala Madrasah dan menunggu persetujuan akhir Komite Madrasah.',
+    description: 'Proposal yang sudah disetujui Kepala Madrasah dan menunggu persetujuan akhir Ketua Komite.',
     status: 'approved',
-    emptyTitle: 'Tidak ada proposal menunggu persetujuan komite',
+    emptyTitle: 'Tidak ada proposal menunggu persetujuan Ketua Komite',
     emptyDescription: 'Proposal yang sudah disetujui Kepala Madrasah akan muncul di sini.',
   },
 };
@@ -165,7 +165,7 @@ const ApprovalWorkflow: React.FC = () => {
           <div>
             <h1 className="text-lg font-semibold text-yellow-900">Akses tidak tersedia</h1>
             <p className="text-sm text-yellow-800 mt-1">
-              Halaman ini hanya digunakan oleh Verifikator, Kepala Madrasah, dan Komite Madrasah.
+              Halaman ini hanya digunakan oleh Verifikator, Kepala Madrasah, dan Ketua Komite.
             </p>
           </div>
         </div>

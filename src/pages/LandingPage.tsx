@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, Users, FileText, Shield, BarChart3, Clock, Eye, BookOpen, Download, LogIn } from 'lucide-react';
 
@@ -42,7 +42,7 @@ const LandingPage: React.FC = () => {
     { name: 'Verifikator', desc: 'Memverifikasi kelengkapan proposal' },
     { name: 'Kepala Madrasah', desc: 'Menyetujui proposal' },
     { name: 'Bendahara', desc: 'Memproses pencairan dana' },
-    { name: 'Komite Madrasah', desc: 'Persetujuan akhir proposal besar' },
+    { name: 'Ketua Komite', desc: 'Persetujuan akhir proposal besar' },
   ];
 
   return (
@@ -216,7 +216,7 @@ const LandingPage: React.FC = () => {
               <div className="space-y-6">
                 <div className="flex gap-4">
                   <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">❌</span>
+                    <span className="text-2xl">âŒ</span>
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-800 mb-1">Masalah Sebelumnya</h4>
@@ -228,7 +228,7 @@ const LandingPage: React.FC = () => {
                 
                 <div className="flex gap-4">
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">✅</span>
+                    <span className="text-2xl">âœ…</span>
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-800 mb-1">Solusi SiRangkul</h4>
@@ -244,12 +244,12 @@ const LandingPage: React.FC = () => {
               <h3 className="text-xl font-bold text-gray-800 mb-6">Keunggulan untuk MAN 2</h3>
               <div className="space-y-4">
                 {[
-                  { icon: '⏱️', title: 'Proses Lebih Cepat', desc: 'Pengajuan dan persetujuan proposal tidak lagi berhari-hari, cukup dalam hitungan jam.' },
-                  { icon: '📊', title: 'Data Real-time', desc: 'Kepala Madrasah dapat memantau sisa pagu dan realisasi anggaran kapan saja.' },
-                  { icon: '📝', title: 'Audit Trail Lengkap', desc: 'Setiap tindakan tercatat digital untuk memudahkan proses audit internal maupun eksternal.' },
-                  { icon: '🔓', title: 'Transparansi Publik', desc: 'Masyarakat dapat melihat data RKAM melalui akses publik, meningkatkan kepercayaan stakeholder.' },
-                  { icon: '📱', title: 'Akses Fleksibel', desc: 'Dapat diakses dari mana saja melalui browser, tanpa perlu instalasi aplikasi khusus.' },
-                  { icon: '🔔', title: 'Notifikasi Otomatis', desc: 'Pengingat otomatis untuk proposal yang pending dan memerlukan tindakan segera.' },
+                  { icon: 'â±ï¸', title: 'Proses Lebih Cepat', desc: 'Pengajuan dan persetujuan proposal tidak lagi berhari-hari, cukup dalam hitungan jam.' },
+                  { icon: 'ðŸ“Š', title: 'Data Real-time', desc: 'Kepala Madrasah dapat memantau sisa pagu dan realisasi anggaran kapan saja.' },
+                  { icon: 'ðŸ“', title: 'Audit Trail Lengkap', desc: 'Setiap tindakan tercatat digital untuk memudahkan proses audit internal maupun eksternal.' },
+                  { icon: 'ðŸ”“', title: 'Transparansi Publik', desc: 'Masyarakat dapat melihat data RKAM melalui akses publik, meningkatkan kepercayaan stakeholder.' },
+                  { icon: 'ðŸ“±', title: 'Akses Fleksibel', desc: 'Dapat diakses dari mana saja melalui browser, tanpa perlu instalasi aplikasi khusus.' },
+                  { icon: 'ðŸ””', title: 'Notifikasi Otomatis', desc: 'Pengingat otomatis untuk proposal yang pending dan memerlukan tindakan segera.' },
                 ].map((item, index) => (
                   <div key={index} className="flex items-start gap-3 bg-white p-4 rounded-xl">
                     <span className="text-2xl">{item.icon}</span>
@@ -350,7 +350,7 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
-            © 2024 SiRangkul. Dikembangkan untuk MAN 2 Kota Makassar.
+            Â© 2024 SiRangkul. Dikembangkan untuk MAN 2 Kota Makassar.
           </div>
         </div>
       </footer>

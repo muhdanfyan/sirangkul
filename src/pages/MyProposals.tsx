@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
@@ -82,7 +82,7 @@ const MyProposals: React.FC = () => {
       draft: { color: 'bg-gray-100 text-gray-800', label: 'Draft' },
       submitted: { color: 'bg-blue-100 text-blue-800', label: 'Menunggu Verifikator' },
       verified: { color: 'bg-indigo-100 text-indigo-800', label: 'Menunggu Kepala Madrasah' },
-      approved: { color: 'bg-purple-100 text-purple-800', label: 'Menunggu Komite Madrasah' },
+      approved: { color: 'bg-purple-100 text-purple-800', label: 'Menunggu Ketua Komite' },
       rejected: { color: 'bg-red-100 text-red-800', label: 'Ditolak' },
       final_approved: { color: 'bg-green-100 text-green-800', label: 'Siap Dibayar' },
       payment_processing: { color: 'bg-yellow-100 text-yellow-800', label: 'Proses Pembayaran' },
@@ -264,7 +264,7 @@ const MyProposals: React.FC = () => {
               <option value="draft">Draft</option>
               <option value="submitted">Menunggu Verifikator</option>
               <option value="verified">Menunggu Kepala Madrasah</option>
-              <option value="approved">Menunggu Komite Madrasah</option>
+              <option value="approved">Menunggu Ketua Komite</option>
               <option value="rejected">Ditolak</option>
               <option value="final_approved">Siap Dibayar</option>
               <option value="payment_processing">Proses Pembayaran</option>
@@ -459,7 +459,7 @@ const MyProposals: React.FC = () => {
                     <div className="flex items-start gap-3">
                       <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                       <div>
-                        <p className="font-medium text-gray-900">Disetujui Komite Madrasah</p>
+                        <p className="font-medium text-gray-900">Disetujui Ketua Komite</p>
                         <p className="text-gray-600">{formatDate(selectedProposal.final_approved_at)}</p>
                       </div>
                     </div>

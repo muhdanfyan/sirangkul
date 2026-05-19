@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -57,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         return;
       }
 
-      const shouldLoadProposals = ['Pengusul', 'Verifikator', 'Kepala Madrasah', 'Komite Madrasah', 'Bendahara'].includes(user.role);
+      const shouldLoadProposals = ['Pengusul', 'Verifikator', 'Kepala Madrasah', 'Ketua Komite', 'Bendahara'].includes(user.role);
       const shouldLoadPayments = ['Administrator', 'Bendahara'].includes(user.role);
 
       try {
@@ -112,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { icon: Users, label: 'User', path: '/users', roles: ['Administrator'] },
     { icon: PiggyBank, label: 'RKAM', path: '/rkam', roles: ['Administrator', 'Bendahara', 'Kepala Madrasah'] },
     { icon: Settings, label: 'RAKM Viewer', path: '/rkam-viewer-management', roles: ['Administrator'], emails: ['superadmin@sirangkul.sch.id'] },
-    { icon: CheckCircle, label: 'Persetujuan', path: '/approvals', roles: ['Verifikator', 'Kepala Madrasah', 'Komite Madrasah'] },
+    { icon: CheckCircle, label: 'Persetujuan', path: '/approvals', roles: ['Verifikator', 'Kepala Madrasah', 'Ketua Komite'] },
     { icon: CreditCard, label: 'Pembayaran', path: '/payments', roles: ['Bendahara', 'Administrator'] },
     { icon: FileBarChart, label: 'Laporan', path: '/reports' },
     { icon: MessageSquare, label: 'Feedback', path: '/feedback', roles: ['Administrator', 'Kepala Madrasah'] },
@@ -229,7 +229,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         <div className="absolute bottom-0 w-full p-4 border-t border-gray-200">
           <div className="text-xs text-gray-500 text-center">
-            © 2025 SiRangkul v1.0
+            Â© 2025 SiRangkul v1.0
           </div>
         </div>
       </div>

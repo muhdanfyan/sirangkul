@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiService, Proposal } from '../../services/api';
 import { Plus, Search, Filter, Info, Edit3, Trash2 } from 'lucide-react';
@@ -104,7 +104,7 @@ const ProposalList: React.FC = () => {
       draft: 'Draft',
       submitted: 'Menunggu Verifikator',
       verified: 'Menunggu Kepala Madrasah',
-      approved: 'Menunggu Komite Madrasah',
+      approved: 'Menunggu Ketua Komite',
       rejected: 'Ditolak',
       final_approved: 'Siap Dibayar',
       payment_processing: 'Proses Pembayaran',
@@ -184,7 +184,7 @@ const ProposalList: React.FC = () => {
             <option value="draft">Draft</option>
             <option value="submitted">Menunggu Verifikator</option>
             <option value="verified">Menunggu Kepala Madrasah</option>
-            <option value="approved">Menunggu Komite Madrasah</option>
+            <option value="approved">Menunggu Ketua Komite</option>
             <option value="rejected">Ditolak</option>
             <option value="final_approved">Siap Dibayar</option>
             <option value="payment_processing">Proses Pembayaran</option>

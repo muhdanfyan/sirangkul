@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 
 interface RejectionModalProps {
   isOpen: boolean;
@@ -6,7 +6,7 @@ interface RejectionModalProps {
   onConfirm: (reason: string, improvements: string) => void;
   proposalTitle: string;
   isLoading?: boolean;
-  userRole: 'verifikator' | 'kepala_madrasah' | 'komite_madrasah';
+  userRole: 'verifikator' | 'kepala_madrasah' | 'ketua_komite';
 }
 
 const RejectionModal: React.FC<RejectionModalProps> = ({
@@ -59,7 +59,7 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
     const roleLabels = {
       'verifikator': 'Verifikator',
       'kepala_madrasah': 'Kepala Madrasah',
-      'komite_madrasah': 'Komite Madrasah'
+      'ketua_komite': 'Ketua Komite'
     };
     return roleLabels[userRole];
   };
@@ -68,7 +68,7 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
     const placeholders = {
       'verifikator': 'Contoh: Dokumen pendukung tidak lengkap, data anggaran tidak sesuai format, dll.',
       'kepala_madrasah': 'Contoh: Proposal tidak sesuai dengan prioritas madrasah, anggaran melebihi alokasi, dll.',
-      'komite_madrasah': 'Contoh: Perlu konsultasi lebih lanjut dengan stakeholder, nilai terlalu besar untuk periode ini, dll.'
+      'ketua_komite': 'Contoh: Perlu konsultasi lebih lanjut dengan stakeholder, nilai terlalu besar untuk periode ini, dll.'
     };
     return placeholders[userRole];
   };
@@ -77,7 +77,7 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
     const placeholders = {
       'verifikator': 'Contoh: Harap lampirkan RAB detail, perjelas tujuan kegiatan, sesuaikan format proposal dengan template, dll.',
       'kepala_madrasah': 'Contoh: Harap sesuaikan dengan skala prioritas madrasah, kurangi jumlah anggaran atau pecah menjadi beberapa tahap, dll.',
-      'komite_madrasah': 'Contoh: Harap ajukan kembali semester depan dengan pertimbangan X, sertakan analisis dampak yang lebih detail, dll.'
+      'ketua_komite': 'Contoh: Harap ajukan kembali semester depan dengan pertimbangan X, sertakan analisis dampak yang lebih detail, dll.'
     };
     return placeholders[userRole];
   };
@@ -124,7 +124,7 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
                   "{proposalTitle}"
                 </p>
                 <p className="text-xs text-red-600 mt-2">
-                  ⚠️ Pastikan Anda memberikan alasan yang jelas dan saran perbaikan yang konstruktif untuk membantu pengusul memperbaiki proposalnya.
+                  Pastikan Anda memberikan alasan yang jelas dan saran perbaikan yang konstruktif untuk membantu pengusul memperbaiki proposalnya.
                 </p>
               </div>
             </div>

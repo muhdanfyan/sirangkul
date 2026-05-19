@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Upload, FileText, DollarSign, Save, Send, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiService, ProposalAttachmentUpload, RKAM } from '../services/api';
@@ -739,7 +739,7 @@ const ProposalSubmission: React.FC = () => {
             <div className="space-y-2 text-sm text-blue-800">
               <div>1. Verifikator</div>
               <div>2. Kepala Madrasah</div>
-              <div>3. Komite Madrasah</div>
+              <div>3. Ketua Komite</div>
               <div>4. Bendahara</div>
             </div>
             <div className="mt-4 text-xs text-blue-700">

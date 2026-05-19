@@ -1,13 +1,13 @@
-# 05 Skenario Local Flow Bidang, Approval, Reject, Upload, dan Download Dokumen
+﻿# 05 Skenario Local Flow Bidang, Approval, Reject, Upload, dan Download Dokumen
 
 Dokumen ini adalah skenario uji lokal untuk memastikan alur proposal per bidang berjalan benar dari pengusul sampai bendahara, termasuk upload dokumen proposal + LPJ, approval, rejection, resubmit, akses lintas bidang, dan download dokumen di setiap titik proposal singgah.
 
 ## 1. Tujuan
 
-1. Memastikan setiap bidang punya pasangan user `pengusul`, `verifikator`, dan `komite_madrasah`.
-2. Memastikan Kepala Madrasah bersifat global dan dapat melihat proposal semua bidang.
-3. Memastikan proposal hanya masuk ke antrian role dan bidang yang benar: Verifikator per bidang, Kepala Madrasah global, Komite Madrasah per bidang, lalu Bendahara global.
-4. Memastikan reject dari Verifikator, Komite, dan Kepala Madrasah mengembalikan proposal ke pengusul dengan alasan dan saran perbaikan.
+1. Memastikan setiap bidang punya pasangan user `pengusul` dan `verifikator`.
+2. Memastikan Kepala Madrasah dan Ketua Komite bersifat global, tunggal, dan tidak terikat bidang.
+3. Memastikan proposal hanya masuk ke antrian role yang benar: Verifikator per bidang, Kepala Madrasah global, Ketua Komite global, lalu Bendahara global.
+4. Memastikan reject dari Verifikator, Ketua Komite, dan Kepala Madrasah mengembalikan proposal ke pengusul dengan alasan dan saran perbaikan.
 5. Memastikan pengusul dapat mengganti dokumen setelah proposal ditolak.
 6. Memastikan file `proposal` dan `lpj` dapat di-download oleh role yang sedang memproses proposal.
 7. Memastikan role bidang lain tidak dapat melihat atau download dokumen proposal yang bukan bidangnya.
@@ -34,7 +34,7 @@ Catatan route lokal:
 
 - Frontend memanggil `/api/...`.
 - Vite proxy meneruskan ke Laravel lokal `http://127.0.0.1:8000`.
-- Backend lokal saat dokumen ini dibuat mendaftarkan route API tanpa prefix internal, jadi proxy harus melakukan rewrite `/api` ke `/`.
+- Backend lokal saat dokumen ini diperbarui mendaftarkan route API dengan prefix `/api`, jadi Vite proxy meneruskan `/api/...` tanpa rewrite.
 
 ## 3. Safety Gate Sebelum Seeder
 
@@ -55,6 +55,7 @@ Seeder yang direkomendasikan sudah tersedia:
 
 ```powershell
 cd api-sirangkul
+php artisan migrate
 php artisan db:seed --class=LocalWorkflowSeeder
 ```
 
@@ -77,21 +78,22 @@ Seeder harus memastikan data berikut tersedia.
 | :--- | :--- |
 | Pengusul | `flowtest.pengusul.{slug}@sirangkul.test` |
 | Verifikator | `flowtest.verifikator.{slug}@sirangkul.test` |
-| Komite Madrasah | `flowtest.komite.{slug}@sirangkul.test` |
 | Kepala Madrasah global | `kepala@madrasah.com` |
+| Ketua Komite global | `flowtest.ketua-komite@sirangkul.test` |
 | Bendahara global | `flowtest.bendahara@sirangkul.test` |
 | Administrator global | `flowtest.admin@sirangkul.test` |
 
 Validasi setelah seeder:
 
 ```powershell
-php artisan tinker --execute="$roles=['pengusul','verifikator','komite_madrasah']; foreach (App\Models\Bidang::whereIn('name',['Pendidikan','HUMAS','Sarana dan Prasarana','Sekretariat Komite'])->get() as $b) { echo $b->name . ': '; foreach ($roles as $r) { echo $r . '=' . App\Models\User::where('role',$r)->where('bidang_id',$b->id)->count() . ' '; } echo PHP_EOL; } echo 'Kepala=' . App\Models\User::where('role','kepala_madrasah')->count() . PHP_EOL;"
+php artisan tinker --execute="$roles=['pengusul','verifikator']; foreach (App\Models\Bidang::whereIn('name',['Pendidikan','HUMAS','Sarana dan Prasarana','Sekretariat Komite'])->get() as $b) { echo $b->name . ': '; foreach ($roles as $r) { echo $r . '=' . App\Models\User::where('role',$r)->where('bidang_id',$b->id)->count() . ' '; } echo PHP_EOL; } echo 'Kepala=' . App\Models\User::where('role','kepala_madrasah')->whereNull('bidang_id')->count() . PHP_EOL; echo 'KetuaKomite=' . App\Models\User::where('role','ketua_komite')->whereNull('bidang_id')->count() . PHP_EOL;"
 ```
 
 Expected:
 
-- Setiap bidang punya minimal 1 pengusul, 1 verifikator, dan 1 komite.
-- Kepala Madrasah hanya 1.
+- Setiap bidang punya minimal 1 pengusul dan 1 verifikator.
+- Kepala Madrasah hanya 1 dan `bidang_id` null.
+- Ketua Komite hanya 1 dan `bidang_id` null.
 - RKAM `Flow Test RKAM ...` tersedia untuk setiap bidang dengan sisa anggaran cukup.
 
 ## 5. Dokumen Uji
@@ -121,7 +123,7 @@ Untuk setiap bidang, buat 4 proposal agar approve dan reject diuji merata.
 | :--- | :--- | :--- |
 | A | `FLOW-{slug}-APPROVE` | Full approve sampai completed |
 | B | `FLOW-{slug}-REJECT-VERIFIKATOR` | Reject di Verifikator, revisi, resubmit, lanjut approve |
-| C | `FLOW-{slug}-REJECT-KOMITE` | Reject di Komite, revisi, resubmit, lanjut approve |
+| C | `FLOW-{slug}-REJECT-KETUA-KOMITE` | Reject di Ketua Komite, revisi, resubmit, lanjut approve |
 | D | `FLOW-{slug}-REJECT-KEPALA` | Reject di Kepala Madrasah, revisi, resubmit, lanjut approve |
 
 Total minimal proposal: 4 bidang x 4 case = 16 proposal.
@@ -180,10 +182,10 @@ Jalankan untuk semua bidang.
 10. Download `File Proposal` dan `File LPJ`.
 11. Approve dengan catatan `Disetujui Kepala Madrasah`.
 12. Pastikan status menjadi `approved`.
-13. Login Komite bidang yang sama.
-14. Pastikan proposal terlihat.
+13. Login Ketua Komite global.
+14. Pastikan proposal semua bidang yang sudah disetujui Kepala Madrasah terlihat, termasuk proposal ini.
 15. Download `File Proposal` dan `File LPJ`.
-16. Approve final dengan catatan `Komite menyetujui proposal {Bidang}`.
+16. Approve final dengan catatan `Ketua Komite menyetujui proposal {Bidang}`.
 17. Pastikan status menjadi `final_approved`.
 18. Login Bendahara.
 19. Buka daftar pembayaran pending.
@@ -198,8 +200,8 @@ Jalankan untuk semua bidang.
 
 Expected:
 
-- Semua approval menghasilkan status berurutan: `submitted -> verified -> approved -> final_approved -> payment_processing -> completed`, dengan makna `verified` menunggu Kepala Madrasah dan `approved` menunggu Komite Madrasah.
-- Download dua dokumen berhasil di Verifikator, Komite, Kepala Madrasah, Bendahara, dan Pengusul.
+- Semua approval menghasilkan status berurutan: `submitted -> verified -> approved -> final_approved -> payment_processing -> completed`, dengan makna `verified` menunggu Kepala Madrasah dan `approved` menunggu Ketua Komite.
+- Download dua dokumen berhasil di Verifikator, Ketua Komite, Kepala Madrasah, Bendahara, dan Pengusul.
 - Download bukti pembayaran berhasil.
 - Tidak ada 403 untuk role yang berhak.
 - Tidak ada 404 file missing.
@@ -228,7 +230,7 @@ Jalankan untuk semua bidang.
 14. Login Verifikator bidang yang sama.
 15. Pastikan dokumen yang tampil adalah dokumen revisi, bukan dokumen lama.
 16. Approve.
-17. Lanjutkan ke Kepala Madrasah, Komite, dan Bendahara seperti Case A.
+17. Lanjutkan ke Kepala Madrasah, Ketua Komite, dan Bendahara seperti Case A.
 
 Expected:
 
@@ -239,21 +241,21 @@ Expected:
 - Upload ulang mengganti file lama.
 - Setelah resubmit, status kembali ke `submitted` dan catatan approval lama yang tidak relevan bersih.
 
-## 10. Case C: Reject Di Komite Lalu Resubmit
+## 10. Case C: Reject Di Ketua Komite Lalu Resubmit
 
 Jalankan untuk semua bidang.
 
 1. Login Verifikator bidang yang sama.
-2. Approve proposal `FLOW-{slug}-REJECT-KOMITE`.
+2. Approve proposal `FLOW-{slug}-REJECT-KETUA-KOMITE`.
 3. Pastikan status menjadi `verified`.
 4. Login Kepala Madrasah.
 5. Approve proposal.
 6. Pastikan status menjadi `approved`.
-7. Login Komite bidang yang sama.
+7. Login Ketua Komite global.
 8. Buka proposal.
 9. Download `File Proposal` dan `File LPJ`.
 10. Reject dengan:
-   - Alasan: `Anggaran belum sesuai prioritas komite untuk bidang {Bidang}.`
+   - Alasan: `Anggaran belum sesuai prioritas Ketua Komite untuk bidang {Bidang}.`
    - Saran: `Sesuaikan nominal, tambahkan dasar kebutuhan, dan ajukan ulang setelah revisi.`
 11. Pastikan status menjadi `rejected`.
 12. Login Pengusul bidang yang sama.
@@ -264,17 +266,17 @@ Jalankan untuk semua bidang.
 17. Approve ulang.
 18. Login Kepala Madrasah.
 19. Approve ulang.
-20. Login Komite bidang yang sama.
+20. Login Ketua Komite global.
 21. Pastikan dokumen revisi dapat di-download.
 22. Approve.
 23. Lanjutkan ke Bendahara seperti Case A.
 
 Expected:
 
-- Reject Komite hanya valid saat status `approved`.
+- Reject Ketua Komite hanya valid saat status `approved`.
 - Status berubah ke `rejected`.
-- Field `rejected_by_role` bernilai `komite_madrasah`.
-- Proposal yang sudah direvisi kembali melewati Verifikator dan Kepala Madrasah sebelum Komite.
+- Field `rejected_by_role` bernilai `ketua_komite`.
+- Proposal yang sudah direvisi kembali melewati Verifikator dan Kepala Madrasah sebelum Ketua Komite.
 
 ## 11. Case D: Reject Di Kepala Madrasah Lalu Resubmit
 
@@ -297,7 +299,7 @@ Jalankan untuk semua bidang.
 13. Login Verifikator bidang yang sama, approve ulang.
 14. Login Kepala Madrasah, pastikan dokumen revisi dapat di-download.
 15. Approve ulang.
-16. Login Komite bidang yang sama, approve ulang.
+16. Login Ketua Komite global, approve ulang.
 17. Lanjutkan ke Bendahara seperti Case A.
 
 Expected:
@@ -309,7 +311,7 @@ Expected:
 
 ## 12. Skenario RBAC Lintas Bidang
 
-Jalankan minimal satu kali untuk setiap bidang dan setiap role scoped.
+Jalankan minimal satu kali untuk setiap bidang pada role scoped (`pengusul` dan `verifikator`). Ketua Komite dan Kepala Madrasah tidak masuk skenario lintas bidang karena keduanya global.
 
 Contoh untuk proposal bidang Pendidikan:
 
@@ -318,8 +320,8 @@ Contoh untuk proposal bidang Pendidikan:
 3. Pastikan proposal Pendidikan tidak muncul.
 4. Jika mengetahui URL detail proposal Pendidikan, coba akses langsung.
 5. Coba download attachment proposal Pendidikan.
-6. Login Komite HUMAS.
-7. Ulangi langkah yang sama.
+6. Login Pengusul HUMAS.
+7. Jika mengetahui URL detail proposal Pendidikan, coba akses langsung dan coba download attachment.
 
 Expected:
 
@@ -331,10 +333,10 @@ Ulangi kombinasi:
 
 | Proposal Bidang | User Salah Bidang |
 | :--- | :--- |
-| Pendidikan | Verifikator HUMAS, Komite HUMAS |
-| HUMAS | Verifikator Sarpras, Komite Sarpras |
-| Sarana dan Prasarana | Verifikator Sekretariat, Komite Sekretariat |
-| Sekretariat Komite | Verifikator Pendidikan, Komite Pendidikan |
+| Pendidikan | Verifikator HUMAS, Pengusul HUMAS |
+| HUMAS | Verifikator Sarpras, Pengusul Sarpras |
+| Sarana dan Prasarana | Verifikator Sekretariat, Pengusul Sekretariat |
+| Sekretariat Komite | Verifikator Pendidikan, Pengusul Pendidikan |
 
 ## 13. Skenario Validasi Upload Negatif
 
@@ -348,7 +350,7 @@ Jalankan minimal pada satu proposal draft dan satu proposal rejected.
 | Ekstensi tidak valid | Upload `.exe`, `.php`, atau `.js` | Ditolak di UI/backend |
 | Tipe duplikat | Kirim dua file dengan `attachment_type=proposal` | Backend `422` |
 | Upload setelah submitted | Coba upload saat status `submitted` | Backend `422` |
-| Upload oleh bukan owner | Verifikator/Komite upload attachment | Backend `403` |
+| Upload oleh bukan owner | Verifikator/Ketua Komite upload attachment | Backend `403` |
 | Hapus attachment setelah submitted | Pengusul hapus attachment setelah submit | Backend `422` |
 
 ## 14. Skenario Download Per Tempat Proposal Singgah
@@ -361,8 +363,7 @@ Untuk setiap proposal, catat hasil download dua file attachment pada checkpoint 
 | `submitted` | Verifikator bidang sama | Antrian persetujuan/detail | Bisa list dan download |
 | `submitted` | Verifikator bidang lain | Direct URL/API | `403` |
 | `verified` | Kepala Madrasah | Antrian persetujuan/detail | Bisa list dan download |
-| `approved` | Komite bidang sama | Antrian persetujuan/detail | Bisa list dan download |
-| `approved` | Komite bidang lain | Direct URL/API | `403` |
+| `approved` | Ketua Komite global | Antrian persetujuan/detail | Bisa list dan download semua bidang |
 | `final_approved` | Bendahara | Pembayaran/detail proposal | Bisa list dan download |
 | `payment_processing` | Bendahara | Pembayaran/detail payment | Bisa download bukti pembayaran |
 | `completed` | Pengusul/Bendahara/Admin | Detail proposal/payment | Bisa melihat ringkasan dan download dokumen relevan |
@@ -393,7 +394,7 @@ Jika ingin memverifikasi lewat API selain UI, gunakan endpoint berikut dengan to
 | Upload attachment | POST multipart | `/proposals/{proposalId}/attachments` |
 | Submit proposal | POST | `/proposals/{proposalId}/submit` |
 | Verifikasi | POST | `/proposals/{proposalId}/verify` |
-| Approve Komite final | POST | `/proposals/{proposalId}/approve` |
+| Approve Ketua Komite final | POST | `/proposals/{proposalId}/approve` |
 | Reject | POST | `/proposals/{proposalId}/reject` |
 | Approve Kepala Madrasah | POST | `/proposals/{proposalId}/final-approve` |
 | Pending payment | GET | `/payments/pending` |
@@ -420,9 +421,9 @@ Skenario dianggap lulus jika semua kondisi berikut terpenuhi:
 3. Setiap attachment bisa di-download oleh pengusul pemilik.
 4. Verifikator hanya melihat proposal bidangnya saat `submitted`.
 5. Kepala Madrasah melihat proposal semua bidang saat `verified`.
-6. Komite hanya melihat proposal bidangnya saat `approved`.
+6. Ketua Komite melihat proposal semua bidang saat `approved`.
 7. Bendahara melihat proposal `final_approved` pada pembayaran pending.
-8. Reject di Verifikator, Komite, dan Kepala Madrasah menghasilkan status `rejected` dan menyimpan alasan/saran.
+8. Reject di Verifikator, Ketua Komite, dan Kepala Madrasah menghasilkan status `rejected` dan menyimpan alasan/saran.
 9. Pengusul dapat edit dan upload ulang dokumen setelah reject.
 10. Dokumen revisi menggantikan dokumen lama.
 11. Role bidang lain tidak dapat download attachment proposal.
@@ -433,7 +434,7 @@ Skenario dianggap lulus jika semua kondisi berikut terpenuhi:
 
 Gunakan tabel ini saat menjalankan test manual.
 
-| Bidang | Case | Proposal ID | Status Akhir | Upload Proposal | Upload LPJ | Download Pengusul | Download Verifikator | Download Komite | Download Kepala | Download Bendahara | RBAC Bidang Lain | Catatan |
+| Bidang | Case | Proposal ID | Status Akhir | Upload Proposal | Upload LPJ | Download Pengusul | Download Verifikator | Download Ketua Komite | Download Kepala | Download Bendahara | RBAC Bidang Lain | Catatan |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | Pendidikan | A |  |  |  |  |  |  |  |  |  |  |  |
 | Pendidikan | B |  |  |  |  |  |  |  |  |  |  |  |
