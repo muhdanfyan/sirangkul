@@ -5,6 +5,7 @@ import Header from './components/Layout/Header';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
 import RKAMManagement from './pages/RKAMManagement';
+import RKAMDetail from './pages/RKAMDetail';
 import ProposalSubmission from './pages/ProposalSubmission';
 import ProposalTracking from './pages/ProposalTracking';
 import ApprovalWorkflow from './pages/ApprovalWorkflow';
@@ -68,6 +69,7 @@ function ProtectedRoute() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<UserManagement />} />
             <Route path="/rkam" element={<RKAMManagement />} />
+            <Route path="/rkam/:id" element={<RKAMDetail />} />
             <Route path="/rkam-viewer-management" element={<RkamViewerManagement />} />
             
             {/* Proposal Routes */}

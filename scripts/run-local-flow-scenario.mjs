@@ -26,7 +26,7 @@ const fields = [
 const cases = [
   { key: 'A', suffix: 'APPROVE', amount: 1000000, rejectAt: null },
   { key: 'B', suffix: 'REJECT-VERIFIKATOR', amount: 1250000, rejectAt: 'verifikator' },
-  { key: 'C', suffix: 'REJECT-KOMITE', amount: 1500000, rejectAt: 'komite_madrasah' },
+  { key: 'C', suffix: 'REJECT-KETUA-KOMITE', amount: 1500000, rejectAt: 'ketua_komite' },
   { key: 'D', suffix: 'REJECT-KEPALA', amount: 1750000, rejectAt: 'kepala_madrasah' },
 ];
 
@@ -60,11 +60,11 @@ function account(role, slug = null) {
   if (runtimeEmail) return runtimeEmail;
 
   if (role === 'kepala_madrasah') return 'kepala@madrasah.com';
+  if (role === 'ketua_komite') return 'flowtest.ketua-komite@sirangkul.test';
   if (role === 'bendahara') return 'flowtest.bendahara@sirangkul.test';
   if (role === 'administrator') return 'flowtest.admin@sirangkul.test';
   if (role === 'pengusul') return `flowtest.pengusul.${slug}@sirangkul.test`;
   if (role === 'verifikator') return `flowtest.verifikator.${slug}@sirangkul.test`;
-  if (role === 'komite_madrasah') return `flowtest.komite.${slug}@sirangkul.test`;
   throw new Error(`Unknown account role: ${role}`);
 }
 
@@ -330,14 +330,14 @@ async function verifyProposal(token, proposalId, field, scope) {
 
 async function approveKomite(token, proposalId, field, scope) {
   const visible = await proposalListContains(token, proposalId, 'approved');
-  expect(visible, scope, 'Proposal tidak terlihat di antrian Komite bidang yang sama', { proposalId });
-  await downloadAllAttachments(token, proposalId, `${scope}.download.komite`);
+  expect(visible, scope, 'Proposal tidak terlihat di antrian Ketua Komite global', { proposalId });
+  await downloadAllAttachments(token, proposalId, `${scope}.download.ketua_komite`);
   const { body } = await request('POST', `/proposals/${proposalId}/approve`, {
     token,
-    json: { notes: `Komite menyetujui proposal ${field.name}` },
+    json: { notes: `Ketua Komite menyetujui proposal ${field.name}` },
   });
   const proposal = getProposalFromApprovalBody(body);
-  expect(proposal.status === 'final_approved', scope, 'Approve Komite tidak menghasilkan status final_approved', {
+  expect(proposal.status === 'final_approved', scope, 'Approve Ketua Komite tidak menghasilkan status final_approved', {
     status: proposal.status,
   });
   return proposal;
@@ -424,8 +424,8 @@ async function rejectProposal(token, proposalId, actorRole, field, scope) {
       reason: `Dokumen proposal belum memuat rincian kebutuhan bidang ${field.name}.`,
       suggestions: 'Lengkapi rincian kebutuhan, jadwal kegiatan, dan penanggung jawab sebelum diajukan ulang.',
     },
-    komite_madrasah: {
-      reason: `Anggaran belum sesuai prioritas komite untuk bidang ${field.name}.`,
+    ketua_komite: {
+      reason: `Anggaran belum sesuai prioritas Ketua Komite untuk bidang ${field.name}.`,
       suggestions: 'Sesuaikan nominal, tambahkan dasar kebutuhan, dan ajukan ulang setelah revisi.',
     },
     kepala_madrasah: {
@@ -523,7 +523,7 @@ async function createProposalForCase(field, flowCase, rkam) {
 
 async function runApprovalToCompletion(field, proposalId, scope, options = {}) {
   const verifikatorToken = await login(account('verifikator', field.slug));
-  const komiteToken = await login(account('komite_madrasah', field.slug));
+  const ketuaKomiteToken = await login(account('ketua_komite'));
   const kepalaToken = await login(account('kepala_madrasah'));
   const bendaharaToken = await login(account('bendahara'));
 
@@ -534,7 +534,7 @@ async function runApprovalToCompletion(field, proposalId, scope, options = {}) {
     await finalApprove(kepalaToken, proposalId, scope);
   }
   if (!options.skipKomite) {
-    await approveKomite(komiteToken, proposalId, field, scope);
+    await approveKomite(ketuaKomiteToken, proposalId, field, scope);
   }
   return processPayment(bendaharaToken, proposalId, field, scope);
 }
@@ -564,17 +564,17 @@ async function runMainMatrix() {
         created.set(`${field.slug}:${flowCase.key}`, createdProposal.proposalId);
 
         const verifikatorToken = await login(account('verifikator', field.slug));
-        const komiteToken = await login(account('komite_madrasah', field.slug));
+        const ketuaKomiteToken = await login(account('ketua_komite'));
         const kepalaToken = await login(account('kepala_madrasah'));
 
         if (flowCase.rejectAt === 'verifikator') {
           await rejectProposal(verifikatorToken, createdProposal.proposalId, 'verifikator', field, scope);
           await reviseAndResubmit(createdProposal.ownerToken, createdProposal.proposalId, field, flowCase, scope);
           await runApprovalToCompletion(field, createdProposal.proposalId, scope);
-        } else if (flowCase.rejectAt === 'komite_madrasah') {
+        } else if (flowCase.rejectAt === 'ketua_komite') {
           await verifyProposal(verifikatorToken, createdProposal.proposalId, field, scope);
           await finalApprove(kepalaToken, createdProposal.proposalId, scope);
-          await rejectProposal(komiteToken, createdProposal.proposalId, 'komite_madrasah', field, scope);
+          await rejectProposal(ketuaKomiteToken, createdProposal.proposalId, 'ketua_komite', field, scope);
           await reviseAndResubmit(createdProposal.ownerToken, createdProposal.proposalId, field, flowCase, scope);
           await runApprovalToCompletion(field, createdProposal.proposalId, scope);
         } else if (flowCase.rejectAt === 'kepala_madrasah') {
@@ -632,7 +632,7 @@ async function runRbac(created) {
     const attachments = await listAttachments(ownerToken, proposalId);
     const attachmentId = attachments[0]?.id;
 
-    for (const role of ['verifikator', 'komite_madrasah']) {
+    for (const role of ['verifikator', 'pengusul']) {
       const wrongToken = await login(account(role, wrongField.slug));
       const scope = `rbac.${targetField.slug}.${role}.${wrongField.slug}`;
       const visible = await proposalListContains(wrongToken, proposalId);
@@ -828,7 +828,7 @@ async function runNegativeUploads() {
 
 async function validateSetup() {
   for (const field of fields) {
-    const roles = ['pengusul', 'verifikator', 'komite_madrasah'];
+    const roles = ['pengusul', 'verifikator'];
     for (const role of roles) {
       const email = account(role, field.slug);
       const token = await login(email);
@@ -846,9 +846,14 @@ async function validateSetup() {
   expect(Boolean(kepalaToken), 'setup.kepala', 'Login Kepala Madrasah gagal');
   expect(kepala?.bidang_id === null, 'setup.kepala', 'Kepala Madrasah flow test tidak global/bidang_id null', kepala);
 
+  const ketuaToken = await login(account('ketua_komite'));
+  const ketua = users.get(account('ketua_komite'));
+  expect(Boolean(ketuaToken), 'setup.ketua_komite', 'Login Ketua Komite gagal');
+  expect(ketua?.bidang_id === null, 'setup.ketua_komite', 'Ketua Komite flow test tidak global/bidang_id null', ketua);
+
   await login(account('bendahara'));
   await login(account('administrator'));
-  results.setup.push({ checked: 'flowtest logins and bidang mapping', ok: true });
+  results.setup.push({ checked: 'flowtest logins, global roles, and bidang mapping', ok: true });
 }
 
 async function main() {

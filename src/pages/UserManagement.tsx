@@ -31,6 +31,8 @@ const ROLE_OPTIONS = [
   { value: 'bendahara', label: 'Bendahara' },
 ];
 
+const TABLE_ROLE_OPTIONS = ROLE_OPTIONS.filter((role) => role.value !== KETUA_KOMITE_ROLE);
+
 const createEmptyKepalaMadrasahForm = () => ({
   full_name: '',
   email: '',
@@ -74,6 +76,11 @@ const UserManagement: React.FC = () => {
   const [isEditingKepalaMadrasah, setIsEditingKepalaMadrasah] = useState(false);
   const [isSavingKepalaMadrasah, setIsSavingKepalaMadrasah] = useState(false);
   const [kepalaMadrasahForm, setKepalaMadrasahForm] = useState(createEmptyKepalaMadrasahForm);
+  const [ketuaKomite, setKetuaKomite] = useState<User | null>(null);
+  const [isKetuaKomiteLoading, setIsKetuaKomiteLoading] = useState(true);
+  const [isEditingKetuaKomite, setIsEditingKetuaKomite] = useState(false);
+  const [isSavingKetuaKomite, setIsSavingKetuaKomite] = useState(false);
+  const [ketuaKomiteForm, setKetuaKomiteForm] = useState(createEmptyKepalaMadrasahForm);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info' | 'warning'; message: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -117,7 +124,7 @@ const UserManagement: React.FC = () => {
         page: currentPage,
         per_page: perPage,
         role: selectedRole,
-        exclude_role: KEPALA_MADRASAH_ROLE,
+        exclude_role: `${KEPALA_MADRASAH_ROLE},${KETUA_KOMITE_ROLE}`,
         bidang_id: selectedBidangId,
         search: searchTerm,
         sort_by: sortConfig.key,
@@ -180,6 +187,35 @@ const UserManagement: React.FC = () => {
     }
   }, []);
 
+  const fetchKetuaKomite = useCallback(async () => {
+    try {
+      setIsKetuaKomiteLoading(true);
+      const response = await apiService.getUsers({
+        role: KETUA_KOMITE_ROLE,
+        no_paginate: true,
+      });
+      const data = Array.isArray(response) ? response : response.data;
+      const ketuaUser = data.find((user) => user.role === KETUA_KOMITE_ROLE) || null;
+      setKetuaKomite(ketuaUser);
+
+      if (ketuaUser) {
+        setKetuaKomiteForm({
+          full_name: ketuaUser.full_name || ketuaUser.name || '',
+          email: ketuaUser.email,
+          status: ketuaUser.status || 'Active',
+          password: '',
+        });
+      } else {
+        setKetuaKomiteForm(createEmptyKepalaMadrasahForm());
+      }
+    } catch (error) {
+      console.error('Failed to fetch Ketua Komite:', error);
+      setToast({ type: 'error', message: 'Gagal memuat data Ketua Komite.' });
+    } finally {
+      setIsKetuaKomiteLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
@@ -187,6 +223,10 @@ const UserManagement: React.FC = () => {
   useEffect(() => {
     fetchKepalaMadrasah();
   }, [fetchKepalaMadrasah]);
+
+  useEffect(() => {
+    fetchKetuaKomite();
+  }, [fetchKetuaKomite]);
 
   useEffect(() => {
     fetchBidangs();
@@ -274,6 +314,7 @@ const UserManagement: React.FC = () => {
       setShowFormModal(false);
       await fetchUsers();
       await fetchKepalaMadrasah();
+      await fetchKetuaKomite();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Gagal menyimpan user.';
       setToast({ type: 'error', message });
@@ -290,6 +331,7 @@ const UserManagement: React.FC = () => {
       setToast({ type: 'success', message: 'User berhasil dihapus.' });
       await fetchUsers();
       await fetchKepalaMadrasah();
+      await fetchKetuaKomite();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Gagal menghapus user.';
       setToast({ type: 'error', message });
@@ -304,8 +346,10 @@ const UserManagement: React.FC = () => {
   );
 
   const formRoleOptions = useMemo(
-    () => ROLE_OPTIONS,
-    [],
+    () => ROLE_OPTIONS.filter((role) => (
+      role.value !== KETUA_KOMITE_ROLE || (!ketuaKomite && !editingId)
+    )),
+    [editingId, ketuaKomite],
   );
 
   const handleStartKepalaMadrasahEdit = () => {
@@ -373,6 +417,80 @@ const UserManagement: React.FC = () => {
       setToast({ type: 'error', message });
     } finally {
       setIsSavingKepalaMadrasah(false);
+    }
+  };
+
+  const handleStartKetuaKomiteEdit = () => {
+    if (ketuaKomite) {
+      setKetuaKomiteForm({
+        full_name: ketuaKomite.full_name || ketuaKomite.name || '',
+        email: ketuaKomite.email,
+        status: ketuaKomite.status || 'Active',
+        password: '',
+      });
+    } else {
+      setKetuaKomiteForm(createEmptyKepalaMadrasahForm());
+    }
+    setIsEditingKetuaKomite(true);
+  };
+
+  const handleCancelKetuaKomiteEdit = () => {
+    if (ketuaKomite) {
+      setKetuaKomiteForm({
+        full_name: ketuaKomite.full_name || ketuaKomite.name || '',
+        email: ketuaKomite.email,
+        status: ketuaKomite.status || 'Active',
+        password: '',
+      });
+    } else {
+      setKetuaKomiteForm(createEmptyKepalaMadrasahForm());
+    }
+    setIsEditingKetuaKomite(false);
+  };
+
+  const handleSubmitKetuaKomite = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!ketuaKomite && !ketuaKomiteForm.password) {
+      setToast({ type: 'error', message: 'Password wajib diisi saat membuat Ketua Komite.' });
+      return;
+    }
+
+    if (ketuaKomiteForm.password && ketuaKomiteForm.password.length < 8) {
+      setToast({ type: 'error', message: 'Password minimal 8 karakter.' });
+      return;
+    }
+
+    try {
+      setIsSavingKetuaKomite(true);
+      const payload = {
+        full_name: ketuaKomiteForm.full_name,
+        email: ketuaKomiteForm.email,
+        role: KETUA_KOMITE_ROLE,
+        status: ketuaKomiteForm.status,
+        bidang_id: null,
+        ...(ketuaKomiteForm.password ? { password: ketuaKomiteForm.password } : {}),
+      };
+
+      const savedUser = ketuaKomite
+        ? await apiService.updateUser(ketuaKomite.id, payload)
+        : await apiService.addUser(payload);
+
+      setKetuaKomite(savedUser);
+      setKetuaKomiteForm({
+        full_name: savedUser.full_name || savedUser.name || '',
+        email: savedUser.email,
+        status: savedUser.status || 'Active',
+        password: '',
+      });
+      setIsEditingKetuaKomite(false);
+      await fetchUsers();
+      setToast({ type: 'success', message: 'Data Ketua Komite berhasil disimpan.' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Gagal menyimpan Ketua Komite.';
+      setToast({ type: 'error', message });
+    } finally {
+      setIsSavingKetuaKomite(false);
     }
   };
 
@@ -542,6 +660,159 @@ const UserManagement: React.FC = () => {
         </div>
       </section>
 
+      <section className="overflow-hidden rounded-xl border border-amber-100 bg-white shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-amber-50 bg-amber-50/60 p-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-lg shadow-amber-100">
+              <CheckCircle size={24} />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-amber-600">Ketua Komite</p>
+              <h2 className="mt-1 text-lg font-bold text-gray-900">
+                {isKetuaKomiteLoading
+                  ? 'Memuat data...'
+                  : ketuaKomite?.full_name || ketuaKomite?.name || 'Belum ditentukan'}
+              </h2>
+            </div>
+          </div>
+
+          {!isKetuaKomiteLoading && !isEditingKetuaKomite && (
+            <button
+              type="button"
+              onClick={handleStartKetuaKomiteEdit}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-white px-4 py-2 text-sm font-bold text-amber-700 shadow-sm transition-all hover:bg-amber-50"
+            >
+              {ketuaKomite ? <Edit2 size={16} /> : <Plus size={16} />}
+              {ketuaKomite ? 'Edit Data' : 'Buat Akun'}
+            </button>
+          )}
+        </div>
+
+        <div className="p-5">
+          {isKetuaKomiteLoading ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={`ketua-loading-${index}`} className="animate-pulse">
+                  <div className="mb-2 h-3 w-20 rounded bg-gray-100" />
+                  <div className="h-10 rounded-lg bg-gray-100" />
+                </div>
+              ))}
+            </div>
+          ) : isEditingKetuaKomite ? (
+            <form onSubmit={handleSubmitKetuaKomite} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-gray-400">Nama Lengkap</label>
+                  <input
+                    type="text"
+                    required
+                    value={ketuaKomiteForm.full_name}
+                    onChange={(event) => setKetuaKomiteForm((prev) => ({ ...prev, full_name: event.target.value }))}
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 font-semibold outline-none transition-all focus:border-amber-500 focus:ring-4 focus:ring-amber-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-gray-400">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={ketuaKomiteForm.email}
+                    onChange={(event) => setKetuaKomiteForm((prev) => ({ ...prev, email: event.target.value }))}
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 outline-none transition-all focus:border-amber-500 focus:ring-4 focus:ring-amber-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-gray-400">Status</label>
+                  <select
+                    value={ketuaKomiteForm.status}
+                    onChange={(event) => setKetuaKomiteForm((prev) => ({ ...prev, status: event.target.value }))}
+                    className="w-full appearance-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 outline-none transition-all focus:border-amber-500 focus:ring-4 focus:ring-amber-50"
+                  >
+                    <option value="Active">Aktif</option>
+                    <option value="Inactive">Non-Aktif</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-gray-400">
+                    Password {ketuaKomite && <span className="normal-case italic font-normal text-[10px]">(Kosongkan jika tetap)</span>}
+                  </label>
+                  <input
+                    type="password"
+                    required={!ketuaKomite}
+                    minLength={8}
+                    value={ketuaKomiteForm.password}
+                    onChange={(event) => setKetuaKomiteForm((prev) => ({ ...prev, password: event.target.value }))}
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 outline-none transition-all focus:border-amber-500 focus:ring-4 focus:ring-amber-50"
+                    placeholder={ketuaKomite ? 'Kosongkan jika tetap' : 'Minimal 8 karakter'}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={handleCancelKetuaKomiteEdit}
+                  disabled={isSavingKetuaKomite}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-gray-700 shadow-sm transition-all hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <XIcon size={16} />
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingKetuaKomite}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-5 py-2 text-sm font-bold text-white shadow-lg shadow-amber-100 transition-all hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <CheckCircle size={16} />
+                  {isSavingKetuaKomite ? 'Menyimpan...' : 'Simpan'}
+                </button>
+              </div>
+            </form>
+          ) : ketuaKomite ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Nama Lengkap</p>
+                <p className="mt-1 font-bold text-gray-900">{ketuaKomite.full_name || ketuaKomite.name || '-'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Email</p>
+                <div className="mt-1 flex items-center gap-2 text-gray-700">
+                  <Mail size={14} className="text-gray-400" />
+                  <span className="font-medium">{ketuaKomite.email}</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Role</p>
+                <span className={`mt-1 inline-flex rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getRoleTone(KETUA_KOMITE_ROLE)}`}>
+                  Ketua Komite
+                </span>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Status</p>
+                {ketuaKomite.status === 'Active' ? (
+                  <div className="mt-1 flex items-center gap-1.5 text-green-600">
+                    <CheckCircle size={14} />
+                    <span className="text-xs font-bold">Aktif</span>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex items-center gap-1.5 text-red-600">
+                    <XCircle size={14} />
+                    <span className="text-xs font-bold">Non-Aktif</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+              Ketua Komite belum ditentukan. Gunakan tombol Buat Akun untuk membuat satu akun global tanpa bidang.
+            </div>
+          )}
+        </div>
+      </section>
+
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div className="relative md:col-span-2">
@@ -563,7 +834,7 @@ const UserManagement: React.FC = () => {
               className="w-full appearance-none rounded-lg border border-gray-200 bg-gray-50 py-2 pl-10 pr-4 outline-none transition-all focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">Semua Role</option>
-              {ROLE_OPTIONS.map((role) => (
+              {TABLE_ROLE_OPTIONS.map((role) => (
                 <option key={role.value} value={role.value}>{role.label}</option>
               ))}
             </select>

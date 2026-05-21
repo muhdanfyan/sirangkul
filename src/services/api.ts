@@ -326,7 +326,8 @@ export interface RKAMCreateRequest {
 export interface RKAMUpdateRequest extends Partial<RKAMCreateRequest> {}
 
 export interface ApiError {
-  message: string;
+  message?: string;
+  errors?: Record<string, string[]>;
 }
 
 export interface ProposalAttachment {
@@ -370,6 +371,18 @@ class ApiService {
     this.baseURL = baseURL;
   }
 
+  private getErrorMessage(errorData: ApiError, fallback: string): string {
+    if (errorData.message) {
+      return errorData.message;
+    }
+
+    const firstValidationError = errorData.errors
+      ? Object.values(errorData.errors).flat().find(Boolean)
+      : undefined;
+
+    return firstValidationError || fallback;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -404,7 +417,7 @@ class ApiService {
         if (contentType && contentType.includes('application/json')) {
           try {
             const errorData = await response.json();
-            const error = new Error(errorData.message || `HTTP error! status: ${response.status}`) as any;
+            const error = new Error(this.getErrorMessage(errorData, `HTTP error! status: ${response.status}`)) as any;
             error.response = { data: errorData }; // Mock axios structure for easier transition
             throw error;
           } catch (jsonError) {
@@ -468,7 +481,7 @@ class ApiService {
       : {};
 
     if (!response.ok) {
-      const message = (payload as ApiError).message || `HTTP error! status: ${response.status}`;
+      const message = this.getErrorMessage(payload as ApiError, `HTTP error! status: ${response.status}`);
       const error = new Error(message) as Error & { response?: { data: unknown } };
       error.response = { data: payload };
       throw error;

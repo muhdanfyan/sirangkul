@@ -1,22 +1,21 @@
 ﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, Plus, Edit2, Trash2, Printer, Settings, ChevronLeft, 
   ChevronRight, Calendar, Filter, ArrowUpDown, ChevronUp, ChevronDown, Eye, X as XIcon
 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import Toast from '../components/Toast';
-import { apiService, RKAM, Category, Payment, Proposal } from '../services/api';
+import { apiService, RKAM, Category } from '../services/api';
 import CategoryManagementModal from '../components/CategoryManagementModal';
 import RKAMPrintTemplate from './RKAMPrintTemplate';
 import { applyCompletedPaymentUsageToRKAM, resolveBudgetDateFilter } from '../utils/rkamBudget';
-import { parseAmountValue } from '../utils/currency';
-import { getPaymentStatusLabel } from '../utils/paymentStatus';
 
 const RKAMManagement: React.FC = () => {
+  const navigate = useNavigate();
   // Data States
   const [rkamItems, setRkamItems] = useState<RKAM[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [, setUnits] = useState<string[]>([]);
   
@@ -26,9 +25,6 @@ const RKAMManagement: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
-  const [detailRkam, setDetailRkam] = useState<RKAM | null>(null);
-  const [detailProposals, setDetailProposals] = useState<Proposal[]>([]);
-  const [detailLoading, setDetailLoading] = useState(false);
   
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
@@ -166,7 +162,6 @@ const RKAMManagement: React.FC = () => {
 
       if (paymentResult.status !== 'fulfilled') {
         console.warn('Failed to sync completed payment usage for RKAM page:', paymentResult.reason);
-        setPayments([]);
         setRkamItems(rawRkams);
         setSummary(rawSummary);
         return;
@@ -177,7 +172,6 @@ const RKAMManagement: React.FC = () => {
         end: dateRange.end,
       });
 
-      setPayments(paymentResult.value);
       setRkamItems(applyCompletedPaymentUsageToRKAM(rawRkams, paymentResult.value, paymentDateFilter));
       setSummary(rawSummary);
     } catch (err) {
@@ -389,27 +383,8 @@ const RKAMManagement: React.FC = () => {
     setConfirmDelete(null);
   };
 
-  const handleOpenDetail = async (item: RKAM) => {
-    setDetailRkam(item);
-    setDetailLoading(true);
-    setDetailProposals([]);
-
-    try {
-      const response = await apiService.getRKAMProposals(item.id);
-      setDetailRkam(response.rkam);
-      setDetailProposals(response.proposals);
-    } catch (err: any) {
-      console.error('Failed to fetch RKAM proposals:', err);
-      setToast({ type: 'error', message: err.message || 'Gagal memuat detail proposal RKAM.' });
-    } finally {
-      setDetailLoading(false);
-    }
-  };
-
-  const closeDetailModal = () => {
-    setDetailRkam(null);
-    setDetailProposals([]);
-    setDetailLoading(false);
+  const handleOpenDetail = (item: RKAM) => {
+    navigate(`/rkam/${item.id}`);
   };
 
   const handlePrint = useCallback(async () => {
@@ -437,58 +412,6 @@ const RKAMManagement: React.FC = () => {
       maximumFractionDigits: 0,
     }).format(num);
   };
-
-  const formatDate = (value?: string | null) => {
-    if (!value) {
-      return '-';
-    }
-
-    return new Date(value).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
-  const getProposalStatusConfig = (status: string) => {
-    const config: Record<string, { label: string; className: string }> = {
-      draft: { label: 'Draft', className: 'bg-gray-100 text-gray-700' },
-      submitted: { label: 'Menunggu Verifikator', className: 'bg-blue-100 text-blue-700' },
-      verified: { label: 'Menunggu Kepala Madrasah', className: 'bg-cyan-100 text-cyan-700' },
-      approved: { label: 'Menunggu Ketua Komite', className: 'bg-purple-100 text-purple-700' },
-      rejected: { label: 'Ditolak', className: 'bg-red-100 text-red-700' },
-      final_approved: { label: 'Siap Dibayar', className: 'bg-green-100 text-green-700' },
-      payment_processing: { label: 'Proses Pembayaran', className: 'bg-yellow-100 text-yellow-700' },
-      completed: { label: 'Sudah Terbayar', className: 'bg-emerald-100 text-emerald-700' },
-    };
-
-    return config[status] || { label: status, className: 'bg-gray-100 text-gray-700' };
-  };
-
-  const getPaymentByProposalId = useCallback((proposalId: string) => (
-    payments.find((payment) => payment.proposal_id === proposalId)
-  ), [payments]);
-
-  const detailSummary = useMemo(() => {
-    const totalPengajuan = detailProposals.reduce((sum, proposal) => (
-      sum + parseAmountValue(proposal.jumlah_pengajuan)
-    ), 0);
-
-    const totalTerbayar = detailProposals.reduce((sum, proposal) => {
-      const payment = getPaymentByProposalId(proposal.id);
-      if (payment?.status !== 'completed') {
-        return sum;
-      }
-
-      return sum + parseAmountValue(payment.amount);
-    }, 0);
-
-    return {
-      totalProposal: detailProposals.length,
-      totalPengajuan,
-      totalTerbayar,
-    };
-  }, [detailProposals, getPaymentByProposalId]);
 
   // Helper for progress bar
   const getProgressColor = (percentage: number) => {
@@ -920,129 +843,6 @@ const RKAMManagement: React.FC = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>, document.body)
-      }
-
-      {detailRkam && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-5">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Detail RKAM</p>
-                <h2 className="mt-1 text-2xl font-bold text-gray-900">{detailRkam.item_name}</h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  {detailRkam.bidangRef?.name || detailRkam.bidang || detailRkam.category?.name || detailRkam.kategori} â€¢ Tahun Anggaran {detailRkam.tahun_anggaran}
-                </p>
-              </div>
-              <button
-                onClick={closeDetailModal}
-                className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-              >
-                <XIcon size={22} />
-              </button>
-            </div>
-
-            <div className="space-y-6 p-6">
-              <div className="grid gap-4 md:grid-cols-4">
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                  <p className="text-sm text-gray-500">Pagu RKAM</p>
-                  <p className="mt-1 text-lg font-bold text-gray-900">{formatIDR(Number(detailRkam.pagu))}</p>
-                </div>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                  <p className="text-sm text-gray-500">Terpakai</p>
-                  <p className="mt-1 text-lg font-bold text-orange-600">
-                    {formatIDR(Number(detailRkam.terpakai_filtered ?? detailRkam.terpakai))}
-                  </p>
-                </div>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                  <p className="text-sm text-gray-500">Total Pengajuan</p>
-                  <p className="mt-1 text-lg font-bold text-blue-700">{formatIDR(detailSummary.totalPengajuan)}</p>
-                </div>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                  <p className="text-sm text-gray-500">Total Terbayar</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-700">{formatIDR(detailSummary.totalTerbayar)}</p>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200">
-                <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Proposal yang Menggunakan RKAM Ini</h3>
-                    <p className="text-sm text-gray-500">
-                      Total {detailSummary.totalProposal} proposal terkait dengan RKAM ini.
-                    </p>
-                  </div>
-                </div>
-
-                {detailLoading ? (
-                  <div className="flex items-center justify-center px-6 py-16">
-                    <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600"></div>
-                  </div>
-                ) : detailProposals.length === 0 ? (
-                  <div className="px-6 py-14 text-center text-gray-500">
-                    Belum ada proposal yang menggunakan RKAM ini.
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 text-sm">
-                      <thead className="bg-white">
-                        <tr>
-                          <th className="px-6 py-3 text-left font-semibold text-gray-500">Proposal</th>
-                          <th className="px-6 py-3 text-left font-semibold text-gray-500">Pengusul</th>
-                          <th className="px-6 py-3 text-right font-semibold text-gray-500">Nominal Pengajuan</th>
-                          <th className="px-6 py-3 text-left font-semibold text-gray-500">Status Proposal</th>
-                          <th className="px-6 py-3 text-left font-semibold text-gray-500">Status Pembayaran</th>
-                          <th className="px-6 py-3 text-left font-semibold text-gray-500">Tanggal</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100 bg-white">
-                        {detailProposals.map((proposal) => {
-                          const proposalStatus = getProposalStatusConfig(proposal.status);
-                          const payment = getPaymentByProposalId(proposal.id);
-
-                          return (
-                            <tr key={proposal.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4">
-                                <div>
-                                  <p className="font-semibold text-gray-900">{proposal.title}</p>
-                                  <p className="mt-1 text-xs text-gray-500">{proposal.description || 'Tanpa deskripsi tambahan.'}</p>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-gray-700">
-                                {proposal.user?.full_name || proposal.user?.name || '-'}
-                              </td>
-                              <td className="px-6 py-4 text-right font-semibold text-gray-900">
-                                {formatIDR(parseAmountValue(proposal.jumlah_pengajuan))}
-                              </td>
-                              <td className="px-6 py-4">
-                                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${proposalStatus.className}`}>
-                                  {proposalStatus.label}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-gray-700">
-                                {payment
-                                  ? getPaymentStatusLabel(payment.status)
-                                  : (proposal.status === 'completed' ? 'Sudah Terbayar' : 'Belum Diproses')}
-                              </td>
-                              <td className="px-6 py-4 text-gray-500">
-                                {formatDate(
-                                  proposal.completed_at
-                                  || proposal.final_approved_at
-                                  || proposal.approved_at
-                                  || proposal.submitted_at
-                                  || proposal.created_at,
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>, document.body)
       }
