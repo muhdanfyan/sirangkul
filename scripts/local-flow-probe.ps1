@@ -1,5 +1,6 @@
 param(
-    [string]$BaseUrl = "http://127.0.0.1:8000",
+    [string]$BaseUrl = "http://127.0.0.1:8000/api",
+    [string]$ApiPath = (Join-Path (Split-Path -Parent (Get-Location).Path) "api-sirangkul"),
     [string]$Password = "Password123!"
 )
 
@@ -12,7 +13,7 @@ $bidangs = @(
     @{ Name = "Sekretariat Komite"; Slug = "sekretariat" }
 )
 
-$tmpDir = Join-Path (Get-Location) "api-sirangkul\storage\framework\testing\local-http-flow"
+$tmpDir = Join-Path (Get-Location) "scratch\local-http-flow"
 New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
 
 function Invoke-Api {
@@ -91,8 +92,9 @@ function Write-GzipFile {
 function TokenFor {
     param([string]$Email)
 
+    $apiPathForPhp = $ApiPath.Replace("\", "/").Replace("'", "\\'")
     $php = @"
-chdir('api-sirangkul');
+chdir('$apiPathForPhp');
 require 'vendor/autoload.php';
 `$app = require 'bootstrap/app.php';
 `$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
@@ -117,18 +119,26 @@ function Upload-ProposalAttachment {
         [string]$Slug
     )
 
-    $originalName = "flow-http-$Slug.pdf"
-    $gzPath = Join-Path $tmpDir "$originalName.gz"
-    Write-GzipFile -Path $gzPath -Text "%PDF-1.4`nFlow HTTP $Slug`n%%EOF"
+    $proposalName = "flow-http-proposal-$Slug.pdf"
+    $lpjName = "flow-http-lpj-$Slug.pdf"
+    $proposalPath = Join-Path $tmpDir "$proposalName.gz"
+    $lpjPath = Join-Path $tmpDir "$lpjName.gz"
+    Write-GzipFile -Path $proposalPath -Text "%PDF-1.4`nFlow HTTP proposal $Slug`n%%EOF"
+    Write-GzipFile -Path $lpjPath -Text "%PDF-1.4`nFlow HTTP lpj $Slug`n%%EOF"
 
     $json = & curl.exe -sS -X POST "$BaseUrl/proposals/$ProposalId/attachments" `
         -H "Authorization: Bearer $Token" `
         -H "Accept: application/json" `
-        -F "files[]=@$gzPath;filename=$originalName.gz;type=application/gzip" `
-        -F "original_names[]=$originalName" `
+        -F "files[]=@$proposalPath;filename=$proposalName.gz;type=application/gzip" `
+        -F "files[]=@$lpjPath;filename=$lpjName.gz;type=application/gzip" `
+        -F "original_names[]=$proposalName" `
+        -F "original_names[]=$lpjName" `
+        -F "mime_types[]=application/pdf" `
         -F "mime_types[]=application/pdf" `
         -F "file_sizes[]=2048" `
-        -F "attachment_types[]=proposal"
+        -F "file_sizes[]=2048" `
+        -F "attachment_types[]=proposal" `
+        -F "attachment_types[]=lpj"
 
     if ($LASTEXITCODE -ne 0) {
         throw "Attachment upload curl failed for $Slug"
@@ -212,6 +222,7 @@ function Assert-Forbidden {
 $adminToken = TokenFor -Email "flowtest.admin@sirangkul.test"
 $kepalaToken = TokenFor -Email "kepala@madrasah.com"
 $bendaharaToken = TokenFor -Email "flowtest.bendahara@sirangkul.test"
+$komiteToken = TokenFor -Email "flowtest.ketua-komite@sirangkul.test"
 
 foreach ($bidang in $bidangs) {
     $name = $bidang.Name
@@ -219,10 +230,8 @@ foreach ($bidang in $bidangs) {
 
     $pengusulToken = TokenFor -Email "flowtest.pengusul.$slug@sirangkul.test"
     $verifikatorToken = TokenFor -Email "flowtest.verifikator.$slug@sirangkul.test"
-    $komiteToken = TokenFor -Email "flowtest.komite.$slug@sirangkul.test"
     $otherSlug = ($bidangs | Where-Object { $_.Slug -ne $slug } | Select-Object -First 1).Slug
     $otherVerifikatorToken = TokenFor -Email "flowtest.verifikator.$otherSlug@sirangkul.test"
-    $otherKomiteToken = TokenFor -Email "flowtest.komite.$otherSlug@sirangkul.test"
 
     $search = [System.Uri]::EscapeDataString("Flow Test RKAM $name")
     $rkams = Invoke-Api -Method "GET" -Path "/rkam?search=$search&no_paginate=true" -Token $adminToken
@@ -273,7 +282,6 @@ foreach ($bidang in $bidangs) {
     } | Out-Null
 
     Assert-DownloadOk -Token $komiteToken -AttachmentId $attachmentId -Label "$slug-komite"
-    Assert-Forbidden -Token $otherKomiteToken -Path "/attachments/$attachmentId/download" -Label "$slug other komite attachment"
     $reject = Invoke-Api -Method "POST" -Path "/proposals/$proposalId/reject" -Token $komiteToken -Body @{
         rejection_reason = "Reject komite HTTP"
         improvement_suggestions = "Perbaikan dari komite pada flow HTTP."

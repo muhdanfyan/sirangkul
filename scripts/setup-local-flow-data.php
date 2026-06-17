@@ -72,6 +72,15 @@ $summary = [
 
 $runtime = [
     'api_base_url' => getenv('SIRANGKUL_API_BASE_URL') ?: 'http://127.0.0.1:8000/api',
+    'title_prefix' => getenv('SIRANGKUL_FLOW_TITLE_PREFIX') ?: 'FLOW',
+    'accounts' => [
+        'pengusul' => [],
+        'verifikator' => [],
+        'kepala_madrasah' => 'kepala@madrasah.com',
+        'ketua_komite' => 'flowtest.ketua-komite@sirangkul.test',
+        'bendahara' => 'flowtest.bendahara@sirangkul.test',
+        'administrator' => 'flowtest.admin@sirangkul.test',
+    ],
     'tokens' => [],
 ];
 
@@ -82,14 +91,20 @@ DB::transaction(function () use ($bidangDefinitions, $password, &$summary, &$run
         if (!$bidang) {
             $bidang = new Bidang();
             $bidang->id = $definition['id'];
+            $bidang->fill([
+                'name' => $definition['name'],
+                'description' => $definition['description'],
+                'color' => $definition['color'],
+                'sort_order' => $definition['sort_order'],
+            ]);
+        } else {
+            $bidang->fill([
+                'name' => $definition['name'],
+                'description' => $bidang->description ?: $definition['description'],
+                'color' => $bidang->color ?: $definition['color'],
+                'sort_order' => $bidang->sort_order ?? $definition['sort_order'],
+            ]);
         }
-
-        $bidang->fill([
-            'name' => $definition['name'],
-            'description' => $definition['description'],
-            'color' => $definition['color'],
-            'sort_order' => $definition['sort_order'],
-        ]);
         $bidang->save();
 
         if (Schema::hasTable('categories')) {
@@ -97,9 +112,9 @@ DB::transaction(function () use ($bidangDefinitions, $password, &$summary, &$run
                 ['id' => $bidang->id],
                 [
                     'name' => $definition['name'],
-                    'description' => $definition['description'],
-                    'color' => $definition['color'],
-                    'sort_order' => $definition['sort_order'],
+                    'description' => $bidang->description ?: $definition['description'],
+                    'color' => $bidang->color ?: $definition['color'],
+                    'sort_order' => $bidang->sort_order ?? $definition['sort_order'],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
@@ -120,11 +135,6 @@ DB::transaction(function () use ($bidangDefinitions, $password, &$summary, &$run
             "flowtest.verifikator.{$slug}@sirangkul.test" => [
                 'full_name' => 'Flow Test Verifikator ' . $definition['name'],
                 'role' => 'verifikator',
-                'bidang_id' => $bidang->id,
-            ],
-            "flowtest.komite.{$slug}@sirangkul.test" => [
-                'full_name' => 'Flow Test Komite ' . $definition['name'],
-                'role' => 'komite_madrasah',
                 'bidang_id' => $bidang->id,
             ],
         ];
@@ -150,6 +160,7 @@ DB::transaction(function () use ($bidangDefinitions, $password, &$summary, &$run
 
             $user->tokens()->where('name', 'local-flow-scenario')->delete();
             $runtime['tokens'][$email] = $user->createToken('local-flow-scenario')->plainTextToken;
+            $runtime['accounts'][$data['role']][$slug] = $email;
         }
 
         $rkam = Rkam::withoutGlobalScopes()
@@ -223,6 +234,11 @@ DB::transaction(function () use ($bidangDefinitions, $password, &$summary, &$run
             'role' => 'bendahara',
             'bidang_id' => null,
         ],
+        'flowtest.ketua-komite@sirangkul.test' => [
+            'full_name' => 'Flow Test Ketua Komite',
+            'role' => 'ketua_komite',
+            'bidang_id' => null,
+        ],
         'flowtest.admin@sirangkul.test' => [
             'full_name' => 'Flow Test Administrator',
             'role' => 'administrator',
@@ -251,6 +267,7 @@ DB::transaction(function () use ($bidangDefinitions, $password, &$summary, &$run
 
         $user->tokens()->where('name', 'local-flow-scenario')->delete();
         $runtime['tokens'][$email] = $user->createToken('local-flow-scenario')->plainTextToken;
+        $runtime['accounts'][$data['role']] = $email;
     }
 });
 

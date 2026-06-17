@@ -10,14 +10,34 @@ import Toast from '../components/Toast';
 import { apiService, RKAM, Category } from '../services/api';
 import CategoryManagementModal from '../components/CategoryManagementModal';
 import RKAMPrintTemplate from './RKAMPrintTemplate';
-import { applyCompletedPaymentUsageToRKAM, resolveBudgetDateFilter } from '../utils/rkamBudget';
+import { applyCompletedPaymentUsageToRKAM, resolveBudgetDateFilter, type BudgetTimeframe } from '../utils/rkamBudget';
+import { useAuth } from '../contexts/AuthContext';
+
+const OFFICIAL_RKAM_BIDANG_NAMES = [
+  'HUMAS',
+  'Pendidikan',
+  'Sarana dan Prasarana',
+  'Sekretariat Komite',
+];
+
+const DEFAULT_UNITS = ['Tahun', 'Bulan', 'Paket', 'Kegiatan', 'Unit', 'Orang', 'Siswa'];
+const INVALID_UNIT_OPTION_NAMES = new Set(['volume', 'sarana', 'qr-botanica']);
+const SHORT_BIDANG_LABELS: Record<string, string> = {
+  'Sarana dan Prasarana': 'SARPRA',
+  'Sekretariat Komite': 'SEKKOM',
+};
+const getErrorMessage = (error: unknown, fallback: string) => (
+  error instanceof Error && error.message ? error.message : fallback
+);
 
 const RKAMManagement: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canManageRKAM = user?.role === 'Administrator' || user?.role === 'Bendahara';
   // Data States
   const [rkamItems, setRkamItems] = useState<RKAM[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [, setUnits] = useState<string[]>([]);
+  const [units, setUnits] = useState<string[]>([]);
   
   // UI States
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +63,7 @@ const RKAMManagement: React.FC = () => {
   });
 
   // Filter States
-  const [timeframe, setTimeframe] = useState<'all' | 'year' | 'month' | 'week' | 'custom'>('all');
+  const [timeframe, setTimeframe] = useState<BudgetTimeframe>('all');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
   // Form State
@@ -73,13 +93,47 @@ const RKAMManagement: React.FC = () => {
   }, [formData.volume, formData.unit_price]);
 
   const normalizeText = (value?: string | null) => (value || '').trim().toLowerCase();
+  const getCurrencyDigits = (value: string | number | null | undefined) => {
+    if (typeof value === 'number') {
+      return String(Math.trunc(value));
+    }
+
+    const rawValue = String(value ?? '').trim();
+    if (!rawValue) {
+      return '';
+    }
+
+    if (/^\d+\.\d{1,2}$/.test(rawValue)) {
+      return rawValue.split('.')[0].replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+    }
+
+    return rawValue.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+  };
+  const formatCurrencyInput = (value: string | number | null | undefined) => {
+    const digits = getCurrencyDigits(value);
+    return digits ? new Intl.NumberFormat('id-ID').format(Number(digits)) : '';
+  };
+  const isOfficialBidangName = (value?: string | null) => OFFICIAL_RKAM_BIDANG_NAMES.includes((value || '').trim());
+  const getBidangName = (item: RKAM) => (item.bidangRef?.name || item.bidang || item.category?.name || item.kategori || '').trim();
+  const getTableBidangLabel = (item: RKAM) => {
+    const bidangName = getBidangName(item);
+    return SHORT_BIDANG_LABELS[bidangName] || bidangName;
+  };
+
+  const unitOptions = useMemo(() => {
+    const mergedUnits = [...DEFAULT_UNITS, ...units]
+      .map((unit) => (unit || '').trim())
+      .filter((unit) => unit && !/^\d+([.,]\d+)?$/.test(unit) && !INVALID_UNIT_OPTION_NAMES.has(normalizeText(unit)));
+
+    return Array.from(new Set(mergedUnits)).sort((left, right) => left.localeCompare(right));
+  }, [units]);
 
   const categoryFilterOptions = useMemo(() => {
     const optionsMap = new Map<string, { value: string; label: string }>();
 
     categories.forEach((category) => {
       const label = category.name?.trim();
-      if (!label) {
+      if (!label || !isOfficialBidangName(label)) {
         return;
       }
 
@@ -92,7 +146,7 @@ const RKAMManagement: React.FC = () => {
 
     rkamItems.forEach((item) => {
       const label = (item.bidangRef?.name || item.bidang || item.category?.name || item.kategori || '').trim();
-      if (!label) {
+      if (!label || !isOfficialBidangName(label)) {
         return;
       }
 
@@ -125,7 +179,9 @@ const RKAMManagement: React.FC = () => {
           accumulator.push(category);
         }
         return accumulator;
-      }, []).sort((a, b) => a.name.localeCompare(b.name));
+      }, [])
+        .filter((category) => isOfficialBidangName(category.name))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
       setCategories(mergedCategories);
       setUnits(optionUnits);
@@ -316,6 +372,11 @@ const RKAMManagement: React.FC = () => {
 
   // CRUD Handlers
   const handleOpenForm = (item?: RKAM) => {
+    if (!canManageRKAM) {
+      setToast({ type: 'warning', message: 'Akses tambah/edit RKAM hanya untuk Administrator dan Bendahara.' });
+      return;
+    }
+
     if (item) {
       setEditingId(item.id);
       setFormData({
@@ -323,9 +384,9 @@ const RKAMManagement: React.FC = () => {
         item_name: item.item_name,
         volume: String(item.volume),
         satuan: item.satuan,
-        unit_price: String(item.unit_price),
-        dana_bos: String(item.dana_bos),
-        dana_komite: String(item.dana_komite),
+        unit_price: getCurrencyDigits(item.unit_price),
+        dana_bos: getCurrencyDigits(item.dana_bos),
+        dana_komite: getCurrencyDigits(item.dana_komite),
         tahun_anggaran: item.tahun_anggaran,
         deskripsi: item.deskripsi || '',
       });
@@ -352,9 +413,9 @@ const RKAMManagement: React.FC = () => {
       const payload = {
         ...formData,
         volume: Number(formData.volume),
-        unit_price: Number(formData.unit_price),
-        dana_bos: Number(formData.dana_bos || 0),
-        dana_komite: Number(formData.dana_komite || 0),
+        unit_price: Number(getCurrencyDigits(formData.unit_price)),
+        dana_bos: Number(getCurrencyDigits(formData.dana_bos) || 0),
+        dana_komite: Number(getCurrencyDigits(formData.dana_komite) || 0),
       };
 
       if (editingId) {
@@ -366,8 +427,8 @@ const RKAMManagement: React.FC = () => {
       }
       setShowFormModal(false);
       fetchRKAMData();
-    } catch (err: any) {
-      setToast({ type: 'error', message: err.message || 'Gagal menyimpan RKAM' });
+    } catch (err: unknown) {
+      setToast({ type: 'error', message: getErrorMessage(err, 'Gagal menyimpan RKAM') });
     }
   };
 
@@ -377,8 +438,8 @@ const RKAMManagement: React.FC = () => {
       await apiService.deleteRKAM(confirmDelete);
       setToast({ type: 'success', message: 'RKAM berhasil dihapus' });
       fetchRKAMData();
-    } catch (err: any) {
-      setToast({ type: 'error', message: err.message || 'Gagal menghapus RKAM' });
+    } catch (err: unknown) {
+      setToast({ type: 'error', message: getErrorMessage(err, 'Gagal menghapus RKAM') });
     }
     setConfirmDelete(null);
   };
@@ -397,9 +458,9 @@ const RKAMManagement: React.FC = () => {
         window.print();
         setIsPreparingPrint(false);
       }, 800);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Print failed:', err);
-      setToast({ type: 'error', message: err.message || 'Gagal menyiapkan cetakan.' });
+      setToast({ type: 'error', message: getErrorMessage(err, 'Gagal menyiapkan cetakan.') });
       setIsPreparingPrint(false);
     }
   }, [filteredRkamItems]);
@@ -429,13 +490,15 @@ const RKAMManagement: React.FC = () => {
           <p className="text-gray-500 mt-0.5">Pantau dan kelola distribusi anggaran madrasah secara akurat.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setIsCategoryModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
-          >
-            <Settings size={18} />
-            Kelola Bidang
-          </button>
+          {canManageRKAM && (
+            <button 
+              onClick={() => setIsCategoryModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
+            >
+              <Settings size={18} />
+              Kelola Bidang
+            </button>
+          )}
           <button 
             onClick={handlePrint}
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
@@ -443,13 +506,15 @@ const RKAMManagement: React.FC = () => {
             <Printer size={18} />
             Cetak
           </button>
-          <button 
-            onClick={() => handleOpenForm()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium shadow-sm"
-          >
-            <Plus size={18} />
-            Tambah RKAM
-          </button>
+          {canManageRKAM && (
+            <button 
+              onClick={() => handleOpenForm()}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium shadow-sm"
+            >
+              <Plus size={18} />
+              Tambah RKAM
+            </button>
+          )}
         </div>
       </div>
 
@@ -504,7 +569,7 @@ const RKAMManagement: React.FC = () => {
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <select
               value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value as any)}
+              onChange={(e) => setTimeframe(e.target.value as BudgetTimeframe)}
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg appearance-none bg-white outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">Seluruh Waktu</option>
@@ -584,7 +649,7 @@ const RKAMManagement: React.FC = () => {
                           backgroundColor: `${item.bidangRef?.color || item.category?.color || '#6b7280'}10`
                         }}
                       >
-                        {item.bidangRef?.name || item.bidang || item.category?.name || item.kategori}
+                        {getTableBidangLabel(item)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -620,18 +685,24 @@ const RKAMManagement: React.FC = () => {
                         >
                           <Eye size={14} />
                         </button>
-                        <button 
-                          onClick={() => handleOpenForm(item)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button 
-                          onClick={() => setConfirmDelete(item.id)}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {canManageRKAM && (
+                          <>
+                            <button 
+                              onClick={() => handleOpenForm(item)}
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                              title="Edit RKAM"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button 
+                              onClick={() => setConfirmDelete(item.id)}
+                              className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                              title="Hapus RKAM"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -708,22 +779,24 @@ const RKAMManagement: React.FC = () => {
       )}
 
       {/* Category Management Modal */}
-      <CategoryManagementModal 
-        isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
-        onCategoriesChanged={fetchOptions}
-      />
+      {canManageRKAM && (
+        <CategoryManagementModal 
+          isOpen={isCategoryModalOpen}
+          onClose={() => setIsCategoryModalOpen(false)}
+          onCategoriesChanged={fetchOptions}
+        />
+      )}
 
       {/* RKAM Add/Edit Modal */}
-      {showFormModal && createPortal(
+      {showFormModal && canManageRKAM && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold text-gray-900">{editingId ? 'Edit Anggaran RKAM' : 'Tambah Anggaran Baru'}</h2>
               <button onClick={() => setShowFormModal(false)} className="p-2 hover:bg-gray-100 rounded-full"><XIcon size={24} className="text-gray-400" /></button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Item / Uraian</label>
@@ -752,9 +825,9 @@ const RKAMManagement: React.FC = () => {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Volume</label>
-                  <div className="flex gap-2">
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(12rem,0.5fr)] gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Volume</label>
                     <input
                       type="number"
                       required
@@ -763,37 +836,38 @@ const RKAMManagement: React.FC = () => {
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"
                       placeholder="e.g. 1"
                     />
-                    <div className="relative flex-1">
-                      <input
-                        type="text"
-                        required
-                        list="unitsDropdown"
-                        value={formData.satuan}
-                        onChange={e => setFormData({ ...formData, satuan: e.target.value })}
-                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"
-                        placeholder="Satuan"
-                      />
-                      <datalist id="unitsDropdown">
-                        <option value="Tahun" />
-                        <option value="Bulan" />
-                        <option value="Paket" />
-                        <option value="Orang" />
-                        <option value="Lusin" />
-                        <option value="Item" />
-                      </datalist>
-                    </div>
+                    <p className="mt-1 text-[11px] text-gray-400">Jumlah kebutuhan item RKAM.</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Satuan Volume</label>
+                    <input
+                      type="text"
+                      required
+                      list="unitsDropdown"
+                      value={formData.satuan}
+                      onChange={e => setFormData({ ...formData, satuan: e.target.value })}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"
+                      placeholder="Contoh: Bulan"
+                    />
+                    <datalist id="unitsDropdown">
+                      {unitOptions.map((unit) => (
+                        <option key={unit} value={unit} />
+                      ))}
+                    </datalist>
+                    <p className="mt-1 text-[11px] text-gray-400">Contoh: Bulan, Tahun, Paket, Orang.</p>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Harga Satuan (Rp)</label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     required
-                    value={formData.unit_price}
-                    onChange={e => setFormData({ ...formData, unit_price: e.target.value })}
+                    value={formatCurrencyInput(formData.unit_price)}
+                    onChange={e => setFormData({ ...formData, unit_price: getCurrencyDigits(e.target.value) })}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"
-                    placeholder="e.g. 100000"
+                    placeholder="Contoh: 1.000.000"
                   />
                 </div>
 
@@ -807,9 +881,10 @@ const RKAMManagement: React.FC = () => {
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Dana BOS (Rp)</label>
                   <input
-                    type="number"
-                    value={formData.dana_bos}
-                    onChange={e => setFormData({ ...formData, dana_bos: e.target.value })}
+                    type="text"
+                    inputMode="numeric"
+                    value={formatCurrencyInput(formData.dana_bos)}
+                    onChange={e => setFormData({ ...formData, dana_bos: getCurrencyDigits(e.target.value) })}
                     className="w-full px-4 py-2 bg-green-50 border border-green-100 rounded-lg outline-none"
                     placeholder="0"
                   />
@@ -818,9 +893,10 @@ const RKAMManagement: React.FC = () => {
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Dana Komite (Rp)</label>
                   <input
-                    type="number"
-                    value={formData.dana_komite}
-                    onChange={e => setFormData({ ...formData, dana_komite: e.target.value })}
+                    type="text"
+                    inputMode="numeric"
+                    value={formatCurrencyInput(formData.dana_komite)}
+                    onChange={e => setFormData({ ...formData, dana_komite: getCurrencyDigits(e.target.value) })}
                     className="w-full px-4 py-2 bg-purple-50 border border-purple-100 rounded-lg outline-none"
                     placeholder="0"
                   />

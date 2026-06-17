@@ -51,10 +51,18 @@ Jangan gunakan `migrate:fresh` kecuali database benar-benar khusus testing.
 
 ## 4. Seed Data Yang Dibutuhkan
 
-Seeder yang direkomendasikan sudah tersedia:
+Untuk runner otomatis dari repo frontend, gunakan script setup berikut dari root frontend `sirangkul`:
 
 ```powershell
-cd api-sirangkul
+npm run flow:setup
+```
+
+Script ini membuat/menyegarkan user flow test, RKAM `Flow Test RKAM ...`, token runtime di `scratch/local-flow-runtime.json`, dan akun Ketua Komite global `flowtest.ketua-komite@sirangkul.test`.
+
+Jika hanya ingin seed backend tanpa token runtime runner, seeder backend tetap tersedia:
+
+```powershell
+cd ..\api-sirangkul
 php artisan migrate
 php artisan db:seed --class=LocalWorkflowSeeder
 ```
@@ -95,6 +103,20 @@ Expected:
 - Kepala Madrasah hanya 1 dan `bidang_id` null.
 - Ketua Komite hanya 1 dan `bidang_id` null.
 - RKAM `Flow Test RKAM ...` tersedia untuk setiap bidang dengan sisa anggaran cukup.
+
+Jalankan runner otomatis dari root frontend setelah setup:
+
+```powershell
+npm run flow:test
+```
+
+Bersihkan data test setelah selesai:
+
+```powershell
+npm run flow:cleanup
+```
+
+Cleanup hanya menargetkan marker test: proposal `FLOW-*` atau `HTTP Flow Proposal *`, RKAM `Flow Test RKAM *`, token flow, dan user `flowtest.*@sirangkul.test`. Akun `kepala@madrasah.com` tidak dihapus; hanya token flow-nya yang dibersihkan.
 
 ## 5. Dokumen Uji
 
